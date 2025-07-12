@@ -1,75 +1,254 @@
 <div class="container-fluid">
   <div class="row">
-    <!-- Welcome Section -->
-    <div class="col-12 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <div class="welcome-avatar mb-3">
-            <div class="user-avatar-large">
-              <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <div class="row">
+        <!-- Welcome Section -->
+        <div class="col-12 mb-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <div class="welcome-avatar mb-3">
+                <div class="user-avatar-large">
+                  <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+                </div>
+              </div>
+              <h2>Welcome back, <%= user.firstName %>!</h2>
+              <!-- <p class="text-muted">What's on your mind today?</p> -->
             </div>
           </div>
-          <h2>Welcome back, <%= user.firstName %>!</h2>
-          <!-- <p class="text-muted">What's on your mind today?</p> -->
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <!-- <i class="fas fa-newspaper fa-2x text-primary mb-3"></i> -->
+              <h5>Posts</h5>
+              <p class="text-muted">0 posts</p>
+              <button class="btn btn-primary btn-sm">Create Post</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <!-- <i class="fas fa-heart fa-2x text-danger mb-3"></i> -->
+              <h5>Likes</h5>
+              <p class="text-muted">0 likes</p>
+              <button class="btn btn-danger btn-sm">View Liked Posts</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="col-md-4 mb-4">
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <!-- Friends Sidebar -->
       <div class="card">
-        <div class="card-body text-center">
-          <!-- <i class="fas fa-newspaper fa-2x text-primary mb-3"></i> -->
-          <h5>Posts</h5>
-          <p class="text-muted">0 posts</p>
-          <button class="btn btn-primary btn-sm">Create Post</button>
+        <div class="card-header bg-transparent border-0">
+          <h6 class="mb-0">
+            Your Friends
+            <span id="friendsCount" class="badge bg-primary ms-2">0</span>
+          </h6>
         </div>
-      </div>
-    </div>
+        <div class="card-body">
+          <!-- Loading State -->
+          <div id="friendsLoading" class="text-center">
+            <div
+              class="spinner-border spinner-border-sm text-primary"
+              role="status"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 small text-muted">Loading friends...</p>
+          </div>
 
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <!-- <i class="fas fa-users fa-2x text-success mb-3"></i> -->
-          <h5>Friends</h5>
-          <p class="text-muted">0 friends</p>
-          <button
-            class="btn btn-success btn-sm"
-            onclick="window.location.href='/friends'"
+          <!-- Friends List -->
+          <div id="friendsList" style="display: none"></div>
+
+          <!-- No Friends -->
+          <div
+            id="noFriends"
+            style="display: none"
+            class="text-center text-muted"
           >
-            Find Friends
+            <p class="mb-2">No friends yet</p>
+            <p class="small">
+              Start connecting with people to build your network!
+            </p>
+            <button class="btn btn-primary btn-sm" onclick="showUserSearch()">
+              <i class="fas fa-search"></i> Find Friends
+            </button>
+          </div>
+
+          <!-- Messages -->
+          <div class="mt-4">
+            <h6 class="mb-3">
+              Messages
+              <span id="messagesCount" class="badge bg-info ms-2">0</span>
+            </h6>
+            <div class="text-center text-muted">
+              <p class="mb-2">No messages yet</p>
+
+              <button class="btn btn-info btn-sm">View Messages</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load friends list when page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    loadFriendsList();
+  });
+
+  function loadFriendsList() {
+    const friendsLoading = document.getElementById("friendsLoading");
+    const friendsList = document.getElementById("friendsList");
+    const noFriends = document.getElementById("noFriends");
+
+    // Show loading state
+    friendsLoading.style.display = "block";
+    friendsList.style.display = "none";
+    noFriends.style.display = "none";
+
+    fetch("/friends/list")
+      .then((response) => response.json())
+      .then((data) => {
+        friendsLoading.style.display = "none";
+        displayFriends(data.friends);
+      })
+      .catch((error) => {
+        console.error("Error loading friends:", error);
+        friendsLoading.style.display = "none";
+        noFriends.style.display = "block";
+      });
+  }
+
+  function displayFriends(friends) {
+    const friendsList = document.getElementById("friendsList");
+    const noFriends = document.getElementById("noFriends");
+    const friendsCount = document.getElementById("friendsCount");
+
+    // Update friends count
+    if (friendsCount) {
+      friendsCount.textContent = friends.length;
+    }
+
+    if (friends.length === 0) {
+      friendsList.style.display = "none";
+      noFriends.style.display = "block";
+      return;
+    }
+
+    noFriends.style.display = "none";
+    friendsList.style.display = "block";
+
+    friendsList.innerHTML = friends
+      .map(
+        (friend) => `
+      <div class="d-flex align-items-center mb-2">
+        <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+          ${(friend.firstName || "").charAt(0)}${(friend.lastName || "").charAt(
+          0
+        )}
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-bold small">${friend.firstName || ""} ${
+          friend.lastName || ""
+        }</div>
+          <div class="text-muted small">@${friend.username}</div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="text-success me-2">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <button class="btn btn-outline-danger btn-sm" onclick="removeFriend('${
+            friend.id
+          }', '${friend.firstName || ""} ${
+          friend.lastName || ""
+        }')" title="Remove friend">
+            <i class="fas fa-user-minus"></i>
           </button>
         </div>
       </div>
-    </div>
+    `
+      )
+      .join("");
 
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <div class="card-body text-center">
-          <!-- <i class="fas fa-heart fa-2x text-danger mb-3"></i> -->
-          <h5>Likes</h5>
-          <p class="text-muted">0 likes</p>
-          <button class="btn btn-danger btn-sm">View Liked Posts</button>
+    // Add a "View All" link if there are many friends
+    if (friends.length > 8) {
+      friendsList.innerHTML += `
+        <div class="text-center mt-2">
+          <button class="btn btn-outline-primary btn-sm" onclick="showAllFriends()">
+            View All ${friends.length} Friends
+          </button>
         </div>
-      </div>
-    </div>
+      `;
+    }
+  }
 
-    <!-- Recent Activity
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="fas fa-clock"></i> Recent Activity</h5>
-        </div>
-        <div class="card-body">
-          <div class="text-center text-muted py-4">
-            <i class="fas fa-inbox fa-3x mb-3"></i>
-            <p>No recent activity yet.</p>
-            <p class="small">
-              Start connecting with friends to see their updates here!
-            </p>
-          </div>
-        </div>
-      </div>
-    </div> -->
-  </div>
-</div>
+  function showUserSearch() {
+    // Focus on the header search input
+    const searchInput = document.getElementById("headerSearchInput");
+    if (searchInput) {
+      searchInput.focus();
+      // Trigger search dropdown
+      searchInput.dispatchEvent(new Event("input"));
+    }
+  }
+
+  function showAllFriends() {
+    // This could open a modal or navigate to a friends page
+    alert("This would show all friends in a modal or separate page");
+  }
+
+  // Function to refresh friends list (can be called after accepting a request)
+  function refreshFriendsList() {
+    loadFriendsList();
+  }
+
+  function removeFriend(friendId, friendName) {
+    if (
+      confirm(
+        `Are you sure you want to remove ${friendName} from your friends?`
+      )
+    ) {
+      fetch("/friends/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ friendId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            // Refresh the friends list
+            refreshFriendsList();
+
+            // Show success notification
+            const alertDiv = document.createElement("div");
+            alertDiv.className =
+              "alert alert-info alert-dismissible fade show position-fixed";
+            alertDiv.style.cssText =
+              "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+            alertDiv.innerHTML = `
+              <i class="fas fa-user-minus"></i> ${friendName} removed from friends
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+          } else {
+            alert(data.error || "Could not remove friend");
+          }
+        })
+        .catch(() => {
+          alert("Could not remove friend. Please try again.");
+        });
+    }
+  }
+</script>

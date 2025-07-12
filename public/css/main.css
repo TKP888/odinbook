@@ -102,38 +102,57 @@ body {
   width: 100%;
 }
 
+.input-group.input-group-rounded .form-control,
+.input-group.input-group-rounded .btn {
+  border-radius: 999px;
+}
+
+/* Utility classes for rounded start/end (for custom pill look) */
+.rounded-pill-start {
+  border-top-left-radius: 999px !important;
+  border-bottom-left-radius: 999px !important;
+}
+.rounded-pill-end {
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
+
 .search-input {
-  border-radius: 20px;
   border: 2px solid #e9ecef;
-  padding: 8px 45px 8px 15px;
+  padding: 8px 15px;
   background: rgba(255, 255, 255, 0.9);
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  box-shadow: none;
 }
 
 .search-input:focus {
   border-color: #667eea;
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
   background: white;
 }
 
 .search-btn {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
+  border: 2px solid #e9ecef;
+  border-left: none;
+  background: #f8f9fa;
   color: #667eea;
-  padding: 8px 12px;
-  border-radius: 50%;
   transition: all 0.3s ease;
-  z-index: 2;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  height: 40px;
 }
 
 .search-btn:hover {
   background: rgba(102, 126, 234, 0.1);
   color: #764ba2;
+}
+
+.input-group.input-group-rounded .form-control:focus {
+  z-index: 2;
 }
 
 .search-results-dropdown {
@@ -207,24 +226,153 @@ body {
 
 .dropdown-menu {
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  padding: 8px 0;
-  min-width: 200px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  margin-top: 5px;
 }
 
 .dropdown-item {
-  padding: 10px 16px;
-  color: #65676b;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: background-color 0.2s ease;
+  padding: 8px 16px;
+  color: #495057;
+  transition: all 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background-color: #f2f3f5;
+  background-color: #f8f9fa;
   color: #667eea;
+}
+
+/* Friend Requests Dropdown Styles */
+.dropdown-menu .dropdown-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.dropdown-menu .dropdown-header h6 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.dropdown-menu .dropdown-divider {
+  margin: 0.5rem 0;
+  border-color: #e9ecef;
+}
+
+/* Friend request item styles */
+.dropdown-menu .dropdown-item.p-2 {
+  padding: 12px 16px !important;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.dropdown-menu .dropdown-item.p-2:last-child {
+  border-bottom: none;
+}
+
+.dropdown-menu .dropdown-item.p-2:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-menu .btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.dropdown-menu .btn-group-sm .btn i {
+  font-size: 0.7rem;
+}
+
+/* Position fixed alerts for friend request actions */
+.alert.position-fixed {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Friends List Styles */
+#friendsList .d-flex {
+  padding: 8px 0;
+  border-bottom: 1px solid #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+#friendsList .d-flex:last-child {
+  border-bottom: none;
+}
+
+#friendsList .d-flex:hover {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 8px;
+  margin: 0 -8px;
+}
+
+#friendsList .user-avatar-small {
+  flex-shrink: 0;
+}
+
+#friendsList .text-success i {
+  font-size: 0.9rem;
+}
+
+/* Dashboard card improvements */
+.card-header h6 {
+  margin: 0;
+  font-weight: 600;
+  color: #495057;
+}
+
+.card-header h6 i {
+  margin-right: 8px;
+  color: #667eea;
+}
+
+/* Dashboard Sidebar Styles */
+.col-lg-3 .card {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.col-lg-3 .card-header {
+  background: transparent;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem;
+}
+
+.col-lg-3 .card-body {
+  padding: 1rem;
+}
+
+/* Sidebar sections */
+.col-lg-3 .mt-4 h6 {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.col-lg-3 .mt-4 h6 i {
+  margin-right: 8px;
+  color: #667eea;
+}
+
+.col-lg-3 .mt-4 .text-center {
+  padding: 1rem 0;
 }
 
 /* Responsive Design for Header Search */
@@ -233,14 +381,13 @@ body {
     max-width: 200px;
     margin: 0 10px;
   }
-
   .search-input {
     font-size: 0.8rem;
-    padding: 6px 40px 6px 12px;
+    padding: 6px 12px;
   }
-
   .search-btn {
-    padding: 6px 10px;
+    padding: 0 12px;
+    height: 36px;
   }
 }
 
@@ -248,7 +395,6 @@ body {
   .header-search {
     display: none;
   }
-
   .header-container {
     padding: 0 15px;
   }
@@ -385,4 +531,13 @@ body {
 
 .text-muted {
   color: #495057 !important;
+}
+
+/* Responsive adjustments for sidebar */
+@media (max-width: 991.98px) {
+  .col-lg-3 .card {
+    position: static;
+    max-height: none;
+    margin-top: 1rem;
+  }
 }

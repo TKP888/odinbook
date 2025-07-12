@@ -41,24 +41,37 @@
                   <span class="d-none d-md-inline">Profile</span>
                 </a>
               </li> -->
-              <!-- <li class="nav-item">
+              <li class="nav-item dropdown">
                 <a
-                  href="/friends"
-                  class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'friends' ? 'active' : '' %>"
+                  href="#"
+                  class="nav-link dropdown-toggle"
+                  data-bs-toggle="dropdown"
+                  role="button"
+                  aria-expanded="false"
                 >
-                  <i class="fas fa-users"></i>
                   <span class="d-none d-md-inline">Friends</span>
+                  <span
+                    id="headerRequestCount"
+                    class="badge bg-danger ms-1"
+                    style="display: none"
+                    >0</span
+                  >
                 </a>
-              </li>
-              <li class="nav-item">
-                <a
-                  href="/messages"
-                  class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'messages' ? 'active' : '' %>"
+                <ul
+                  class="dropdown-menu dropdown-menu-end"
+                  style="width: 350px"
                 >
-                  <i class="fas fa-comments"></i>
-                  <span class="d-none d-md-inline">Messages</span>
-                </a>
-              </li> -->
+                  <li class="dropdown-header">
+                    <h6 class="mb-0">Friend Requests</h6>
+                  </li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li id="headerRequestsList">
+                    <div class="text-center text-muted p-3">
+                      <p class="mb-0 small">No pending requests</p>
+                    </div>
+                  </li>
+                </ul>
+              </li>
             </ul>
           </nav>
         </div>
@@ -66,23 +79,25 @@
         <!-- Search Bar -->
         <div class="header-search">
           <div class="search-container">
-            <div class="input-group">
+            <div class="input-group input-group-rounded">
               <input
                 type="text"
-                class="form-control search-input"
+                class="form-control search-input rounded-pill-start"
                 id="headerSearchInput"
                 placeholder="Search users..."
                 autocomplete="off"
+                style="
+                  border-top-right-radius: 0;
+                  border-bottom-right-radius: 0;
+                "
               />
               <button
-                class="btn btn-outline-secondary search-btn"
+                class="btn btn-outline-secondary search-btn rounded-pill-end"
                 type="button"
                 onclick="headerSearchUsers()"
-              >
-                <i class="fas fa-search"></i>
-              </button>
+                style="border-top-left-radius: 0; border-bottom-left-radius: 0"
+              ></button>
             </div>
-
             <!-- Search Results Dropdown -->
             <div
               id="headerSearchResults"
@@ -121,19 +136,6 @@
               <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
             </div>
             <ul class="dropdown-menu">
-              <!-- <li>
-                <a class="dropdown-item" href="/profile">
-                  <i class="fas fa-user-circle"></i>
-                  Profile
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="/settings">
-                  <i class="fas fa-cog"></i>
-                  Settings
-                </a>
-              </li> -->
-              <!-- <li><hr class="dropdown-divider" /></li> -->
               <li>
                 <a class="dropdown-item" href="/auth/logout">
                   <i class="fas fa-sign-out-alt"></i>
@@ -190,6 +192,8 @@
           .getElementById("headerSearchInput")
           .value.trim();
 
+        console.log("Header search triggered for:", searchTerm);
+
         if (searchTerm.length === 0) {
           hideHeaderSearchResults();
           return;
@@ -197,9 +201,16 @@
 
         showHeaderSearchLoading();
 
-        fetch(`/friends/search?q=${encodeURIComponent(searchTerm)}`)
-          .then((response) => response.json())
+        const searchUrl = `/friends/search?q=${encodeURIComponent(searchTerm)}`;
+        console.log("Making request to:", searchUrl);
+
+        fetch(searchUrl)
+          .then((response) => {
+            console.log("Search response status:", response.status);
+            return response.json();
+          })
           .then((data) => {
+            console.log("Search results:", data);
             hideHeaderSearchLoading();
             displayHeaderSearchResults(data.users);
           })
@@ -243,7 +254,7 @@
             </div>
             <button class="btn btn-primary btn-sm" onclick="sendFriendRequest('${
               user.id
-            }')">
+            }', '${user.firstName || ""} ${user.lastName || ""}')">
               <i class="fas fa-user-plus"></i>
             </button>
           </div>
@@ -253,9 +264,59 @@
           .join("");
       }
 
-      function sendFriendRequest(userId) {
-        // TODO: Implement friend request functionality
-        alert("Friend request feature coming soon!");
+      function sendFriendRequest(userId, userName = "") {
+        fetch("/friends/request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ receiverId: userId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              // Show success notification
+              const alertDiv = document.createElement("div");
+              alertDiv.className =
+                "alert alert-success alert-dismissible fade show position-fixed";
+              alertDiv.style.cssText =
+                "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+              alertDiv.innerHTML = `
+                <i class="fas fa-user-plus"></i> Friend request sent to ${
+                  userName || "user"
+                }!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+              document.body.appendChild(alertDiv);
+              setTimeout(() => alertDiv.remove(), 3000);
+
+              // Hide search results
+              hideHeaderSearchResults();
+              // Clear search input
+              document.getElementById("headerSearchInput").value = "";
+            } else {
+              if (
+                data.error ===
+                "You already have a pending request from this user"
+              ) {
+                // Show a more helpful message
+                const alertDiv = document.createElement("div");
+                alertDiv.className =
+                  "alert alert-info alert-dismissible fade show position-fixed";
+                alertDiv.style.cssText =
+                  "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+                alertDiv.innerHTML = `
+                  <i class="fas fa-info-circle"></i> ${data.error}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 5000);
+              } else {
+                alert(data.error || "Could not send request");
+              }
+            }
+          })
+          .catch(() => {
+            alert("Could not send request. Please try again.");
+          });
       }
 
       function showHeaderSearchLoading() {
@@ -308,6 +369,161 @@
             hideHeaderSearchResults();
           }
         });
+      });
+    </script>
+
+    <script>
+      // Update header friend request count badge and dropdown content
+      function updateHeaderRequestCount() {
+        fetch("/friends/requests")
+          .then((response) => response.json())
+          .then((data) => {
+            const countBadge = document.getElementById("headerRequestCount");
+            const requestsList = document.getElementById("headerRequestsList");
+
+            if (countBadge) {
+              if (data.requests.length > 0) {
+                countBadge.textContent = data.requests.length;
+                countBadge.style.display = "inline";
+              } else {
+                countBadge.style.display = "none";
+              }
+            }
+
+            if (requestsList) {
+              if (data.requests.length === 0) {
+                requestsList.innerHTML = `
+                <div class="text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+              } else {
+                requestsList.innerHTML = data.requests
+                  .map(
+                    (request) => `
+                <div class="dropdown-item p-2">
+                  <div class="d-flex align-items-center">
+                    <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                      ${(request.sender.firstName || "").charAt(0)}${(
+                      request.sender.lastName || ""
+                    ).charAt(0)}
+                    </div>
+                    <div class="flex-grow-1">
+                      <div class="fw-bold small">${
+                        request.sender.firstName || ""
+                      } ${request.sender.lastName || ""}</div>
+                      <div class="text-muted small">@${
+                        request.sender.username
+                      }</div>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button class="btn btn-success btn-sm" onclick="acceptRequest('${
+                        request.id
+                      }')" title="Accept">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${
+                        request.id
+                      }')" title="Decline">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `
+                  )
+                  .join("");
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error updating header request count:", error);
+          });
+      }
+
+      function acceptRequest(requestId) {
+        fetch("/friends/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              updateHeaderRequestCount();
+
+              // Refresh friends list on dashboard if we're on the dashboard page
+              if (typeof refreshFriendsList === "function") {
+                refreshFriendsList();
+              }
+
+              // Show success message
+              const alertDiv = document.createElement("div");
+              alertDiv.className =
+                "alert alert-success alert-dismissible fade show position-fixed";
+              alertDiv.style.cssText =
+                "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+              alertDiv.innerHTML = `
+              <i class="fas fa-check"></i> Friend request accepted!
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+              document.body.appendChild(alertDiv);
+              setTimeout(() => alertDiv.remove(), 3000);
+            } else {
+              alert(data.error || "Could not accept request");
+            }
+          })
+          .catch(() => {
+            alert("Could not accept request. Please try again.");
+          });
+      }
+
+      function declineRequest(requestId) {
+        fetch("/friends/decline", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              updateHeaderRequestCount();
+              // Show success message
+              const alertDiv = document.createElement("div");
+              alertDiv.className =
+                "alert alert-info alert-dismissible fade show position-fixed";
+              alertDiv.style.cssText =
+                "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+              alertDiv.innerHTML = `
+              <i class="fas fa-times"></i> Friend request declined
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+              document.body.appendChild(alertDiv);
+              setTimeout(() => alertDiv.remove(), 3000);
+            } else {
+              alert(data.error || "Could not decline request");
+            }
+          })
+          .catch(() => {
+            alert("Could not decline request. Please try again.");
+          });
+      }
+
+      function showUserSearch() {
+        // Focus on the header search input
+        const searchInput = document.getElementById("headerSearchInput");
+        if (searchInput) {
+          searchInput.focus();
+          // Trigger search dropdown
+          searchInput.dispatchEvent(new Event("input"));
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        updateHeaderRequestCount();
+        // Update every 30 seconds for live updates
+        setInterval(updateHeaderRequestCount, 30000);
       });
     </script>
   </body>
