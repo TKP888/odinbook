@@ -55,6 +55,7 @@ app.use("/dashboard", require("./routes/dashboard"));
 app.use("/profile", require("./routes/profile"));
 app.use("/friends", require("./routes/friends"));
 app.use("/messages", require("./routes/messages"));
+app.use("/posts", require("./routes/posts"));
 
 // Home route
 app.get("/", (req, res) => {
