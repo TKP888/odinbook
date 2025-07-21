@@ -13,14 +13,35 @@ function ensureAuthenticated(req, res, next) {
   res.redirect("/auth/login");
 }
 
-// Get all posts (with pagination)
+// Get posts from current user and friends (with pagination)
 router.get("/", ensureAuthenticated, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    // Get current user's friends
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        friends: {
+          select: { id: true },
+        },
+      },
+    });
+
+    // Create array of user IDs to include (current user + friends)
+    const allowedUserIds = [
+      req.user.id,
+      ...(currentUser?.friends?.map((friend) => friend.id) || []),
+    ];
+
     const posts = await prisma.post.findMany({
+      where: {
+        userId: {
+          in: allowedUserIds,
+        },
+      },
       include: {
         user: {
           select: {
@@ -39,7 +60,13 @@ router.get("/", ensureAuthenticated, async (req, res) => {
       take: limit,
     });
 
-    const totalPosts = await prisma.post.count();
+    const totalPosts = await prisma.post.count({
+      where: {
+        userId: {
+          in: allowedUserIds,
+        },
+      },
+    });
     const totalPages = Math.ceil(totalPosts / limit);
 
     res.json({
@@ -88,6 +115,51 @@ router.get("/my-posts", ensureAuthenticated, async (req, res) => {
   }
 });
 
+// Get all posts (admin/discover feature - optional)
+router.get("/all", ensureAuthenticated, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await prisma.post.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            profilePicture: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip,
+      take: limit,
+    });
+
+    const totalPosts = await prisma.post.count();
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    res.json({
+      posts,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalPosts,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    res.status(500).json({ error: "Failed to fetch all posts" });
+  }
+});
+
 // Get a specific post by ID
 router.get("/:id", ensureAuthenticated, async (req, res) => {
   try {
@@ -128,10 +200,10 @@ router.post("/", ensureAuthenticated, async (req, res) => {
       return res.status(400).json({ error: "Post content is required" });
     }
 
-    if (content.length > 1000) {
+    if (content.length > 250) {
       return res
         .status(400)
-        .json({ error: "Post content cannot exceed 1000 characters" });
+        .json({ error: "Post content cannot exceed 250 characters" });
     }
 
     const post = await prisma.post.create({
