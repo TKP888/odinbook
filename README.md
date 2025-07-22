@@ -9,6 +9,12 @@ A social media web application built with Node.js, Express, EJS, Passport.js, Pr
 - Session management
 - Modern, responsive UI with Bootstrap
 - PostgreSQL database with Prisma ORM
+- Post creation and management
+- Like and unlike posts
+- Comment on posts
+- View who liked a post
+- Friend system with friend requests
+- Real-time notifications
 
 ## Prerequisites
 

@@ -52,6 +52,33 @@ router.get("/", ensureAuthenticated, async (req, res) => {
             profilePicture: true,
           },
         },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -102,6 +129,33 @@ router.get("/my-posts", ensureAuthenticated, async (req, res) => {
             profilePicture: true,
           },
         },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -131,6 +185,33 @@ router.get("/all", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+          },
+        },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
           },
         },
       },
@@ -175,6 +256,33 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+          },
+        },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
           },
         },
       },
@@ -316,6 +424,206 @@ router.delete("/:id", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("Error deleting post:", error);
     res.status(500).json({ error: "Failed to delete post" });
+  }
+});
+
+// Like/Unlike a post
+router.post("/:id/like", ensureAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if post exists
+    const post = await prisma.post.findUnique({
+      where: { id },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // Check if user already liked the post
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_postId: {
+          userId: req.user.id,
+          postId: id,
+        },
+      },
+    });
+
+    if (existingLike) {
+      // Unlike the post
+      await prisma.like.delete({
+        where: {
+          userId_postId: {
+            userId: req.user.id,
+            postId: id,
+          },
+        },
+      });
+
+      res.json({
+        success: true,
+        liked: false,
+        message: "Post unliked",
+      });
+    } else {
+      // Like the post
+      await prisma.like.create({
+        data: {
+          userId: req.user.id,
+          postId: id,
+        },
+      });
+
+      res.json({
+        success: true,
+        liked: true,
+        message: "Post liked",
+      });
+    }
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    res.status(500).json({ error: "Failed to toggle like" });
+  }
+});
+
+// Get likes for a post
+router.get("/:id/likes", ensureAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const likes = await prisma.like.findMany({
+      where: { postId: id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.json({ likes });
+  } catch (error) {
+    console.error("Error fetching likes:", error);
+    res.status(500).json({ error: "Failed to fetch likes" });
+  }
+});
+
+// Add a comment to a post
+router.post("/:id/comments", ensureAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: "Comment content is required" });
+    }
+
+    if (content.length > 500) {
+      return res
+        .status(400)
+        .json({ error: "Comment cannot exceed 500 characters" });
+    }
+
+    // Check if post exists
+    const post = await prisma.post.findUnique({
+      where: { id },
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const comment = await prisma.comment.create({
+      data: {
+        content: content.trim(),
+        userId: req.user.id,
+        postId: id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({ comment, success: true });
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    res.status(500).json({ error: "Failed to create comment" });
+  }
+});
+
+// Get comments for a post
+router.get("/:id/comments", ensureAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const comments = await prisma.comment.findMany({
+      where: { postId: id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    res.json({ comments });
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ error: "Failed to fetch comments" });
+  }
+});
+
+// Delete a comment (only by the comment owner)
+router.delete("/comments/:commentId", ensureAuthenticated, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+
+    // Check if comment exists and belongs to the user
+    const existingComment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!existingComment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    if (existingComment.userId !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own comments" });
+    }
+
+    await prisma.comment.delete({
+      where: { id: commentId },
+    });
+
+    res.json({ success: true, message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ error: "Failed to delete comment" });
   }
 });
 
