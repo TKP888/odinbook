@@ -427,7 +427,7 @@
             ${user.bio ? `<p class="small mb-0">${user.bio}</p>` : ""}
           </div>
           <div class="col-auto">
-            <button class="btn btn-primary btn-sm" onclick="sendFriendRequest('${
+            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromIndex('${
               user.id
             }')">
               <i class="fas fa-user-plus"></i> Add Friend
@@ -441,7 +441,7 @@
           .join("");
       }
 
-      function sendFriendRequest(userId) {
+      function sendFriendRequestFromIndex(userId) {
         fetch("/friends/request", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

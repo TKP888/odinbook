@@ -41,36 +41,13 @@
                   <span class="d-none d-md-inline">Profile</span>
                 </a>
               </li> -->
-              <li class="nav-item dropdown">
+              <li class="nav-item">
                 <a
-                  href="#"
-                  class="nav-link dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                  role="button"
-                  aria-expanded="false"
+                  href="/friends/users"
+                  class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>"
                 >
-                  <span class="d-none d-md-inline">Friends</span>
-                  <span
-                    id="headerRequestCount"
-                    class="badge bg-danger ms-1"
-                    style="display: none"
-                    >0</span
-                  >
+                  <span class="d-none d-md-inline">Users</span>
                 </a>
-                <ul
-                  class="dropdown-menu dropdown-menu-end"
-                  style="width: 350px"
-                >
-                  <li class="dropdown-header">
-                    <h6 class="mb-0">Friend Requests</h6>
-                  </li>
-                  <li><hr class="dropdown-divider" /></li>
-                  <li id="headerRequestsList">
-                    <div class="text-center text-muted p-3">
-                      <p class="mb-0 small">No pending requests</p>
-                    </div>
-                  </li>
-                </ul>
               </li>
             </ul>
           </nav>
@@ -133,9 +110,29 @@
         <div class="header-right">
           <div class="user-menu dropdown">
             <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown">
-              <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+              <%= user && user.firstName ? user.firstName.charAt(0) : '' %><%=
+              user && user.lastName ? user.lastName.charAt(0) : '' %>
             </div>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="/friends/users?tab=requests">
+                  <i class="fas fa-user-plus"></i>
+                  Friend Requests
+                  <span
+                    id="headerRequestCount"
+                    class="badge bg-danger ms-1"
+                    style="display: none"
+                    >0</span
+                  >
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/friends/users?tab=friends">
+                  <i class="fas fa-user-friends"></i>
+                  My Friends
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
               <li>
                 <a class="dropdown-item" href="/auth/logout">
                   <i class="fas fa-sign-out-alt"></i>
@@ -252,7 +249,7 @@
             }</div>
               <div class="text-muted small">@${user.username}</div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="sendFriendRequest('${
+            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
               user.id
             }', '${user.firstName || ""} ${user.lastName || ""}')">
               <i class="fas fa-user-plus"></i>
@@ -264,7 +261,7 @@
           .join("");
       }
 
-      function sendFriendRequest(userId, userName = "") {
+      function sendFriendRequestFromHeader(userId, userName = "") {
         fetch("/friends/request", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

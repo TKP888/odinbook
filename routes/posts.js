@@ -36,12 +36,12 @@ router.get("/", ensureAuthenticated, async (req, res) => {
       ...(currentUser?.friends?.map((friend) => friend.id) || []),
     ];
 
+    // If user has no friends, show all posts for now (for demo purposes)
+    const whereClause =
+      allowedUserIds.length > 1 ? { userId: { in: allowedUserIds } } : {}; // Show all posts if user has no friends
+
     const posts = await prisma.post.findMany({
-      where: {
-        userId: {
-          in: allowedUserIds,
-        },
-      },
+      where: whereClause,
       include: {
         user: {
           select: {
@@ -88,11 +88,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     });
 
     const totalPosts = await prisma.post.count({
-      where: {
-        userId: {
-          in: allowedUserIds,
-        },
-      },
+      where: whereClause,
     });
     const totalPages = Math.ceil(totalPosts / limit);
 

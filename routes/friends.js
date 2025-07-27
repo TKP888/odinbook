@@ -18,6 +18,163 @@ router.get("/", ensureAuthenticated, (req, res) => {
   res.redirect("/dashboard");
 });
 
+// Users page - show all users with tabs
+router.get("/users", ensureAuthenticated, async (req, res) => {
+  try {
+    // Ensure user is authenticated and has required properties
+    if (!req.user || !req.user.id) {
+      req.flash("error_msg", "Authentication required");
+      return res.redirect("/auth/login");
+    }
+
+    const { tab = "all", search = "" } = req.query;
+
+    // Validate tab parameter
+    const validTabs = ["all", "friends", "requests"];
+    const currentTab = validTabs.includes(tab) ? tab : "all";
+
+    let users = [];
+    let friends = [];
+    let pendingRequests = [];
+
+    // Get current user's friends
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        friends: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+            bio: true,
+            profilePicture: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    friends = currentUser?.friends || [];
+
+    // Get pending friend requests
+    const requests = await prisma.friendRequest.findMany({
+      where: {
+        OR: [
+          { senderId: req.user.id, status: "pending" },
+          { receiverId: req.user.id, status: "pending" },
+        ],
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+            bio: true,
+            profilePicture: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+            bio: true,
+            profilePicture: true,
+          },
+        },
+      },
+    });
+
+    pendingRequests = requests.map((request) => ({
+      ...request,
+      otherUser:
+        request.senderId === req.user.id ? request.receiver : request.sender,
+      isSent: request.senderId === req.user.id,
+    }));
+
+    // Get all users based on tab
+    if (currentTab === "all") {
+      const whereClause = {
+        id: { not: req.user.id }, // Exclude current user
+      };
+
+      if (search && search.trim()) {
+        whereClause.OR = [
+          { firstName: { contains: search.trim(), mode: "insensitive" } },
+          { lastName: { contains: search.trim(), mode: "insensitive" } },
+          { username: { contains: search.trim(), mode: "insensitive" } },
+          { email: { contains: search.trim(), mode: "insensitive" } },
+        ];
+      }
+
+      users = await prisma.user.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          email: true,
+          bio: true,
+          profilePicture: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      // Check for existing friend requests for each user
+      for (let user of users) {
+        const existingRequest = await prisma.friendRequest.findFirst({
+          where: {
+            OR: [
+              {
+                senderId: req.user.id,
+                receiverId: user.id,
+                status: "pending",
+              },
+              {
+                senderId: user.id,
+                receiverId: req.user.id,
+                status: "pending",
+              },
+            ],
+          },
+        });
+
+        if (existingRequest) {
+          user.hasPendingRequest = true;
+          user.requestId = existingRequest.id;
+          user.isSentByMe = existingRequest.senderId === req.user.id;
+        } else {
+          user.hasPendingRequest = false;
+        }
+      }
+    }
+
+    res.render("friends/users", {
+      title: "Users",
+      activePage: "users",
+      user: req.user,
+      users,
+      friends,
+      pendingRequests,
+      currentTab: currentTab,
+      searchTerm: search,
+    });
+  } catch (error) {
+    console.error("Error loading users page:", error);
+    req.flash("error_msg", "Failed to load users page");
+    res.redirect("/dashboard");
+  }
+});
+
 // Search users endpoint
 router.get("/search", ensureAuthenticated, async (req, res) => {
   try {
@@ -125,13 +282,13 @@ router.post("/request", ensureAuthenticated, async (req, res) => {
   });
   if (alreadyFriends) return res.status(400).json({ error: "Already friends" });
 
-  await prisma.friendRequest.create({
+  const newRequest = await prisma.friendRequest.create({
     data: {
       senderId: req.user.id,
       receiverId,
     },
   });
-  res.json({ success: true });
+  res.json({ success: true, requestId: newRequest.id });
 });
 
 // Get received friend requests
@@ -266,11 +423,11 @@ router.post("/decline", ensureAuthenticated, async (req, res) => {
     if (!requestId)
       return res.status(400).json({ error: "No requestId provided" });
 
-    // Find the request and verify it belongs to the current user
+    // Find the request and verify it belongs to the current user (either as sender or receiver)
     const friendRequest = await prisma.friendRequest.findFirst({
       where: {
         id: requestId,
-        receiverId: req.user.id,
+        OR: [{ receiverId: req.user.id }, { senderId: req.user.id }],
         status: "pending",
       },
     });

@@ -1,0 +1,830 @@
+
+      <!-- Navigation Tabs -->
+      <div class="col-12 mb-4">
+        <div class="card">
+          <div class="card-body p-0">
+            <ul class="nav nav-tabs" id="usersTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link <%= currentTab === 'all' ? 'active' : '' %>"
+                  id="all-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#all"
+                  type="button"
+                  role="tab"
+                  aria-controls="all"
+                  aria-selected="<%= currentTab === 'all' ? 'true' : 'false' %>"
+                >
+                  <!-- <i class="fas fa-globe"></i> -->
+                   All Users
+                  <span class="badge bg-secondary ms-1"
+                    ><%= users.length %></span
+                  >
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link <%= currentTab === 'friends' ? 'active' : '' %>"
+                  id="friends-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#friends"
+                  type="button"
+                  role="tab"
+                  aria-controls="friends"
+                  aria-selected="<%= currentTab === 'friends' ? 'true' : 'false' %>"
+                >
+                  <!-- <i class="fas fa-user-friends"></i> -->
+                  Friends
+                  <span class="badge bg-success ms-1"
+                    ><%= friends.length %></span
+                  >
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button
+                  class="nav-link <%= currentTab === 'requests' ? 'active' : '' %>"
+                  id="requests-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#requests"
+                  type="button"
+                  role="tab"
+                  aria-controls="requests"
+                  aria-selected="<%= currentTab === 'requests' ? 'true' : 'false' %>"
+                >
+                  <!-- <i class="fas fa-user-plus"></i> -->
+                  Friend Requests
+                  <span class="badge bg-warning ms-1"
+                    ><%= pendingRequests.length %></span
+                  >
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="col-12">
+      <div class="tab-content" id="usersTabContent">
+        <!-- All Users Tab -->
+        <div
+          class="tab-pane fade <%= currentTab === 'all' ? 'show active' : '' %>"
+          id="all"
+          role="tabpanel"
+          aria-labelledby="all-tab"
+        >
+          <div class="card">
+            <div class="card-header">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <h5 class="mb-0">All Users</h5>
+                </div>
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="searchInput"
+                      placeholder="Search users..."
+                      value="<%= searchTerm %>"
+                      autocomplete="off"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      onclick="searchUsers()"
+                    >
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="usersList">
+                <% if (users.length === 0) { %>
+                <div class="text-center text-muted py-5">
+                  <i class="fas fa-users fa-3x mb-3"></i>
+                  <h5>No users found</h5>
+                  <p>Try adjusting your search terms or browse all users.</p>
+                </div>
+                <% } else { %>
+                <div class="row">
+                  <% users.forEach(user => { %>
+                  <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                          <div
+                            class="user-avatar-large me-3"
+                            style="width: 50px; height: 50px; font-size: 1.2rem"
+                          >
+                            <%= (user.firstName || '').charAt(0) %><%=
+                            (user.lastName || '').charAt(0) %>
+                          </div>
+                          <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                              <%= user.firstName || '' %> <%= user.lastName ||
+                              '' %> <% if (!user.firstName && !user.lastName) {
+                              %>
+                              <span class="text-muted">(No name)</span>
+                              <% } %>
+                            </h6>
+                            <p class="text-muted mb-0 small">
+                              @<%= user.username %>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          class="d-flex justify-content-between align-items-center"
+                          id="friend-actions-<%= user.id %>"
+                        >
+                          <% if (user.hasPendingRequest && user.isSentByMe) { %>
+                            <!-- Request Sent State -->
+                            <button
+                              class="btn btn-success btn-sm me-2"
+                              id="add-friend-btn-<%= user.id %>"
+                              disabled
+                            >
+                              <i class="fas fa-check"></i> Request Sent
+                            </button>
+                            <button
+                              class="btn btn-outline-secondary btn-sm cancel-request-btn"
+                              id="cancel-request-btn-<%= user.id %>"
+                              data-user-id="<%= user.id %>"
+                              data-user-name="<%= user.firstName || '' %> <%= user.lastName || '' %>"
+                              data-request-id="<%= user.requestId %>"
+                            >
+                              <i class="fas fa-times"></i> Cancel Request
+                            </button>
+                          <% } else if (user.hasPendingRequest && !user.isSentByMe) { %>
+                            <!-- Request Received State -->
+                            <button
+                              class="btn btn-warning btn-sm"
+                              disabled
+                            >
+                              <i class="fas fa-clock"></i> Request Pending
+                            </button>
+                          <% } else { %>
+                            <!-- Add Friend State -->
+                            <button
+                              class="btn btn-primary btn-sm add-friend-btn"
+                              id="add-friend-btn-<%= user.id %>"
+                              data-user-id="<%= user.id %>"
+                              data-user-name="<%= user.firstName || '' %> <%= user.lastName || '' %>"
+                            >
+                              <i class="fas fa-user-plus"></i> Add Friend
+                            </button>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <% }); %>
+                </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Friends Tab -->
+        <div
+          class="tab-pane fade <%= currentTab === 'friends' ? 'show active' : '' %>"
+          id="friends"
+          role="tabpanel"
+          aria-labelledby="friends-tab"
+        >
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Your Friends</h5>
+            </div>
+            <div class="card-body">
+              <% if (friends.length === 0) { %>
+              <div class="text-center text-muted py-5">
+                <i class="fas fa-user-friends fa-3x mb-3"></i>
+                <h5>No friends yet</h5>
+                <p>Start connecting with people to build your network!</p>
+                <button class="btn btn-primary" onclick="switchToAllUsers()">
+                  <i class="fas fa-search"></i> Find Friends
+                </button>
+              </div>
+              <% } else { %>
+              <div class="row">
+                <% friends.forEach(friend => { %>
+                <div class="col-md-6 col-lg-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center mb-3">
+                        <div
+                          class="user-avatar-large me-3"
+                          style="width: 50px; height: 50px; font-size: 1.2rem"
+                        >
+                          <%= (friend.firstName || '').charAt(0) %><%=
+                          (friend.lastName || '').charAt(0) %>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="mb-1">
+                            <%= friend.firstName || '' %> <%= friend.lastName ||
+                            '' %> <% if (!friend.firstName && !friend.lastName)
+                            { %>
+                            <span class="text-muted">(No name)</span>
+                            <% } %>
+                          </h6>
+                          <p class="text-muted mb-0 small">
+                            @<%= friend.username %>
+                          </p>
+                        </div>
+                      </div>
+                      <% if (friend.bio) { %>
+                      <p class="card-text small text-muted mb-3">
+                        <%= friend.bio %>
+                      </p>
+                      <% } %>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <small class="text-muted">
+                          Friends since <%= new
+                          Date(friend.createdAt).toLocaleDateString() %>
+                        </small>
+                        <button
+                          class="btn btn-outline-danger btn-sm"
+                          onclick="removeFriend('<%= friend.id %>', '<%= (friend.firstName || '') + ' ' + (friend.lastName || '') %>')"
+                        >
+                          <i class="fas fa-user-minus"></i> Unfriend
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Friend Requests Tab -->
+        <div
+          class="tab-pane fade <%= currentTab === 'requests' ? 'show active' : '' %>"
+          id="requests"
+          role="tabpanel"
+          aria-labelledby="requests-tab"
+        >
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Friend Requests</h5>
+            </div>
+            <div class="card-body">
+              <% if (pendingRequests.length === 0) { %>
+              <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h5>No pending requests</h5>
+              </div>
+              <% } else { %>
+              <div class="row">
+                <% pendingRequests.forEach(request => { %>
+                <div class="col-md-6 col-lg-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center mb-3">
+                        <div
+                          class="user-avatar-large me-3"
+                          style="width: 50px; height: 50px; font-size: 1.2rem"
+                        >
+                          <%= (request.otherUser.firstName || '').charAt(0)
+                          %><%= (request.otherUser.lastName || '').charAt(0) %>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="mb-1">
+                            <%= request.otherUser.firstName || '' %> <%=
+                            request.otherUser.lastName || '' %> <% if
+                            (!request.otherUser.firstName &&
+                            !request.otherUser.lastName) { %>
+                            <span class="text-muted">(No name)</span>
+                            <% } %>
+                          </h6>
+                          <p class="text-muted mb-0 small">
+                            @<%= request.otherUser.username %>
+                          </p>
+                        </div>
+                      </div>
+                      <% if (request.otherUser.bio) { %>
+                      <p class="card-text small text-muted mb-3">
+                        <%= request.otherUser.bio %>
+                      </p>
+                      <% } %>
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <small class="text-muted">
+                          <% if (request.isSent) { %> Request sent <%= new
+                          Date(request.createdAt).toLocaleDateString() %> <% }
+                          else { %> Request received <%= new
+                          Date(request.createdAt).toLocaleDateString() %> <% }
+                          %>
+                        </small>
+                        <div class="btn-group" role="group">
+                          <% if (!request.isSent) { %>
+                          <button
+                            class="btn btn-success btn-sm"
+                            onclick="acceptRequest('<%= request.id %>')"
+                          >
+                            <i class="fas fa-check"></i> Accept
+                          </button>
+                          <button
+                            class="btn btn-outline-secondary btn-sm"
+                            onclick="declineRequest('<%= request.id %>')"
+                          >
+                            <i class="fas fa-times"></i> Decline
+                          </button>
+                          <% } else { %>
+                          <button
+                            class="btn btn-outline-secondary btn-sm"
+                            onclick="cancelRequest('<%= request.id %>')"
+                          >
+                            <i class="fas fa-times"></i> Cancel
+                          </button>
+                          <% } %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let searchTimeout;
+
+  function searchUsers() {
+    const searchTerm = document.getElementById("searchInput").value.trim();
+    const currentUrl = new URL(window.location);
+
+    if (searchTerm) {
+      currentUrl.searchParams.set("tab", "all");
+      currentUrl.searchParams.set("search", searchTerm);
+    } else {
+      currentUrl.searchParams.set("tab", "all");
+      currentUrl.searchParams.delete("search");
+    }
+
+    window.location.href = currentUrl.toString();
+  }
+
+  function switchToAllUsers() {
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set("tab", "all");
+    currentUrl.searchParams.delete("search");
+    window.location.href = currentUrl.toString();
+  }
+
+    function sendFriendRequestFromUsersPage(userId, userName = "") {
+    const addFriendBtn = document.getElementById(`add-friend-btn-${userId}`);
+    const actionsContainer = document.getElementById(`friend-actions-${userId}`);
+    
+    if (!addFriendBtn) {
+      return;
+    }
+    
+    // Disable button and show loading state
+    addFriendBtn.disabled = true;
+    addFriendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    fetch("/friends/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ receiverId: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification(
+            "Friend request sent to " + (userName || "user") + "!",
+            "success"
+          );
+          
+          // Update friend request counters
+          updateFriendRequestCounters(1);
+          
+          // Update the UI immediately using a more reliable method
+          if (actionsContainer) {
+            // Clear the container
+            actionsContainer.innerHTML = '';
+            
+            // Create Request Sent button
+            const requestSentBtn = document.createElement('button');
+            requestSentBtn.className = 'btn btn-success btn-sm me-2';
+            requestSentBtn.disabled = true;
+            requestSentBtn.innerHTML = '<i class="fas fa-check"></i> Request Sent';
+            
+            // Create Cancel Request button
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-outline-secondary btn-sm cancel-request-btn';
+            cancelBtn.setAttribute('data-user-id', userId);
+            cancelBtn.setAttribute('data-user-name', userName);
+            cancelBtn.setAttribute('data-request-id', data.requestId);
+            cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel Request';
+            
+            // Add buttons to container
+            actionsContainer.appendChild(requestSentBtn);
+            actionsContainer.appendChild(cancelBtn);
+          }
+          
+          // Add card to Friend Requests tab dynamically
+          addRequestCardToRequestsTab(userId, userName, data.requestId);
+        } else {
+          // Reset button to original state
+          addFriendBtn.disabled = false;
+          addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+          showNotification(data.error || "Could not send request", "error");
+        }
+      })
+      .catch(() => {
+        // Reset button to original state
+        addFriendBtn.disabled = false;
+        addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+        showNotification("Could not send request. Please try again.", "error");
+      });
+  }
+
+  function acceptRequest(requestId) {
+    fetch("/friends/accept", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Friend request accepted!", "success");
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showNotification(data.error || "Could not accept request", "error");
+        }
+      })
+      .catch(() => {
+        showNotification(
+          "Could not accept request. Please try again.",
+          "error"
+        );
+      });
+  }
+
+  function declineRequest(requestId) {
+    fetch("/friends/decline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Friend request declined", "info");
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          showNotification(data.error || "Could not decline request", "error");
+        }
+      })
+      .catch(() => {
+        showNotification(
+          "Could not decline request. Please try again.",
+          "error"
+        );
+      });
+  }
+
+  function cancelRequest(requestId) {
+    // Find the button that was clicked
+    const cancelBtn = event.target.closest('button');
+    
+    if (!cancelBtn) {
+      return;
+    }
+    
+    // Disable cancel button and show loading state
+    cancelBtn.disabled = true;
+    cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Canceling...';
+    
+    fetch("/friends/decline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId: requestId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Friend request cancelled", "info");
+          
+          // Update friend request counters
+          updateFriendRequestCounters(-1);
+          
+          // Remove the request card from Friend Requests tab
+          const requestCard = cancelBtn.closest('.col-md-6');
+          if (requestCard) {
+            requestCard.remove();
+          }
+          
+          // Update All Users tab if we're on the requests tab
+          updateAllUsersTabAfterCancel(requestId);
+        } else {
+          // Reset cancel button to original state
+          cancelBtn.disabled = false;
+          cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+          showNotification(data.error || "Could not cancel request", "error");
+        }
+      })
+      .catch(() => {
+        // Reset cancel button to original state
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        showNotification(
+          "Could not cancel request. Please try again.",
+          "error"
+        );
+      });
+  }
+
+  function cancelRequestFromAllUsersPage(userId, userName, requestId) {
+    const cancelBtn = document.getElementById(`cancel-request-btn-${userId}`);
+    const actionsContainer = document.getElementById(`friend-actions-${userId}`);
+    
+    if (!cancelBtn) {
+      console.error("Cancel button not found");
+      return;
+    }
+    
+    // Disable cancel button and show loading state
+    cancelBtn.disabled = true;
+    cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Canceling...';
+    
+    fetch("/friends/decline", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId: requestId || userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Friend request cancelled", "info");
+          
+          // Update friend request counters
+          updateFriendRequestCounters(-1);
+          
+          // Update the UI immediately using a more reliable method
+          if (actionsContainer) {
+            // Clear the container
+            actionsContainer.innerHTML = '';
+            
+            // Create Add Friend button
+            const addFriendBtn = document.createElement('button');
+            addFriendBtn.className = 'btn btn-primary btn-sm add-friend-btn';
+            addFriendBtn.setAttribute('data-user-id', userId);
+            addFriendBtn.setAttribute('data-user-name', userName);
+            addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+            
+            // Add button to container
+            actionsContainer.appendChild(addFriendBtn);
+          }
+          
+          // Remove card from Friend Requests tab
+          removeRequestCardFromRequestsTab(requestId);
+        } else {
+          // Reset cancel button to original state
+          cancelBtn.disabled = false;
+          cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel Request';
+          showNotification(data.error || "Could not cancel request", "error");
+        }
+      })
+      .catch(() => {
+        // Reset cancel button to original state
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel Request';
+        showNotification(
+          "Could not cancel request. Please try again.",
+          "error"
+        );
+      });
+  }
+
+  function removeFriend(friendId, friendName = "") {
+    if (
+      confirm(
+        "Are you sure you want to unfriend " + (friendName || "this user") + "?"
+      )
+    ) {
+      fetch("/friends/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ friendId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            showNotification("Friend removed", "info");
+            setTimeout(() => window.location.reload(), 1000);
+          } else {
+            showNotification(data.error || "Could not remove friend", "error");
+          }
+        })
+        .catch(() => {
+          showNotification(
+            "Could not remove friend. Please try again.",
+            "error"
+          );
+        });
+    }
+  }
+
+  function updateFriendRequestCounters(change) {
+    // Update the tab counter
+    const tabCounter = document.querySelector('.badge.bg-warning');
+    if (tabCounter) {
+      const currentCount = parseInt(tabCounter.textContent) || 0;
+      const newCount = Math.max(0, currentCount + change);
+      tabCounter.textContent = newCount;
+    }
+    
+    // Update the header counter
+    const headerCounter = document.getElementById('headerRequestCount');
+    if (headerCounter) {
+      const currentCount = parseInt(headerCounter.textContent) || 0;
+      const newCount = Math.max(0, currentCount + change);
+      headerCounter.textContent = newCount;
+      
+      // Show/hide the badge based on count
+      if (newCount > 0) {
+        headerCounter.style.display = 'inline';
+      } else {
+        headerCounter.style.display = 'none';
+      }
+    }
+  }
+  
+  function addRequestCardToRequestsTab(userId, userName, requestId) {
+    // Find the requests tab content
+    const requestsTab = document.getElementById('requests');
+    if (!requestsTab) {
+      return;
+    }
+    
+    // Find the row container for the cards
+    const rowContainer = requestsTab.querySelector('.row');
+    if (!rowContainer) {
+      return;
+    }
+    
+    // Create the new card HTML
+    const cardHTML = `
+      <div class="col-md-6 col-lg-4 mb-3" id="request-card-${requestId}">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <div class="user-avatar-large me-3" style="width: 50px; height: 50px; font-size: 1.2rem">
+                ${userName.split(' ').map(n => n.charAt(0)).join('')}
+              </div>
+              <div class="flex-grow-1">
+                <h6 class="mb-1">
+                  ${userName}
+                </h6>
+                <p class="text-muted mb-0 small">
+                  @${userName.toLowerCase().replace(/\s+/g, '')}
+                </p>
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                Request sent ${new Date().toLocaleDateString()}
+              </small>
+              <div class="btn-group" role="group">
+                <button class="btn btn-outline-secondary btn-sm" onclick="cancelRequest('${requestId}')">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add the card to the row
+    rowContainer.insertAdjacentHTML('beforeend', cardHTML);
+  }
+  
+  function updateAllUsersTabAfterCancel(requestId) {
+    // Find the user card in All Users tab that has this request
+    const allUsersTab = document.getElementById('all');
+    if (!allUsersTab) {
+      return;
+    }
+    
+    // Look for any user card that has a cancel button with this requestId
+    const cancelBtn = allUsersTab.querySelector(`[data-request-id="${requestId}"]`);
+    if (cancelBtn) {
+      const actionsContainer = cancelBtn.closest('[id^="friend-actions-"]');
+      if (actionsContainer) {
+        const userId = cancelBtn.getAttribute('data-user-id');
+        const userName = cancelBtn.getAttribute('data-user-name');
+        
+        // Update to "Add Friend" state
+        actionsContainer.innerHTML = '';
+        
+        const addFriendBtn = document.createElement('button');
+        addFriendBtn.className = 'btn btn-primary btn-sm add-friend-btn';
+        addFriendBtn.setAttribute('data-user-id', userId);
+        addFriendBtn.setAttribute('data-user-name', userName);
+        addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+        
+        actionsContainer.appendChild(addFriendBtn);
+      }
+    }
+  }
+  
+  function removeRequestCardFromRequestsTab(requestId) {
+    // Find the card by its ID
+    const requestCard = document.getElementById(`request-card-${requestId}`);
+    if (requestCard) {
+      requestCard.remove();
+    }
+  }
+
+
+
+  function showNotification(message, type = "info") {
+    const alertDiv = document.createElement("div");
+    alertDiv.className = `alert alert-${
+      type === "error" ? "danger" : type
+    } alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText =
+      "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+    alertDiv.innerHTML = `
+      <i class="fas fa-${
+        type === "success"
+          ? "check"
+          : type === "error"
+          ? "exclamation-triangle"
+          : "info-circle"
+      }"></i> ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 3000);
+  }
+
+  // Add event listeners
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+
+    // Real-time search with debouncing
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimeout);
+      const searchTerm = this.value.trim();
+
+      if (searchTerm.length === 0) {
+        return;
+      }
+
+      searchTimeout = setTimeout(() => {
+        searchUsers();
+      }, 500);
+    });
+
+    // Search on Enter key
+    searchInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        searchUsers();
+      }
+    });
+
+    // Event delegation for dynamically created buttons
+    document.addEventListener("click", function(e) {
+      // Add friend button event listeners
+      if (e.target.closest(".add-friend-btn")) {
+        const button = e.target.closest(".add-friend-btn");
+        const userId = button.getAttribute("data-user-id");
+        const userName = button.getAttribute("data-user-name");
+        sendFriendRequestFromUsersPage(userId, userName);
+      }
+      
+      // Cancel request button event listeners
+      if (e.target.closest(".cancel-request-btn")) {
+        const button = e.target.closest(".cancel-request-btn");
+        const userId = button.getAttribute("data-user-id");
+        const userName = button.getAttribute("data-user-name");
+        const requestId = button.getAttribute("data-request-id");
+        cancelRequestFromAllUsersPage(userId, userName, requestId);
+      }
+    });
+  });
+</script>
