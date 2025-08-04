@@ -16,6 +16,27 @@ A social media web application built with Node.js, Express, EJS, Passport.js, Pr
 - Friend system with friend requests
 - Real-time notifications
 
+## Avatar Generation for Seed Data
+
+The seed file uses **Gravatar** to generate profile pictures for users:
+
+### Gravatar Benefits
+
+- Uses email addresses to generate consistent avatars
+- Professional geometric patterns with `d=identicon` parameter
+- 200px size for optimal quality
+- Free and reliable service
+- Same email always generates the same avatar
+
+### How It Works
+
+The `getGravatarUrl()` function:
+
+1. Takes the user's email address
+2. Creates an MD5 hash of the email (lowercase, trimmed)
+3. Generates a Gravatar URL with size=200 and identicon fallback
+4. Returns a consistent, professional avatar for each user
+
 ## Prerequisites
 
 - Node.js (v14 or higher)

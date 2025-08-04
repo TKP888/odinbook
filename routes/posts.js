@@ -50,6 +50,8 @@ router.get("/", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -123,6 +125,8 @@ router.get("/my-posts", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -181,6 +185,8 @@ router.get("/all", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -252,6 +258,8 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -323,6 +331,8 @@ router.post("/", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
       },
@@ -380,6 +390,8 @@ router.put("/:id", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
       },
@@ -640,10 +652,10 @@ router.put("/comments/:commentId", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       comment: updatedComment,
-      message: "Comment updated successfully" 
+      message: "Comment updated successfully",
     });
   } catch (error) {
     console.error("Error updating comment:", error);

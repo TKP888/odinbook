@@ -2,8 +2,28 @@
 
 const { PrismaClient } = require("@prisma/client");
 const { faker } = require("@faker-js/faker");
+const crypto = require("crypto");
+require("dotenv").config();
 
 const prisma = new PrismaClient();
+
+// Function to generate Gravatar URL (no API key needed for avatars)
+function getGravatarUrl(email, size = 200) {
+  const hash = crypto
+    .createHash("md5")
+    .update(email.toLowerCase().trim())
+    .digest("hex");
+  return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon&r=pg`;
+}
+
+// Example: If you need to use the API key for profile data
+// function getGravatarProfile(email) {
+//   const hash = crypto
+//     .createHash("md5")
+//     .update(email.toLowerCase().trim())
+//     .digest("hex");
+//   return `https://www.gravatar.com/${hash}.json`;
+// }
 
 async function main() {
   const NUM_USERS = 60;
@@ -91,15 +111,18 @@ async function main() {
 
   // Create users with unique bios
   for (let i = 0; i < NUM_USERS; i++) {
+    const email = faker.internet.email();
+    const username = faker.internet.username();
     const user = await prisma.user.create({
       data: {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
+        email: email,
+        username: username,
         password: faker.internet.password(), // You might want to hash in real apps
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         bio: bios[i],
-        profilePicture: faker.image.avatar(),
+        profilePicture: getGravatarUrl(email),
+        useGravatar: true,
         birthday: faker.date.birthdate({ min: 18, max: 65, mode: "age" }),
         gender: faker.helpers.arrayElement(["male", "female", "non-binary"]),
         location: faker.location.city() + ", " + faker.location.country(),

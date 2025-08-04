@@ -4,8 +4,37 @@ const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 
 const prisma = new PrismaClient();
+
+// Gravatar utility functions
+function getGravatarUrl(email, size = 200) {
+  const hash = crypto
+    .createHash("md5")
+    .update(email.toLowerCase().trim())
+    .digest("hex");
+  return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon&r=pg`;
+}
+
+async function getGravatarProfile(email) {
+  try {
+    const hash = crypto
+      .createHash("md5")
+      .update(email.toLowerCase().trim())
+      .digest("hex");
+    const response = await fetch(`https://www.gravatar.com/${hash}.json`);
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.entry?.[0] || null;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching Gravatar profile:", error);
+    return null;
+  }
+}
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -389,16 +418,18 @@ router.post(
       // Update user's profile picture in database
       const updatedUser = await prisma.user.update({
         where: { id: req.user.id },
-        data: { profilePicture: fileUrl },
+        data: { profilePicture: fileUrl, useGravatar: false },
         select: {
           id: true,
           profilePicture: true,
+          useGravatar: true,
         },
       });
 
       res.json({
         success: true,
         profilePicture: updatedUser.profilePicture,
+        useGravatar: updatedUser.useGravatar,
         message: "Profile picture updated successfully",
       });
     } catch (error) {
@@ -407,5 +438,52 @@ router.post(
     }
   }
 );
+
+// Toggle Gravatar usage
+router.post("/toggle-gravatar", ensureAuthenticated, async (req, res) => {
+  try {
+    const { useGravatar } = req.body;
+    
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { 
+        useGravatar: useGravatar,
+        profilePicture: useGravatar ? getGravatarUrl(req.user.email) : null
+      },
+      select: {
+        id: true,
+        profilePicture: true,
+        useGravatar: true,
+        email: true,
+      },
+    });
+
+    res.json({
+      success: true,
+      profilePicture: updatedUser.profilePicture,
+      useGravatar: updatedUser.useGravatar,
+      message: useGravatar ? "Gravatar enabled" : "Gravatar disabled",
+    });
+  } catch (error) {
+    console.error("Error toggling Gravatar:", error);
+    res.status(500).json({ error: "Failed to toggle Gravatar" });
+  }
+});
+
+// Get Gravatar profile data
+router.get("/gravatar-profile", ensureAuthenticated, async (req, res) => {
+  try {
+    const gravatarProfile = await getGravatarProfile(req.user.email);
+    
+    res.json({
+      success: true,
+      profile: gravatarProfile,
+      hasGravatar: !!gravatarProfile,
+    });
+  } catch (error) {
+    console.error("Error fetching Gravatar profile:", error);
+    res.status(500).json({ error: "Failed to fetch Gravatar profile" });
+  }
+});
 
 module.exports = router;

@@ -1156,6 +1156,7 @@ function saveProfileChanges() {
   const birthday = document.getElementById("editBirthday").value;
   const gender = document.getElementById("editGender").value;
   const location = document.getElementById("editLocation").value.trim();
+  const useGravatar = document.getElementById("useGravatar").checked;
 
   // Validate input
   if (!firstName || !lastName || !username) {
@@ -1202,6 +1203,7 @@ function saveProfileChanges() {
   saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   saveBtn.disabled = true;
 
+  // First update profile information
   fetch("/profile/update", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -1217,8 +1219,35 @@ function saveProfileChanges() {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
+        // Then handle Gravatar toggle
+        return fetch("/profile/toggle-gravatar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ useGravatar }),
+        });
+      } else {
+        throw new Error(data.error || "Failed to update profile");
+      }
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
         // Hide the modal first
         editProfileModal.hide();
+
+        // Update profile picture if Gravatar was toggled
+        if (data.profilePicture) {
+          const profilePicture = document.getElementById("profilePicture");
+          if (profilePicture) {
+            profilePicture.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+          }
+
+          // Update header avatar
+          const headerAvatar = document.querySelector(".user-avatar");
+          if (headerAvatar) {
+            headerAvatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+          }
+        }
 
         // Show success notification
         const alertDiv = document.createElement("div");
@@ -1231,26 +1260,12 @@ function saveProfileChanges() {
             `;
         document.body.appendChild(alertDiv);
 
-        // Update profile information dynamically
-        updateProfileDisplay(data.user);
-
         // Remove the notification after 2 seconds
         setTimeout(() => {
           alertDiv.remove();
         }, 2000);
       } else {
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText = "top: 20px; right: 20px; z-index: 9999;";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${
-                data.error || "Failed to update profile"
-              }</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+        throw new Error(data.error || "Failed to update Gravatar settings");
       }
     })
     .catch((error) => {
@@ -1260,7 +1275,9 @@ function saveProfileChanges() {
         "alert alert-danger alert-dismissible fade show position-fixed";
       alertDiv.style.cssText = "top: 20px; right: 20px; z-index: 9999;";
       alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to update profile. Please try again.</div>
+            <div><i class="fas fa-exclamation-triangle"></i> ${
+              error.message || "Failed to update profile. Please try again."
+            }</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           `;
       document.body.appendChild(alertDiv);
@@ -1324,27 +1341,27 @@ function handleProfilePictureUpload(event) {
     body: formData,
   })
     .then((response) => response.json())
-         .then((data) => {
-       if (data.success) {
-         // Update the profile picture with the new image
-         profilePicture.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
-         
-         // Update header avatar immediately
-         const headerAvatar = document.querySelector('.user-avatar');
-         if (headerAvatar) {
-           headerAvatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
-         }
-         
-         // Show success notification
-         const alertDiv = document.createElement("div");
-         alertDiv.className =
-           "alert alert-success alert-dismissible fade show position-fixed";
-         alertDiv.innerHTML = `
+    .then((data) => {
+      if (data.success) {
+        // Update the profile picture with the new image
+        profilePicture.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+
+        // Update header avatar immediately
+        const headerAvatar = document.querySelector(".user-avatar");
+        if (headerAvatar) {
+          headerAvatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+        }
+
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
            <div><i class="fas fa-check"></i> Profile picture updated successfully!</div>
            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
          `;
-         document.body.appendChild(alertDiv);
-         setTimeout(() => alertDiv.remove(), 3000);
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
       } else {
         // Restore original content on error
         profilePicture.innerHTML = originalContent;

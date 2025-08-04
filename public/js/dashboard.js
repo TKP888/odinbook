@@ -7,6 +7,23 @@ const currentUserId = document
   .querySelector('meta[name="user-id"]')
   ?.getAttribute("content");
 
+// Function to get user avatar (Gravatar or initials)
+function getUserAvatar(user) {
+  // If user has a profile picture (including Gravatar URLs), use it
+  if (
+    user.profilePicture &&
+    (user.profilePicture.startsWith("http") ||
+      user.profilePicture.startsWith("/uploads/"))
+  ) {
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+  } else {
+    // Fallback to initials
+    return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
+      0
+    )}`;
+  }
+}
+
 // Load posts when page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadPosts();
@@ -288,9 +305,7 @@ function displayPosts(posts) {
 <div class="post-item mb-4 p-3 border rounded">
   <div class="d-flex align-items-start mb-3">
     <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
-      ${(post.user.firstName || "").charAt(0)}${(
-        post.user.lastName || ""
-      ).charAt(0)}
+      ${getUserAvatar(post.user)}
     </div>
     <div class="flex-grow-1">
       <div class="d-flex justify-content-between align-items-start">
@@ -378,9 +393,7 @@ function displayPosts(posts) {
         <div class="comment-item p-2 border-bottom">
           <div class="d-flex align-items-start">
             <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
-              ${(comment.user.firstName || "").charAt(0)}${(
-                  comment.user.lastName || ""
-                ).charAt(0)}
+              ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-start">
@@ -777,9 +790,7 @@ function showLikesModal(postId) {
             (like) => `
     <div class="d-flex align-items-center mb-2">
       <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
-        ${(like.user.firstName || "").charAt(0)}${(
-              like.user.lastName || ""
-            ).charAt(0)}
+        ${getUserAvatar(like.user)}
       </div>
       <div class="flex-grow-1">
         <div class="fw-bold">
