@@ -68,6 +68,7 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
           const cancelBtn = document.createElement("button");
           cancelBtn.className =
             "btn btn-outline-secondary btn-sm cancel-request-btn";
+          cancelBtn.id = `cancel-request-btn-${userId}`;
           cancelBtn.setAttribute("data-user-id", userId);
           cancelBtn.setAttribute("data-user-name", userName);
           cancelBtn.setAttribute("data-request-id", data.requestId);
@@ -217,6 +218,7 @@ function cancelRequestFromAllUsersPage(userId, userName, requestId) {
           // Create Add Friend button
           const addFriendBtn = document.createElement("button");
           addFriendBtn.className = "btn btn-primary btn-sm add-friend-btn";
+          addFriendBtn.id = `add-friend-btn-${userId}`;
           addFriendBtn.setAttribute("data-user-id", userId);
           addFriendBtn.setAttribute("data-user-name", userName);
           addFriendBtn.innerHTML =

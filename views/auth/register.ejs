@@ -53,6 +53,42 @@
     />
   </div>
 
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="birthday" class="form-label"> Birthday (Optional) </label>
+      <input
+        type="date"
+        class="form-control"
+        id="birthday"
+        name="birthday"
+        value="<%= typeof birthday != 'undefined' ? birthday : '' %>"
+      />
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label for="gender" class="form-label"> Gender (Optional) </label>
+      <select class="form-control" id="gender" name="gender">
+        <option value="">Select gender</option>
+        <option value="Male" <%= typeof gender != 'undefined' && gender === 'Male' ? 'selected' : '' %>>Male</option>
+        <option value="Female" <%= typeof gender != 'undefined' && gender === 'Female' ? 'selected' : '' %>>Female</option>
+        <option value="Other" <%= typeof gender != 'undefined' && gender === 'Other' ? 'selected' : '' %>>Other</option>
+        <option value="Prefer not to say" <%= typeof gender != 'undefined' && gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label for="location" class="form-label"> Location (Optional) </label>
+    <input
+      type="text"
+      class="form-control"
+      id="location"
+      name="location"
+      placeholder="City, Country (e.g., London, UK)"
+      value="<%= typeof location != 'undefined' ? location : '' %>"
+    />
+  </div>
+
   <div class="mb-3">
     <label for="password" class="form-label"> Password </label>
     <input

@@ -2,6 +2,11 @@
 let createPostModal;
 let editPostModal;
 
+// Get current user ID from the page
+const currentUserId = document
+  .querySelector('meta[name="user-id"]')
+  ?.getAttribute("content");
+
 // Load posts when page loads
 document.addEventListener("DOMContentLoaded", function () {
   loadPosts();
@@ -49,6 +54,26 @@ function initializeModals() {
       if (charCount > 900) {
         charCountElement.style.color = "#dc3545";
       } else if (charCount > 800) {
+        charCountElement.style.color = "#ffc107";
+      } else {
+        charCountElement.style.color = "#6c757d";
+      }
+    });
+  }
+
+  // Character count for edit comment textarea
+  const editCommentContent = document.getElementById("editCommentContent");
+  if (editCommentContent) {
+    editCommentContent.addEventListener("input", function () {
+      const text = this.value;
+      const charCount = text.length;
+      document.getElementById("editCommentCharCount").textContent = charCount;
+
+      // Update character count color
+      const charCountElement = document.getElementById("editCommentCharCount");
+      if (charCount > 200) {
+        charCountElement.style.color = "#dc3545";
+      } else if (charCount > 150) {
         charCountElement.style.color = "#ffc107";
       } else {
         charCountElement.style.color = "#6c757d";
@@ -271,7 +296,9 @@ function displayPosts(posts) {
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <h6 class="mb-1">
-            ${post.user.firstName || ""} ${post.user.lastName || ""}
+            <a href="/profile/${post.user.id}" class="text-decoration-none">
+              ${post.user.firstName || ""} ${post.user.lastName || ""}
+            </a>
             <span class="text-muted small">@${post.user.username}</span>
           </h6>
           <small class="text-muted">
@@ -281,7 +308,7 @@ function displayPosts(posts) {
           </small>
         </div>
         ${
-          post.user.id === "<%= user.id %>"
+          post.user.id === currentUserId
             ? `
           <div class="dropdown">
             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -310,17 +337,13 @@ function displayPosts(posts) {
       <!-- Action Buttons -->
       <div class="d-flex gap-2">
         <button class="btn btn-sm ${
-          post.likes.some((like) => like.user.id === "<%= user.id %>")
-            ? "btn-primary"
+          post.likes.some((like) => like.user.id === currentUserId)
+            ? "liked"
             : "btn-outline-primary"
         } like-btn" id="like-btn-${post.id}" onclick="likePost('${
         post.id
       }')" data-post-id="${post.id}">
-          <i class="fas fa-heart" style="${
-            post.likes.some((like) => like.user.id === "<%= user.id %>")
-              ? "color: #dc3545;"
-              : ""
-          }"></i> Like
+          <i class="fas fa-heart"></i> Like
         </button>
         <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
           post.id
@@ -345,9 +368,7 @@ function displayPosts(posts) {
   </div>
 
   <!-- Comments Section -->
-  <div class="comments-section mt-3" id="comments-section-${
-    post.id
-  }" style="display: none;">
+  <div class="comments-section mt-3 d-none" id="comments-section-${post.id}">
     <div class="comments-list mb-3" id="comments-list-${post.id}">
       ${
         post.comments && post.comments.length > 0
@@ -364,20 +385,38 @@ function displayPosts(posts) {
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
-                  <small class="fw-bold">${comment.user.firstName || ""} ${
+                  <small class="fw-bold">
+                    <a href="/profile/${
+                      comment.user.id
+                    }" class="text-decoration-none">
+                      ${comment.user.firstName || ""} ${
                   comment.user.lastName || ""
-                }</small>
+                }
+                    </a>
+                  </small>
                   <div class="comment-content">${comment.content}</div>
                   <small class="text-muted">${formatDateTime(
                     comment.createdAt
                   )}</small>
                 </div>
                 ${
-                  comment.user.id === "<%= user.id %>"
+                  comment.user.id === currentUserId
                     ? `
-                  <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${comment.id}', '${post.id}')">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                      comment.id
+                    }', '${post.id}', '${comment.content.replace(
+                        /'/g,
+                        "\\'"
+                      )}')" title="Edit comment">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                      comment.id
+                    }', '${post.id}')" title="Delete comment">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
                 `
                     : ""
                 }
@@ -484,7 +523,7 @@ function editPost(postId) {
     .then((data) => {
       if (data.post) {
         // Check if the post belongs to the current user
-        if (data.post.user.id === "<%= user.id %>") {
+        if (data.post.user.id === currentUserId) {
           // Populate the edit modal
           document.getElementById("editPostId").value = postId;
           document.getElementById("editPostContent").value = data.post.content;
@@ -602,8 +641,8 @@ function likePost(postId) {
         if (data.liked) {
           // Like the post
           likeButton.classList.remove("btn-outline-primary");
-          likeButton.classList.add("btn-primary");
-          icon.style.color = "#dc3545";
+          likeButton.classList.add("liked");
+          icon.style.color = "white";
 
           // Update likes count
           const likesElement = document.getElementById(`likes-${postId}`);
@@ -613,7 +652,7 @@ function likePost(postId) {
           }`;
         } else {
           // Unlike the post
-          likeButton.classList.remove("btn-primary");
+          likeButton.classList.remove("liked");
           likeButton.classList.add("btn-outline-primary");
           icon.style.color = "";
 
@@ -636,10 +675,14 @@ function likePost(postId) {
 
 function toggleComments(postId) {
   const commentsSection = document.getElementById(`comments-section-${postId}`);
+
   if (commentsSection.classList.contains("d-none")) {
     commentsSection.classList.remove("d-none");
-    // Refresh comments when opening the section
-    loadCommentsForPost(postId);
+    // Focus on the comment input when opening
+    const commentInput = document.getElementById(`comment-input-${postId}`);
+    if (commentInput) {
+      commentInput.focus();
+    }
   } else {
     commentsSection.classList.add("d-none");
   }
@@ -667,20 +710,36 @@ function loadCommentsForPost(postId) {
         <div class="flex-grow-1">
           <div class="d-flex justify-content-between align-items-start">
             <div>
-              <small class="fw-bold">${comment.user.firstName || ""} ${
-              comment.user.lastName || ""
-            }</small>
+              <small class="fw-bold">
+                <a href="/profile/${
+                  comment.user.id
+                }" class="text-decoration-none">
+                  ${comment.user.firstName || ""} ${comment.user.lastName || ""}
+                </a>
+              </small>
               <div class="comment-content">${comment.content}</div>
               <small class="text-muted">${formatDateTime(
                 comment.createdAt
               )}</small>
             </div>
             ${
-              comment.user.id === "<%= user.id %>"
+              comment.user.id === currentUserId
                 ? `
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${comment.id}', '${postId}')">
-                <i class="fas fa-trash"></i>
-              </button>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                  comment.id
+                }', '${postId}', '${comment.content.replace(
+                    /'/g,
+                    "\\'"
+                  )}')" title="Edit comment">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                  comment.id
+                }', '${postId}')" title="Delete comment">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
             `
                 : ""
             }
@@ -723,9 +782,11 @@ function showLikesModal(postId) {
             ).charAt(0)}
       </div>
       <div class="flex-grow-1">
-        <div class="fw-bold">${like.user.firstName || ""} ${
-              like.user.lastName || ""
-            }</div>
+        <div class="fw-bold">
+          <a href="/profile/${like.user.id}" class="text-decoration-none">
+            ${like.user.firstName || ""} ${like.user.lastName || ""}
+          </a>
+        </div>
         <div class="text-muted small">@${like.user.username}</div>
       </div>
     </div>
@@ -800,6 +861,98 @@ function deleteComment(commentId, postId) {
         alert("Failed to delete comment. Please try again.");
       });
   }
+}
+
+function editComment(commentId, postId, currentContent) {
+  const editCommentModal = new bootstrap.Modal(
+    document.getElementById("editCommentModal")
+  );
+  document.getElementById("editCommentId").value = commentId;
+  document.getElementById("editCommentContent").value = currentContent;
+  document.getElementById("editCommentCharCount").textContent =
+    currentContent.length;
+
+  // Store postId for use in saveEditedComment
+  document.getElementById("editCommentId").setAttribute("data-post-id", postId);
+
+  // Reset character count color
+  const charCountElement = document.getElementById("editCommentCharCount");
+  if (currentContent.length > 200) {
+    charCountElement.style.color = "#dc3545";
+  } else if (currentContent.length > 150) {
+    charCountElement.style.color = "#ffc107";
+  } else {
+    charCountElement.style.color = "#6c757d";
+  }
+
+  editCommentModal.show();
+}
+
+function saveEditedComment() {
+  const commentId = document.getElementById("editCommentId").value;
+  const postId = document
+    .getElementById("editCommentId")
+    .getAttribute("data-post-id");
+  const content = document.getElementById("editCommentContent").value.trim();
+
+  if (!content) {
+    alert("Please enter some content for your comment.");
+    return;
+  }
+
+  if (content.length > 250) {
+    alert("Comment content cannot exceed 250 characters.");
+    return;
+  }
+
+  const saveEditCommentBtn = document.getElementById("saveEditCommentBtn");
+  const originalText = saveEditCommentBtn.innerHTML;
+  saveEditCommentBtn.innerHTML =
+    '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  saveEditCommentBtn.disabled = true;
+
+  fetch(`/posts/comments/${commentId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        const editCommentModal = bootstrap.Modal.getInstance(
+          document.getElementById("editCommentModal")
+        );
+        editCommentModal.hide();
+
+        // Refresh the comments list to show the updated comment
+        loadCommentsForPost(postId);
+
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.style.cssText =
+          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        alertDiv.innerHTML = `
+  <i class="fas fa-check"></i> Comment updated successfully!
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+`;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+      } else {
+        alert(data.error || "Failed to update comment");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Failed to update comment. Please try again.");
+    })
+    .finally(() => {
+      saveEditCommentBtn.innerHTML = originalText;
+      saveEditCommentBtn.disabled = false;
+    });
 }
 
 function sharePost(postId) {

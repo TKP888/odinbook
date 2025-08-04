@@ -45,6 +45,9 @@ router.post(
       }
       return true;
     }),
+    body("birthday").optional().isISO8601().toDate(),
+    body("gender").optional().isLength({ max: 50 }),
+    body("location").optional().isLength({ max: 100 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -59,11 +62,23 @@ router.post(
         lastName: req.body.lastName,
         email: req.body.email,
         username: req.body.username,
+        birthday: req.body.birthday,
+        gender: req.body.gender,
+        location: req.body.location,
       });
     }
 
     try {
-      const { firstName, lastName, email, username, password } = req.body;
+      const {
+        firstName,
+        lastName,
+        email,
+        username,
+        password,
+        birthday,
+        gender,
+        location,
+      } = req.body;
 
       // Check if user already exists
       const existingUser = await prisma.user.findFirst({
@@ -82,6 +97,9 @@ router.post(
           lastName,
           email,
           username,
+          birthday,
+          gender,
+          location,
         });
       }
 
@@ -97,6 +115,9 @@ router.post(
           email,
           username,
           password: hashedPassword,
+          birthday: birthday ? new Date(birthday) : null,
+          gender: gender || null,
+          location: location || null,
         },
       });
 

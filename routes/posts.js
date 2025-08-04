@@ -592,6 +592,65 @@ router.get("/:id/comments", ensureAuthenticated, async (req, res) => {
   }
 });
 
+// Update a comment (only by the comment owner)
+router.put("/comments/:commentId", ensureAuthenticated, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ error: "Comment content is required" });
+    }
+
+    if (content.length > 250) {
+      return res
+        .status(400)
+        .json({ error: "Comment cannot exceed 250 characters" });
+    }
+
+    // Check if comment exists and belongs to the user
+    const existingComment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!existingComment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    if (existingComment.userId !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: "You can only edit your own comments" });
+    }
+
+    const updatedComment = await prisma.comment.update({
+      where: { id: commentId },
+      data: {
+        content: content.trim(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+      },
+    });
+
+    res.json({ 
+      success: true, 
+      comment: updatedComment,
+      message: "Comment updated successfully" 
+    });
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    res.status(500).json({ error: "Failed to update comment" });
+  }
+});
+
 // Delete a comment (only by the comment owner)
 router.delete("/comments/:commentId", ensureAuthenticated, async (req, res) => {
   try {

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1500 1500">
+  <defs>
+    <style>
+      .f {
+        fill: none;
+      }
+
+      .g {
+        fill: #32c5ff;
+        stroke: #0040fe;
+        stroke-miterlimit: 10;
+        stroke-width: 40px;
+      }
+
+      .h {
+        clip-path: url(#e);
+      }
+
+      .i {
+        clip-path: url(#c);
+      }
+    </style>
+    <clipPath id="c">
+      <rect class="f" x="139.48" y="-7441" width="610.52" height="16383"/>
+    </clipPath>
+    <clipPath id="e">
+      <rect class="f" x="750" y="-7441" width="610.52" height="16383"/>
+    </clipPath>
+  </defs>
+  <g id="b" data-name="&amp;lt;Mirror Repeat&amp;gt;">
+    <g class="i">
+      <path class="g" d="M984.25,290.46c2.21-5.73,3.81-13.58,0-21.53-36.44-75.88-505.8-56-731.53,90.44-50.33,32.65-96.05,56.28-93.1,122.47,9.98,223.84,57.49,745.91,145.43,794.14,207.96,114.06,566,86.97,679.2,86.86"/>
+    </g>
+  </g>
+  <g id="d" data-name="&amp;lt;Mirror Repeat&amp;gt;">
+    <g class="h">
+      <path class="g" d="M515.75,290.46c-2.21-5.73-3.81-13.58,0-21.53,36.44-75.88,505.8-56,731.53,90.44,50.33,32.65,96.05,56.28,93.1,122.47-9.98,223.84-57.49,745.91-145.43,794.14-207.96,114.06-566,86.97-679.2,86.86"/>
+    </g>
+  </g>
+</svg>

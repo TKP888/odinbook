@@ -122,11 +122,13 @@
                           </div>
                           <div class="flex-grow-1">
                             <h6 class="mb-1">
-                              <%= user.firstName || '' %> <%= user.lastName ||
-                              '' %> <% if (!user.firstName && !user.lastName) {
-                              %>
-                              <span class="text-muted">(No name)</span>
-                              <% } %>
+                              <a href="/profile/<%= user.id %>" class="text-decoration-none">
+                                <%= user.firstName || '' %> <%= user.lastName ||
+                                '' %> <% if (!user.firstName && !user.lastName) {
+                                %>
+                                <span class="text-muted">(No name)</span>
+                                <% } %>
+                              </a>
                             </h6>
                             <p class="text-muted mb-0 small">
                               @<%= user.username %>
@@ -222,11 +224,13 @@
                         </div>
                         <div class="flex-grow-1">
                           <h6 class="mb-1">
-                            <%= friend.firstName || '' %> <%= friend.lastName ||
-                            '' %> <% if (!friend.firstName && !friend.lastName)
-                            { %>
-                            <span class="text-muted">(No name)</span>
-                            <% } %>
+                            <a href="/profile/<%= friend.id %>" class="text-decoration-none">
+                              <%= friend.firstName || '' %> <%= friend.lastName ||
+                              '' %> <% if (!friend.firstName && !friend.lastName)
+                              { %>
+                              <span class="text-muted">(No name)</span>
+                              <% } %>
+                            </a>
                           </h6>
                           <p class="text-muted mb-0 small">
                             @<%= friend.username %>
@@ -292,12 +296,14 @@
                         </div>
                         <div class="flex-grow-1">
                           <h6 class="mb-1">
-                            <%= request.otherUser.firstName || '' %> <%=
-                            request.otherUser.lastName || '' %> <% if
-                            (!request.otherUser.firstName &&
-                            !request.otherUser.lastName) { %>
-                            <span class="text-muted">(No name)</span>
-                            <% } %>
+                            <a href="/profile/<%= request.otherUser.id %>" class="text-decoration-none">
+                              <%= request.otherUser.firstName || '' %> <%=
+                              request.otherUser.lastName || '' %> <% if
+                              (!request.otherUser.firstName &&
+                              !request.otherUser.lastName) { %>
+                              <span class="text-muted">(No name)</span>
+                              <% } %>
+                            </a>
                           </h6>
                           <p class="text-muted mb-0 small">
                             @<%= request.otherUser.username %>

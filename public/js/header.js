@@ -4,9 +4,9 @@
 let headerSearchTimeout;
 
 function headerSearchUsers() {
-  const searchTerm = document
-    .getElementById("headerSearchInput")
-    .value.trim();
+  const searchTerm = document.getElementById("headerSearchInput").value.trim();
+
+  console.log("Searching for:", searchTerm);
 
   if (searchTerm.length === 0) {
     hideHeaderSearchResults();
@@ -16,31 +16,41 @@ function headerSearchUsers() {
   showHeaderSearchLoading();
 
   const searchUrl = `/friends/search?q=${encodeURIComponent(searchTerm)}`;
+  console.log("Search URL:", searchUrl);
 
   fetch(searchUrl)
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("Search response status:", response.status);
+      return response.json();
+    })
     .then((data) => {
+      console.log("Search results:", data);
       hideHeaderSearchLoading();
       displayHeaderSearchResults(data.users);
     })
     .catch((error) => {
+      console.error("Search error:", error);
       hideHeaderSearchLoading();
       hideHeaderSearchResults();
     });
 }
 
 function displayHeaderSearchResults(users) {
+  console.log("Displaying search results for users:", users);
+
   const resultsDiv = document.getElementById("headerSearchResults");
   const usersListDiv = document.getElementById("headerUsersList");
   const noResultsDiv = document.getElementById("headerNoResults");
 
   if (users.length === 0) {
+    console.log("No users found, showing no results message");
     resultsDiv.classList.remove("d-none");
     usersListDiv.innerHTML = "";
     noResultsDiv.classList.remove("d-none");
     return;
   }
 
+  console.log(`Found ${users.length} users, displaying results`);
   noResultsDiv.classList.add("d-none");
   resultsDiv.classList.remove("d-none");
 
@@ -50,13 +60,23 @@ function displayHeaderSearchResults(users) {
         <div class="search-result-item">
           <div class="d-flex align-items-center p-2">
             <div class="user-avatar-small me-3">
-              ${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}
+              ${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
+        0
+      )}
             </div>
             <div class="flex-grow-1">
-              <div class="fw-bold">${user.firstName || ""} ${user.lastName || ""}</div>
+              <div class="fw-bold">
+                <a href="/profile/${
+                  user.id
+                }" class="text-decoration-none text-dark user-profile-link">
+                  ${user.firstName || ""} ${user.lastName || ""}
+                </a>
+              </div>
               <div class="text-muted small">@${user.username}</div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${user.id}', '${user.firstName || ""} ${user.lastName || ""}')">
+            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
+              user.id
+            }', '${user.firstName || ""} ${user.lastName || ""}')">
               <i class="fas fa-user-plus"></i>
             </button>
           </div>
@@ -79,10 +99,8 @@ function sendFriendRequestFromHeader(userId, userName = "") {
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
         alertDiv.innerHTML = `
-                <i class="fas fa-user-plus"></i> Friend request sent to ${userName || "user"}!
+                <div><i class="fas fa-user-plus"></i> Friend request sent to ${userName || "user"}!</div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
               `;
         document.body.appendChild(alertDiv);
@@ -94,28 +112,41 @@ function sendFriendRequestFromHeader(userId, userName = "") {
         document.getElementById("headerSearchInput").value = "";
       } else {
         if (
-          data.error ===
-          "You already have a pending request from this user"
+          data.error === "You already have a pending request from this user"
         ) {
           // Show a more helpful message
           const alertDiv = document.createElement("div");
           alertDiv.className =
             "alert alert-info alert-dismissible fade show position-fixed";
-          alertDiv.style.cssText =
-            "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
           alertDiv.innerHTML = `
-                  <i class="fas fa-info-circle"></i> ${data.error}
+                  <div><i class="fas fa-info-circle"></i> ${data.error}</div>
                   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
           document.body.appendChild(alertDiv);
           setTimeout(() => alertDiv.remove(), 5000);
         } else {
-          alert(data.error || "Could not send request");
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-danger alert-dismissible fade show position-fixed";
+          alertDiv.innerHTML = `
+                  <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not send request"}</div>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+          document.body.appendChild(alertDiv);
+          setTimeout(() => alertDiv.remove(), 5000);
         }
       }
     })
     .catch(() => {
-      alert("Could not send request. Please try again.");
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
     });
 }
 
@@ -182,10 +213,10 @@ function updateHeaderRequestCount() {
       if (countBadge) {
         if (data.requests.length > 0) {
           countBadge.textContent = data.requests.length;
-              countBadge.classList.remove("d-none");
-  } else {
-    countBadge.classList.add("d-none");
-  }
+          countBadge.classList.remove("d-none");
+        } else {
+          countBadge.classList.add("d-none");
+        }
       }
 
       if (requestsList) {
@@ -204,8 +235,8 @@ function updateHeaderRequestCount() {
                   <div class="d-flex align-items-center">
                     <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
                       ${(request.sender.firstName || "").charAt(0)}${(
-                        request.sender.lastName || ""
-                      ).charAt(0)}
+                request.sender.lastName || ""
+              ).charAt(0)}
                     </div>
                     <div class="flex-grow-1">
                       <div class="fw-bold small">${
@@ -258,20 +289,34 @@ function acceptRequest(requestId) {
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
         alertDiv.innerHTML = `
-              <i class="fas fa-check"></i> Friend request accepted!
+              <div><i class="fas fa-check"></i> Friend request accepted!</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
       } else {
-        alert(data.error || "Could not accept request");
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not accept request"}</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
       }
     })
     .catch(() => {
-      alert("Could not accept request. Please try again.");
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> Could not accept request. Please try again.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
     });
 }
 
@@ -289,21 +334,34 @@ function declineRequest(requestId) {
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-info alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
         alertDiv.innerHTML = `
-              <i class="fas fa-times"></i> Friend request declined
+              <div><i class="fas fa-times"></i> Friend request declined</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
       } else {
-        alert(data.error || "Could not decline request");
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not decline request"}</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
       }
     })
     .catch(() => {
-      alert("Could not decline request. Please try again.
-");
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> Could not decline request. Please try again.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
     });
 }
 
@@ -315,6 +373,68 @@ function showUserSearch() {
     // Trigger search dropdown
     searchInput.dispatchEvent(new Event("input"));
   }
+}
+
+function sendFriendRequest(userId, userName = "") {
+  fetch("/friends/request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ receiverId: userId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+                <div><i class="fas fa-user-plus"></i> Friend request sent to ${userName || "user"}!</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Reload the page to update the UI
+        window.location.reload();
+      } else {
+        if (
+          data.error === "You already have a pending request from this user"
+        ) {
+          // Show a more helpful message
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-info alert-dismissible fade show position-fixed";
+          alertDiv.innerHTML = `
+                  <div><i class="fas fa-info-circle"></i> ${data.error}</div>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+          document.body.appendChild(alertDiv);
+          setTimeout(() => alertDiv.remove(), 5000);
+        } else {
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-danger alert-dismissible fade show position-fixed";
+          alertDiv.innerHTML = `
+                  <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not send request"}</div>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+          document.body.appendChild(alertDiv);
+          setTimeout(() => alertDiv.remove(), 5000);
+        }
+      }
+    })
+    .catch(() => {
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
