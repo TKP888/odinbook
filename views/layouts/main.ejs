@@ -102,7 +102,8 @@
             <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown">
               <% if (user && user.profilePicture &&
               (user.profilePicture.startsWith('http') ||
-              user.profilePicture.startsWith('/uploads/'))) { %>
+              user.profilePicture.startsWith('/uploads/') ||
+              user.profilePicture.includes('cloudinary.com'))) { %>
                              <img
                  src="<%= user.profilePicture %>"
                  alt="Profile Picture"

@@ -11,6 +11,25 @@ const currentUserId = document
   .querySelector('meta[name="user-id"]')
   ?.getAttribute("content");
 
+// Function to get user avatar (Gravatar or initials)
+function getUserAvatar(user) {
+  // If user has a profile picture (including Gravatar URLs), use it
+  if (
+    user.profilePicture &&
+    (user.profilePicture.startsWith("http") ||
+      user.profilePicture.startsWith("/uploads/") ||
+      user.profilePicture.includes("cloudinary.com") ||
+      user.profilePicture.includes("gravatar.com"))
+  ) {
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+  } else {
+    // Fallback to initials
+    return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
+      0
+    )}`;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   createPostModal = new bootstrap.Modal(
     document.getElementById("createPostModal")
@@ -335,28 +354,38 @@ function toggleLike(postId) {
           likeButton.classList.add("liked");
           icon.style.color = "white";
 
-          // Update likes count
-          const likesElement = document.querySelector(
-            `[data-post-id="${postId}"] .likes-count`
+          // Update likes count - find the post container and then the likes count
+          const postContainer = document.querySelector(
+            `[data-post-id="${postId}"]`
           );
-          const currentLikes = parseInt(likesElement.textContent) || 0;
-          likesElement.textContent = `${currentLikes + 1} like${
-            currentLikes + 1 !== 1 ? "s" : ""
-          }`;
+          const likesElement = postContainer
+            ? postContainer.querySelector(".likes-count")
+            : null;
+          if (likesElement) {
+            const currentLikes = parseInt(likesElement.textContent) || 0;
+            likesElement.textContent = `${currentLikes + 1} like${
+              currentLikes + 1 !== 1 ? "s" : ""
+            }`;
+          }
         } else {
           // Unlike the post
           likeButton.classList.remove("liked");
           likeButton.classList.add("btn-outline-primary");
           icon.style.color = "";
 
-          // Update likes count
-          const likesElement = document.querySelector(
-            `[data-post-id="${postId}"] .likes-count`
+          // Update likes count - find the post container and then the likes count
+          const postContainer = document.querySelector(
+            `[data-post-id="${postId}"]`
           );
-          const currentLikes = parseInt(likesElement.textContent) || 1;
-          likesElement.textContent = `${currentLikes - 1} like${
-            currentLikes - 1 !== 1 ? "s" : ""
-          }`;
+          const likesElement = postContainer
+            ? postContainer.querySelector(".likes-count")
+            : null;
+          if (likesElement) {
+            const currentLikes = parseInt(likesElement.textContent) || 1;
+            likesElement.textContent = `${currentLikes - 1} like${
+              currentLikes - 1 !== 1 ? "s" : ""
+            }`;
+          }
         }
       } else {
         const alertDiv = document.createElement("div");
@@ -434,14 +463,19 @@ function submitComment(postId) {
       if (data.success) {
         commentInput.value = "";
 
-        // Update comment count
-        const commentsElement = document.querySelector(
-          `[data-post-id="${postId}"] .comments-count`
+        // Update comment count - find the post container and then the comments count
+        const postContainer = document.querySelector(
+          `[data-post-id="${postId}"]`
         );
-        const currentComments = parseInt(commentsElement.textContent) || 0;
-        commentsElement.textContent = `${currentComments + 1} comment${
-          currentComments + 1 !== 1 ? "s" : ""
-        }`;
+        const commentsElement = postContainer
+          ? postContainer.querySelector(".comments-count")
+          : null;
+        if (commentsElement) {
+          const currentComments = parseInt(commentsElement.textContent) || 0;
+          commentsElement.textContent = `${currentComments + 1} comment${
+            currentComments + 1 !== 1 ? "s" : ""
+          }`;
+        }
 
         // Add the new comment to the comments list
         const commentsList = document.getElementById(`comments-list-${postId}`);
@@ -464,9 +498,7 @@ function submitComment(postId) {
         newComment.innerHTML = `
           <div class="d-flex align-items-start">
             <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
-              ${(commentUser.firstName || "").charAt(0)}${(
-          commentUser.lastName || ""
-        ).charAt(0)}
+              ${getUserAvatar(commentUser)}
             </div>
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-start">
@@ -502,25 +534,15 @@ function submitComment(postId) {
             </div>
           </div>
         `;
-        commentsList.appendChild(newComment);
 
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-check"></i> Comment added successfully!</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        commentsList.appendChild(newComment);
       } else {
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-danger alert-dismissible fade show position-fixed";
         alertDiv.innerHTML = `
               <div><i class="fas fa-exclamation-triangle"></i> ${
-                data.error || "Failed to add comment"
+                data.error || "Failed to submit comment"
               }</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
@@ -534,7 +556,7 @@ function submitComment(postId) {
       alertDiv.className =
         "alert alert-danger alert-dismissible fade show position-fixed";
       alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to add comment. Please try again.</div>
+            <div><i class="fas fa-exclamation-triangle"></i> Failed to submit comment. Please try again.</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           `;
       document.body.appendChild(alertDiv);

@@ -22,7 +22,8 @@
                       />
                       <% } else if (user.profilePicture &&
                       (user.profilePicture.startsWith('http') ||
-                      user.profilePicture.startsWith('/uploads/'))) { %>
+                      user.profilePicture.startsWith('/uploads/') ||
+                      user.profilePicture.includes('cloudinary.com'))) { %>
                       <img
                         src="<%= user.profilePicture %>"
                         alt="Profile Picture"
@@ -86,6 +87,14 @@
 
               <!-- Posts List -->
               <div id="postsList" class="d-none"></div>
+
+              <!-- Load More Button -->
+              <div id="loadMoreContainer" class="text-center mt-3 d-none">
+                <button id="loadMoreBtn" class="btn btn-outline-primary" onclick="loadMorePosts()">
+                  <i class="fas fa-spinner fa-spin d-none" id="loadMoreSpinner"></i>
+                  Load More Posts
+                </button>
+              </div>
 
               <!-- No Posts -->
               <div id="noPosts" class="text-center text-muted d-none">

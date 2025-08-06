@@ -15,6 +15,8 @@ A social media web application built with Node.js, Express, EJS, Passport.js, Pr
 - View who liked a post
 - Friend system with friend requests
 - Real-time notifications
+- **Cloudinary integration for profile image storage**
+- Gravatar support for avatar generation
 
 ## Avatar Generation for Seed Data
 
@@ -67,7 +69,48 @@ The `getGravatarUrl()` function:
    DATABASE_URL="postgresql://username:password@localhost:5432/odinbook"
    SESSION_SECRET="your-super-secret-session-key-change-this-in-production"
    PORT=3000
+   GRAVATAR_API_KEY="your-gravatar-api-key"
+   
+   # Cloudinary Configuration (Required for profile image uploads)
+   CLOUDINARY_CLOUD_NAME="your-cloud-name"
+   CLOUDINARY_API_KEY="your-api-key"
+   CLOUDINARY_API_SECRET="your-api-secret"
    ```
+
+## Cloudinary Configuration
+
+This application uses **Cloudinary** for profile image storage instead of local file storage. This provides:
+
+- **Scalable cloud storage** - No local disk space required
+- **Automatic image optimization** - Images are automatically resized and optimized
+- **CDN delivery** - Fast global content delivery
+- **Secure URLs** - HTTPS by default
+- **Automatic cleanup** - Old images are deleted when replaced
+
+### Setting up Cloudinary
+
+1. **Create a Cloudinary account**
+   - Go to [cloudinary.com](https://cloudinary.com) and sign up for a free account
+   - Navigate to your Dashboard to get your credentials
+
+2. **Get your credentials**
+   - Cloud Name
+   - API Key
+   - API Secret
+
+3. **Update your .env file**
+   ```
+   CLOUDINARY_CLOUD_NAME="your-cloud-name"
+   CLOUDINARY_API_KEY="your-api-key"
+   CLOUDINARY_API_SECRET="your-api-secret"
+   ```
+
+### How it works
+
+- Profile images are uploaded to Cloudinary's `odinbook/profile-pictures` folder
+- Images are automatically resized to 400x400px with face detection cropping
+- Old images are automatically deleted when a new one is uploaded
+- All images are served via Cloudinary's CDN for optimal performance
 
 4. **Set up the database**
 
@@ -122,7 +165,8 @@ The `getGravatarUrl()` function:
 ```
 odinbook/
 ├── config/
-│   └── passport.js          # Passport authentication configuration
+│   ├── passport.js          # Passport authentication configuration
+│   └── cloudinary.js        # Cloudinary configuration and utilities
 ├── prisma/
 │   └── schema.prisma        # Database schema
 ├── routes/

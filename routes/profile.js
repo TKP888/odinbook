@@ -5,6 +5,10 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
+const {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} = require("../config/cloudinary");
 
 const prisma = new PrismaClient();
 
@@ -36,25 +40,9 @@ async function getGravatarProfile(email) {
   }
 }
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../public/uploads");
-    // Create uploads directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Generate unique filename with timestamp
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "profile-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
+// Configure multer for memory storage (for Cloudinary upload)
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
@@ -91,6 +79,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
         email: true,
         bio: true,
         profilePicture: true,
+        useGravatar: true,
         birthday: true,
         gender: true,
         location: true,
@@ -104,6 +93,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
             email: true,
             bio: true,
             profilePicture: true,
+            useGravatar: true,
             birthday: true,
             gender: true,
             location: true,
@@ -126,6 +116,8 @@ router.get("/", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -148,6 +140,9 @@ router.get("/", ensureAuthenticated, async (req, res) => {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
               },
             },
           },
@@ -412,13 +407,37 @@ router.post(
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Generate the URL for the uploaded file
-      const fileUrl = `/uploads/${req.file.filename}`;
+      // Get current user to check if they have an existing Cloudinary image
+      const currentUser = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          cloudinaryPublicId: true,
+          profilePicture: true,
+        },
+      });
+
+      // Upload file to Cloudinary
+      const result = await uploadToCloudinary(req.file);
+
+      if (!result.success) {
+        return res.status(500).json({
+          error: result.error || "Failed to upload file to Cloudinary",
+        });
+      }
+
+      // Delete old image from Cloudinary if it exists
+      if (currentUser?.cloudinaryPublicId) {
+        await deleteFromCloudinary(currentUser.cloudinaryPublicId);
+      }
 
       // Update user's profile picture in database
       const updatedUser = await prisma.user.update({
         where: { id: req.user.id },
-        data: { profilePicture: fileUrl, useGravatar: false },
+        data: {
+          profilePicture: result.url,
+          cloudinaryPublicId: result.public_id,
+          useGravatar: false,
+        },
         select: {
           id: true,
           profilePicture: true,
@@ -443,12 +462,30 @@ router.post(
 router.post("/toggle-gravatar", ensureAuthenticated, async (req, res) => {
   try {
     const { useGravatar } = req.body;
-    
+
+    // Get current user to check if they have a Cloudinary image
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        cloudinaryPublicId: true,
+        profilePicture: true,
+        email: true,
+      },
+    });
+
+    // If switching to Gravatar, delete the Cloudinary image
+    if (useGravatar && currentUser?.cloudinaryPublicId) {
+      await deleteFromCloudinary(currentUser.cloudinaryPublicId);
+    }
+
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
-      data: { 
+      data: {
         useGravatar: useGravatar,
-        profilePicture: useGravatar ? getGravatarUrl(req.user.email) : null
+        profilePicture: useGravatar ? getGravatarUrl(req.user.email) : null,
+        cloudinaryPublicId: useGravatar
+          ? null
+          : currentUser?.cloudinaryPublicId,
       },
       select: {
         id: true,
@@ -474,7 +511,7 @@ router.post("/toggle-gravatar", ensureAuthenticated, async (req, res) => {
 router.get("/gravatar-profile", ensureAuthenticated, async (req, res) => {
   try {
     const gravatarProfile = await getGravatarProfile(req.user.email);
-    
+
     res.json({
       success: true,
       profile: gravatarProfile,

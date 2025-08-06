@@ -19,6 +19,7 @@ model User {
   lastName  String?
   bio       String?
   profilePicture String?
+  cloudinaryPublicId String?
   useGravatar Boolean @default(false)
   birthday  DateTime?
   gender    String?

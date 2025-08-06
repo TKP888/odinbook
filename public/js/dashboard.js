@@ -7,13 +7,20 @@ const currentUserId = document
   .querySelector('meta[name="user-id"]')
   ?.getAttribute("content");
 
+// Global variables for pagination
+let currentPage = 1;
+let hasNextPage = true;
+let isLoading = false;
+
 // Function to get user avatar (Gravatar or initials)
 function getUserAvatar(user) {
   // If user has a profile picture (including Gravatar URLs), use it
   if (
     user.profilePicture &&
     (user.profilePicture.startsWith("http") ||
-      user.profilePicture.startsWith("/uploads/"))
+      user.profilePicture.startsWith("/uploads/") ||
+      user.profilePicture.includes("cloudinary.com") ||
+      user.profilePicture.includes("gravatar.com"))
   ) {
     return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
   } else {
@@ -254,16 +261,30 @@ function createPost() {
     });
 }
 
-function loadPosts() {
+function loadPosts(reset = true) {
+  if (isLoading) return Promise.resolve();
+
   const postsLoading = document.getElementById("postsLoading");
   const postsList = document.getElementById("postsList");
   const noPosts = document.getElementById("noPosts");
+  const loadMoreContainer = document.getElementById("loadMoreContainer");
 
+  if (reset) {
+    // Reset pagination when loading fresh posts
+    currentPage = 1;
+    hasNextPage = true;
+    postsList.innerHTML = "";
+    loadMoreContainer.classList.add("d-none");
+  }
+
+  if (!hasNextPage && !reset) return Promise.resolve();
+
+  isLoading = true;
   postsLoading.classList.remove("d-none");
-  postsList.classList.add("d-none");
+  postsList.classList.remove("d-none");
   noPosts.classList.add("d-none");
 
-  fetch("/posts")
+  return fetch(`/posts?page=${currentPage}&limit=10`)
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -272,17 +293,33 @@ function loadPosts() {
     })
     .then((data) => {
       postsLoading.classList.add("d-none");
+      isLoading = false;
+
       if (data.posts && data.posts.length > 0) {
-        displayPosts(data.posts);
-        updatePostsCount(data.posts.length);
-      } else {
+        if (reset) {
+          displayPosts(data.posts);
+        } else {
+          appendPosts(data.posts);
+        }
+
+        // Update pagination state
+        hasNextPage = data.pagination.hasNextPage;
+        currentPage = data.pagination.currentPage;
+
+        // Show/hide load more button
+        updateLoadMoreButton();
+      } else if (reset) {
         noPosts.classList.remove("d-none");
       }
     })
     .catch((error) => {
       console.error("Error loading posts:", error);
       postsLoading.classList.add("d-none");
-      noPosts.classList.remove("d-none");
+      isLoading = false;
+      if (reset) {
+        noPosts.classList.remove("d-none");
+      }
+      throw error;
     });
 }
 
@@ -460,6 +497,217 @@ function displayPosts(posts) {
 `
     )
     .join("");
+}
+
+function appendPosts(posts) {
+  const postsList = document.getElementById("postsList");
+  const postsHTML = posts
+    .map(
+      (post) => `
+<div class="post-item mb-4 p-3 border rounded">
+  <div class="d-flex align-items-start mb-3">
+    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+      ${getUserAvatar(post.user)}
+    </div>
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">
+            <a href="/profile/${post.user.id}" class="text-decoration-none">
+              ${post.user.firstName || ""} ${post.user.lastName || ""}
+            </a>
+            <span class="text-muted small">@${post.user.username}</span>
+          </h6>
+          <small class="text-muted">
+            ${formatDateTime(post.createdAt)}
+          </small>
+        </div>
+        ${
+          post.user.id === currentUserId
+            ? `
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
+              Edit
+              </a></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
+                Delete
+              </a></li>
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    </div>
+  </div>
+  <div class="post-content">${post.content.replace(/\n/g, "<br>")}</div>
+
+  <!-- Post Actions -->
+  <div class="post-actions mt-3 pt-3 border-top">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm ${
+          post.likes.some((like) => like.user.id === currentUserId)
+            ? "liked"
+            : "btn-outline-primary"
+        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        post.id
+      }')" data-post-id="${post.id}">
+          <i class="fas fa-heart"></i> Like
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          post.id
+        }')">
+          <i class="fas fa-comment"></i> Comment
+        </button>
+      </div>
+      <!-- Counters -->
+      <div class="text-muted small">
+        <span class="likes-count" id="likes-${
+          post.id
+        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+        post.likes.length
+      } like${post.likes.length !== 1 ? "s" : ""}</span>
+        <span class="comments-count ms-2" id="comments-${
+          post.id
+        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+        post.comments.length
+      } comment${post.comments.length !== 1 ? "s" : ""}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section mt-3 d-none" id="comments-section-${post.id}">
+    <div class="comments-list mb-3" id="comments-list-${post.id}">
+      ${
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (comment) => `
+        <div class="comment-item p-2 border-bottom">
+          <div class="d-flex align-items-start">
+            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+              ${getUserAvatar(comment.user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <small class="fw-bold">
+                    <a href="/profile/${
+                      comment.user.id
+                    }" class="text-decoration-none">
+                      ${comment.user.firstName || ""} ${
+                  comment.user.lastName || ""
+                }
+                    </a>
+                  </small>
+                  <div class="comment-content">${comment.content}</div>
+                  <small class="text-muted">${formatDateTime(
+                    comment.createdAt
+                  )}</small>
+                </div>
+                ${
+                  comment.user.id === currentUserId
+                    ? `
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                  comment.id
+                }', '${post.id}', '${comment.content.replace(
+                        /'/g,
+                        "\\'"
+                      )}')" title="Edit comment">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                  comment.id
+                }', '${post.id}')" title="Delete comment">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+              )
+              .join("")
+          : ""
+      }
+    </div>
+    <div class="comment-form">
+      <div class="input-group">
+        <input type="text" class="form-control form-control-sm" placeholder="Write a comment..." id="comment-input-${
+          post.id
+        }" onkeypress="handleCommentKeyPress(event, '${post.id}')">
+        <button class="btn btn-primary btn-sm" onclick="submitComment('${
+          post.id
+        }')">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`
+    )
+    .join("");
+
+  postsList.innerHTML += postsHTML;
+}
+
+function updateLoadMoreButton() {
+  const loadMoreBtn = document.getElementById("loadMoreBtn");
+  const loadMoreContainer = document.getElementById("loadMoreContainer");
+  const loadMoreSpinner = document.getElementById("loadMoreSpinner");
+
+  if (loadMoreBtn && loadMoreContainer) {
+    if (hasNextPage) {
+      loadMoreContainer.classList.remove("d-none");
+      loadMoreBtn.disabled = false;
+      loadMoreSpinner.classList.add("d-none");
+    } else {
+      loadMoreContainer.classList.add("d-none");
+    }
+  }
+}
+
+function loadMorePosts() {
+  if (!isLoading && hasNextPage) {
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    const loadMoreSpinner = document.getElementById("loadMoreSpinner");
+
+    if (loadMoreBtn && loadMoreSpinner) {
+      loadMoreBtn.disabled = true;
+      loadMoreSpinner.classList.remove("d-none");
+    }
+
+    currentPage++;
+    loadPosts(false)
+      .then(() => {
+        // Re-enable the button and hide spinner after loading
+        if (loadMoreBtn && loadMoreSpinner) {
+          loadMoreBtn.disabled = false;
+          loadMoreSpinner.classList.add("d-none");
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading more posts:", error);
+        // Re-enable the button and hide spinner on error
+        if (loadMoreBtn && loadMoreSpinner) {
+          loadMoreBtn.disabled = false;
+          loadMoreSpinner.classList.add("d-none");
+        }
+      });
+  }
 }
 
 function updatePostsCount(count) {
@@ -716,9 +964,7 @@ function loadCommentsForPost(postId) {
     <div class="comment-item p-2 border-bottom">
       <div class="d-flex align-items-start">
         <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
-          ${(comment.user.firstName || "").charAt(0)}${(
-              comment.user.lastName || ""
-            ).charAt(0)}
+          ${getUserAvatar(comment.user)}
         </div>
         <div class="flex-grow-1">
           <div class="d-flex justify-content-between align-items-start">
