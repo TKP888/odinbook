@@ -9,7 +9,7 @@
               <div class="user-avatar-large profile-picture" id="profilePicture">
                 <% if (typeof profileUser !== 'undefined') { %>
                   <% if (profileUser.useGravatar && profileUser.email) { %>
-                    <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(profileUser.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                    <img src="<%= getGravatarUrl(profileUser.email, 200) %>" alt="Profile Picture" class="profile-image">
                   <% } else if (profileUser.profilePicture && (profileUser.profilePicture.startsWith('http') || profileUser.profilePicture.startsWith('/uploads/') || profileUser.profilePicture.includes('cloudinary.com') || profileUser.profilePicture.includes('gravatar.com'))) { %>
                     <img src="<%= profileUser.profilePicture %>" alt="Profile Picture" class="profile-image">
                   <% } else { %>
@@ -17,12 +17,12 @@
                   <% } %>
                 <% } else { %>
                   <% if (user.useGravatar && user.email) { %>
-                    <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                    <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
                   <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com') || user.profilePicture.includes('gravatar.com'))) { %>
                     <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
                   <% } else if (user.email) { %>
                     <!-- Fallback: Generate Gravatar URL even if useGravatar is not set -->
-                    <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                    <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
                   <% } else { %>
                     <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
                   <% } %>
@@ -240,7 +240,7 @@
                 <div class="friend-item d-flex align-items-center mb-3 p-3 border rounded">
                   <div class="user-avatar-small me-3">
                     <% if (friend.useGravatar && friend.email) { %>
-                      <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(friend.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                      <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
                     <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
                       <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
                     <% } else { %>
@@ -293,7 +293,13 @@
       <div class="card-body">
         <div class="d-flex align-items-start">
           <div class="user-avatar-small me-3">
-            <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+            <% if (user.useGravatar && user.email) { %>
+              <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
+            <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) { %>
+              <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
+            <% } else { %>
+              <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
+            <% } %>
           </div>
           <div class="flex-grow-1">
             <div class="mb-2">
@@ -365,7 +371,7 @@
             <div class="d-flex align-items-start mb-3">
               <div class="user-avatar-small me-3">
                 <% if (post.user.useGravatar && post.user.email) { %>
-                  <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(post.user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                  <img src="<%= getGravatarUrl(post.user.email, 200) %>" alt="Profile Picture" class="profile-image">
                 <% } else if (post.user.profilePicture && (post.user.profilePicture.startsWith('http') || post.user.profilePicture.startsWith('/uploads/') || post.user.profilePicture.includes('cloudinary.com'))) { %>
                   <img src="<%= post.user.profilePicture %>" alt="Profile Picture" class="profile-image">
                 <% } else { %>
@@ -452,7 +458,7 @@
                     <div class="d-flex align-items-start">
                       <div class="user-avatar-tiny me-2">
                         <% if (comment.user.useGravatar && comment.user.email) { %>
-                          <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(comment.user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                          <img src="<%= getGravatarUrl(comment.user.email, 200) %>" alt="Profile Picture" class="profile-image">
                         <% } else if (comment.user.profilePicture && (comment.user.profilePicture.startsWith('http') || comment.user.profilePicture.startsWith('/uploads/') || comment.user.profilePicture.includes('cloudinary.com'))) { %>
                           <img src="<%= comment.user.profilePicture %>" alt="Profile Picture" class="profile-image">
                         <% } else { %>

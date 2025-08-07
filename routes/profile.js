@@ -322,6 +322,8 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
             lastName: true,
             username: true,
             profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
         likes: {
@@ -344,6 +346,9 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
               },
             },
           },

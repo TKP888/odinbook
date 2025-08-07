@@ -3,6 +3,7 @@ const session = require("express-session");
 const passport = require("passport");
 const flash = require("express-flash");
 const path = require("path");
+const crypto = require("crypto");
 require("dotenv").config();
 const expressLayouts = require("express-ejs-layouts");
 
@@ -46,6 +47,17 @@ app.use((req, res, next) => {
   res.locals.error_msg = req.flash("error_msg");
   res.locals.error = req.flash("error");
   res.locals.user = req.user || null;
+  
+  // Gravatar helper function
+  res.locals.getGravatarUrl = function(email, size = 200) {
+    if (!email) return null;
+    const hash = crypto
+      .createHash("md5")
+      .update(email.toLowerCase().trim())
+      .digest("hex");
+    return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon&r=pg`;
+  };
+  
   next();
 });
 

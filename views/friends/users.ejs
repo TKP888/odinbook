@@ -1,68 +1,70 @@
-
-      <!-- Navigation Tabs -->
-      <div class="col-12 mb-4">
-        <div class="card">
-          <div class="card-body p-0">
-            <ul class="nav nav-tabs" id="usersTabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link <%= currentTab === 'all' ? 'active' : '' %>"
-                  id="all-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#all"
-                  type="button"
-                  role="tab"
-                  aria-controls="all"
-                  aria-selected="<%= currentTab === 'all' ? 'true' : 'false' %>"
+<div class="container-fluid">
+  <div class="row">
+    <!-- Navigation Tabs -->
+    <div class="col-12 mb-4">
+      <div class="card">
+        <div class="card-body p-0">
+          <ul class="nav nav-tabs" id="usersTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link <%= currentTab === 'all' ? 'active' : '' %>"
+                id="all-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#all"
+                type="button"
+                role="tab"
+                aria-controls="all"
+                aria-selected="<%= currentTab === 'all' ? 'true' : 'false' %>"
+              >
+                <!-- <i class="fas fa-globe"></i> -->
+                 All Users
+                <span class="badge bg-secondary ms-1"
+                  ><%= users.length %></span
                 >
-                  <!-- <i class="fas fa-globe"></i> -->
-                   All Users
-                  <span class="badge bg-secondary ms-1"
-                    ><%= users.length %></span
-                  >
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link <%= currentTab === 'friends' ? 'active' : '' %>"
-                  id="friends-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#friends"
-                  type="button"
-                  role="tab"
-                  aria-controls="friends"
-                  aria-selected="<%= currentTab === 'friends' ? 'true' : 'false' %>"
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link <%= currentTab === 'friends' ? 'active' : '' %>"
+                id="friends-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#friends"
+                type="button"
+                role="tab"
+                aria-controls="friends"
+                aria-selected="<%= currentTab === 'friends' ? 'true' : 'false' %>"
+              >
+                <!-- <i class="fas fa-user-friends"></i> -->
+                Friends
+                <span class="badge bg-success ms-1"
+                  ><%= friends.length %></span
                 >
-                  <!-- <i class="fas fa-user-friends"></i> -->
-                  Friends
-                  <span class="badge bg-success ms-1"
-                    ><%= friends.length %></span
-                  >
-                </button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button
-                  class="nav-link <%= currentTab === 'requests' ? 'active' : '' %>"
-                  id="requests-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#requests"
-                  type="button"
-                  role="tab"
-                  aria-controls="requests"
-                  aria-selected="<%= currentTab === 'requests' ? 'true' : 'false' %>"
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link <%= currentTab === 'requests' ? 'active' : '' %>"
+                id="requests-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#requests"
+                type="button"
+                role="tab"
+                aria-controls="requests"
+                aria-selected="<%= currentTab === 'requests' ? 'true' : 'false' %>"
+              >
+                <!-- <i class="fas fa-user-plus"></i> -->
+                Friend Requests
+                <span class="badge bg-warning ms-1"
+                  ><%= pendingRequests.length %></span
                 >
-                  <!-- <i class="fas fa-user-plus"></i> -->
-                  Friend Requests
-                  <span class="badge bg-warning ms-1"
-                    ><%= pendingRequests.length %></span
-                  >
-                </button>
-              </li>
-            </ul>
-          </div>
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Tab Content -->
     <div class="col-12">
@@ -118,7 +120,7 @@
                         <div class="d-flex align-items-center mb-3">
                           <div class="user-avatar-medium me-3">
                             <% if (user.useGravatar && user.email) { %>
-                              <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                              <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
                             <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) { %>
                               <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
                             <% } else { %>
@@ -225,7 +227,7 @@
                       <div class="d-flex align-items-center mb-3">
                         <div class="user-avatar-medium me-3">
                           <% if (friend.useGravatar && friend.email) { %>
-                            <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(friend.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                            <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
                           <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
                             <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
                           <% } else { %>
@@ -302,7 +304,7 @@
                       <div class="d-flex align-items-center mb-3">
                         <div class="user-avatar-medium me-3">
                           <% if (request.otherUser.useGravatar && request.otherUser.email) { %>
-                            <img src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(request.otherUser.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg" alt="Profile Picture" class="profile-image">
+                            <img src="<%= getGravatarUrl(request.otherUser.email, 200) %>" alt="Profile Picture" class="profile-image">
                           <% } else if (request.otherUser.profilePicture && (request.otherUser.profilePicture.startsWith('http') || request.otherUser.profilePicture.startsWith('/uploads/') || request.otherUser.profilePicture.includes('cloudinary.com'))) { %>
                             <img src="<%= request.otherUser.profilePicture %>" alt="Profile Picture" class="profile-image">
                           <% } else { %>

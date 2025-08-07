@@ -14,8 +14,16 @@ let isLoading = false;
 
 // Function to get user avatar (Gravatar or initials)
 function getUserAvatar(user) {
+  // Check if user uses Gravatar and has email
+  if (user.useGravatar && user.email) {
+    // Generate Gravatar URL
+    const email = user.email.toLowerCase().trim();
+    const hash = CryptoJS.MD5(email).toString();
+    const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=200&d=identicon&r=pg`;
+    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+  }
   // If user has a profile picture (including Gravatar URLs), use it
-  if (
+  else if (
     user.profilePicture &&
     (user.profilePicture.startsWith("http") ||
       user.profilePicture.startsWith("/uploads/") ||

@@ -16,7 +16,7 @@
                     <div class="user-avatar-large">
                       <% if (user.useGravatar && user.email) { %>
                       <img
-                        src="https://www.gravatar.com/avatar/<%= require('crypto').createHash('md5').update(user.email.toLowerCase().trim()).digest('hex') %>?s=200&d=identicon&r=pg"
+                        src="<%= getGravatarUrl(user.email, 200) %>"
                         alt="Profile Picture"
                         class="profile-image"
                       />
@@ -90,8 +90,15 @@
 
               <!-- Load More Button -->
               <div id="loadMoreContainer" class="text-center mt-3 d-none">
-                <button id="loadMoreBtn" class="btn btn-outline-primary" onclick="loadMorePosts()">
-                  <i class="fas fa-spinner fa-spin d-none" id="loadMoreSpinner"></i>
+                <button
+                  id="loadMoreBtn"
+                  class="btn btn-outline-primary"
+                  onclick="loadMorePosts()"
+                >
+                  <i
+                    class="fas fa-spinner fa-spin d-none"
+                    id="loadMoreSpinner"
+                  ></i>
                   Load More Posts
                 </button>
               </div>
@@ -197,7 +204,7 @@
                   class="form-control"
                   rows="6"
                   placeholder="What's on your mind?"
-                  maxlength="1000"
+                  maxlength="250"
                 ></textarea>
                 <div class="form-text">
                   <span id="editCharCount">0</span>/250
