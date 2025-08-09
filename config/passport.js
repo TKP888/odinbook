@@ -42,6 +42,7 @@ module.exports = function (passport) {
 
   passport.deserializeUser(async (id, done) => {
     try {
+      // Fetch user from database
       const user = await prisma.user.findUnique({
         where: { id: id },
       });

@@ -21,10 +21,21 @@ router.get("/auth/login", (req, res) => {
 
 // Register Page
 router.get("/auth/register", (req, res) => {
+  // Ensure no user data is passed to the registration form
   res.render("auth/register", {
     title: "Register",
     layout: "layouts/auth",
     activePage: "register",
+    firstName: "",
+    lastName: "",
+    email: "",
+    username: "",
+    birthday: "",
+    gender: "",
+    location: "",
+    errors: [],
+    // Explicitly set user to null to prevent any session data inheritance
+    user: null,
   });
 });
 
@@ -45,7 +56,18 @@ router.post(
       }
       return true;
     }),
-    body("birthday").optional().isISO8601().toDate(),
+    body("birthday")
+      .optional()
+      .custom((value) => {
+        // If no value is provided, it's valid
+        if (!value || value === "") {
+          return true;
+        }
+        // If a value is provided, validate it's a valid date
+        const date = new Date(value);
+        return !isNaN(date.getTime());
+      })
+      .withMessage("Please enter a valid date"),
     body("gender").optional().isLength({ max: 50 }),
     body("location").optional().isLength({ max: 100 }),
   ],
@@ -62,9 +84,9 @@ router.post(
         lastName: req.body.lastName,
         email: req.body.email,
         username: req.body.username,
-        birthday: req.body.birthday,
-        gender: req.body.gender,
-        location: req.body.location,
+        birthday: req.body.birthday || "",
+        gender: req.body.gender || "",
+        location: req.body.location || "",
       });
     }
 
@@ -97,9 +119,9 @@ router.post(
           lastName,
           email,
           username,
-          birthday,
-          gender,
-          location,
+          birthday: birthday || "",
+          gender: gender || "",
+          location: location || "",
         });
       }
 
@@ -115,7 +137,7 @@ router.post(
           email,
           username,
           password: hashedPassword,
-          birthday: birthday ? new Date(birthday) : null,
+          birthday: birthday && birthday !== "" ? new Date(birthday) : null,
           gender: gender || null,
           location: location || null,
         },
@@ -133,6 +155,19 @@ router.post(
 
 // Login Handle
 router.post("/auth/login", (req, res, next) => {
+  passport.authenticate("local", {
+    successRedirect: "/dashboard",
+    failureRedirect: "/auth/login",
+    failureFlash: true,
+  })(req, res, next);
+});
+
+// Guest Login Handle
+router.post("/auth/guest-login", (req, res, next) => {
+  // Use passport authentication with guest credentials
+  req.body.email = "guest@odinbook.com";
+  req.body.password = "qwerty";
+  
   passport.authenticate("local", {
     successRedirect: "/dashboard",
     failureRedirect: "/auth/login",

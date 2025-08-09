@@ -266,16 +266,34 @@ router.put("/update", ensureAuthenticated, async (req, res) => {
 // View other user's profile
 router.get("/:id", ensureAuthenticated, async (req, res) => {
   try {
-    const userId = req.params.id;
+    const profileUserId = req.params.id;
 
-    // Don't allow viewing own profile through this route
-    if (userId === req.user.id) {
+    // Check if user is trying to view their own profile
+    if (profileUserId === req.user.id) {
       return res.redirect("/profile");
     }
 
-    // Get the user's profile
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    // Get current user to check for friend relationships
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        friends: {
+          select: { id: true },
+        },
+        sentFriendRequests: {
+          where: { receiverId: profileUserId },
+          select: { id: true, status: true },
+        },
+        receivedFriendRequests: {
+          where: { senderId: profileUserId },
+          select: { id: true, status: true },
+        },
+      },
+    });
+
+    const profileUser = await prisma.user.findUnique({
+      where: { id: profileUserId },
       select: {
         id: true,
         firstName: true,
@@ -284,120 +302,63 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
         email: true,
         bio: true,
         profilePicture: true,
+        useGravatar: true,
         birthday: true,
         gender: true,
         location: true,
         createdAt: true,
-        friends: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            email: true,
-            bio: true,
-            profilePicture: true,
-            birthday: true,
-            gender: true,
-            location: true,
-            createdAt: true,
-          },
-        },
       },
     });
 
-    if (!user) {
+    if (!profileUser) {
       req.flash("error_msg", "User not found");
-      return res.redirect("/dashboard");
+      return res.redirect("/friends/users");
     }
 
-    // Get user's posts
-    const posts = await prisma.post.findMany({
-      where: { userId: userId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            profilePicture: true,
-            useGravatar: true,
-            email: true,
-          },
-        },
-        likes: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-              },
-            },
-          },
-        },
-        comments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-                profilePicture: true,
-                useGravatar: true,
-                email: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    // Check if current user is friends with this user
-    const isFriend = user.friends.some((friend) => friend.id === req.user.id);
+    // Check if they are friends
+    const isFriend = currentUser.friends.some(
+      (friend) => friend.id === profileUserId
+    );
 
     // Check for pending friend requests
-    const pendingRequest = await prisma.friendRequest.findFirst({
-      where: {
-        OR: [
-          {
-            senderId: req.user.id,
-            receiverId: userId,
-            status: "pending",
-          },
-          {
-            senderId: userId,
-            receiverId: req.user.id,
-            status: "pending",
-          },
-        ],
-      },
-    });
+    let pendingRequest = null;
+    if (!isFriend) {
+      const sentRequest = currentUser.sentFriendRequests.find(
+        (req) => req.status === "PENDING"
+      );
+      const receivedRequest = currentUser.receivedFriendRequests.find(
+        (req) => req.status === "PENDING"
+      );
+
+      if (sentRequest) {
+        pendingRequest = {
+          ...sentRequest,
+          senderId: req.user.id,
+          receiverId: profileUserId,
+        };
+      } else if (receivedRequest) {
+        pendingRequest = {
+          ...receivedRequest,
+          senderId: profileUserId,
+          receiverId: req.user.id,
+        };
+      }
+    }
 
     res.render("profile/index", {
-      title: `${user.firstName} ${user.lastName}'s Profile`,
+      title: `${profileUser.firstName} ${profileUser.lastName}`,
       user: req.user,
-      profileUser: user,
-      friends: user.friends,
-      posts: posts,
       layout: "layouts/main",
       activePage: "profile",
-      isFriend,
-      pendingRequest,
+      profileUser: profileUser,
+      currentUser: req.user,
+      isFriend: isFriend,
+      pendingRequest: pendingRequest,
     });
   } catch (error) {
-    console.error("Error loading user profile:", error);
-    req.flash("error_msg", "Failed to load user profile");
-    res.redirect("/dashboard");
+    console.error("Error fetching profile:", error);
+    req.flash("error_msg", "Error loading profile");
+    res.redirect("/friends/users");
   }
 });
 

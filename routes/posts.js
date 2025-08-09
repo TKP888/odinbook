@@ -20,6 +20,8 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    let whereClause = {};
+
     // Get current user's friends
     const currentUser = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -37,7 +39,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     ];
 
     // If user has no friends, show all posts for now (for demo purposes)
-    const whereClause =
+    whereClause =
       allowedUserIds.length > 1 ? { userId: { in: allowedUserIds } } : {}; // Show all posts if user has no friends
 
     const posts = await prisma.post.findMany({
@@ -98,18 +100,17 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     const totalPages = Math.ceil(totalPosts / limit);
 
     res.json({
-      posts,
-      pagination: {
-        currentPage: page,
-        totalPages,
-        totalPosts,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
-      },
+      posts: posts,
+      totalPosts: totalPosts,
+      totalPages: totalPages,
+      currentPage: page,
     });
   } catch (error) {
     console.error("Error fetching posts:", error);
-    res.status(500).json({ error: "Failed to fetch posts" });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching posts",
+    });
   }
 });
 
@@ -318,16 +319,14 @@ router.post("/", ensureAuthenticated, async (req, res) => {
     const { content } = req.body;
 
     if (!content || content.trim().length === 0) {
-      return res.status(400).json({ error: "Post content is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Post content cannot be empty",
+      });
     }
 
-    if (content.length > 250) {
-      return res
-        .status(400)
-        .json({ error: "Post content cannot exceed 250 characters" });
-    }
-
-    const post = await prisma.post.create({
+    // Regular user - create post in database
+    const newPost = await prisma.post.create({
       data: {
         content: content.trim(),
         userId: req.user.id,
@@ -344,13 +343,56 @@ router.post("/", ensureAuthenticated, async (req, res) => {
             email: true,
           },
         },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
       },
     });
 
-    res.status(201).json({ post, success: true });
+    res.json({
+      success: true,
+      message: "Post created successfully",
+      post: newPost,
+    });
   } catch (error) {
     console.error("Error creating post:", error);
-    res.status(500).json({ error: "Failed to create post" });
+    res.status(500).json({
+      success: false,
+      message: "Error creating post",
+    });
   }
 });
 
@@ -444,26 +486,30 @@ router.delete("/:id", ensureAuthenticated, async (req, res) => {
   }
 });
 
-// Like/Unlike a post
+// Like/unlike a post
 router.post("/:id/like", ensureAuthenticated, async (req, res) => {
   try {
-    const { id } = req.params;
+    const postId = req.params.id;
+    const userId = req.user.id;
 
     // Check if post exists
     const post = await prisma.post.findUnique({
-      where: { id },
+      where: { id: postId },
     });
 
     if (!post) {
-      return res.status(404).json({ error: "Post not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
     }
 
     // Check if user already liked the post
     const existingLike = await prisma.like.findUnique({
       where: {
         userId_postId: {
-          userId: req.user.id,
-          postId: id,
+          userId: userId,
+          postId: postId,
         },
       },
     });
@@ -473,35 +519,48 @@ router.post("/:id/like", ensureAuthenticated, async (req, res) => {
       await prisma.like.delete({
         where: {
           userId_postId: {
-            userId: req.user.id,
-            postId: id,
+            userId: userId,
+            postId: postId,
           },
         },
       });
 
+      const likeCount = await prisma.like.count({
+        where: { postId: postId },
+      });
+
       res.json({
         success: true,
+        message: "Post unliked successfully",
         liked: false,
-        message: "Post unliked",
+        likeCount: likeCount,
       });
     } else {
       // Like the post
       await prisma.like.create({
         data: {
-          userId: req.user.id,
-          postId: id,
+          userId: userId,
+          postId: postId,
         },
+      });
+
+      const likeCount = await prisma.like.count({
+        where: { postId: postId },
       });
 
       res.json({
         success: true,
+        message: "Post liked successfully",
         liked: true,
-        message: "Post liked",
+        likeCount: likeCount,
       });
     }
   } catch (error) {
     console.error("Error toggling like:", error);
-    res.status(500).json({ error: "Failed to toggle like" });
+    res.status(500).json({
+      success: false,
+      message: "Error toggling like",
+    });
   }
 });
 
@@ -537,33 +596,34 @@ router.get("/:id/likes", ensureAuthenticated, async (req, res) => {
 // Add a comment to a post
 router.post("/:id/comments", ensureAuthenticated, async (req, res) => {
   try {
-    const { id } = req.params;
+    const postId = req.params.id;
     const { content } = req.body;
 
     if (!content || content.trim().length === 0) {
-      return res.status(400).json({ error: "Comment content is required" });
-    }
-
-    if (content.length > 500) {
-      return res
-        .status(400)
-        .json({ error: "Comment cannot exceed 500 characters" });
+      return res.status(400).json({
+        success: false,
+        message: "Comment content cannot be empty",
+      });
     }
 
     // Check if post exists
     const post = await prisma.post.findUnique({
-      where: { id },
+      where: { id: postId },
     });
 
     if (!post) {
-      return res.status(404).json({ error: "Post not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
     }
 
-    const comment = await prisma.comment.create({
+    // Create the comment
+    const newComment = await prisma.comment.create({
       data: {
         content: content.trim(),
         userId: req.user.id,
-        postId: id,
+        postId: postId,
       },
       include: {
         user: {
@@ -580,10 +640,17 @@ router.post("/:id/comments", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    res.status(201).json({ comment, success: true });
+    res.json({
+      success: true,
+      message: "Comment added successfully",
+      comment: newComment,
+    });
   } catch (error) {
-    console.error("Error creating comment:", error);
-    res.status(500).json({ error: "Failed to create comment" });
+    console.error("Error adding comment:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding comment",
+    });
   }
 });
 

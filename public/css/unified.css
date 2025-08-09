@@ -234,6 +234,8 @@ p {
 
 .search-input {
   border: 1px solid var(--medium-gray);
+  max-height: 20px;
+  margin: 10px;
   padding: var(--spacing-sm) var(--spacing-lg);
   font-size: var(--font-size-sm);
   transition: all var(--transition-normal);
