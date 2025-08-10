@@ -100,7 +100,9 @@ function sendFriendRequestFromHeader(userId, userName = "") {
         alertDiv.className =
           "alert alert-success alert-dismissible fade show position-fixed";
         alertDiv.innerHTML = `
-                <div><i class="fas fa-user-plus"></i> Friend request sent to ${userName || "user"}!</div>
+                <div><i class="fas fa-user-plus"></i> Friend request sent to ${
+                  userName || "user"
+                }!</div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
               `;
         document.body.appendChild(alertDiv);
@@ -129,7 +131,9 @@ function sendFriendRequestFromHeader(userId, userName = "") {
           alertDiv.className =
             "alert alert-danger alert-dismissible fade show position-fixed";
           alertDiv.innerHTML = `
-                  <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not send request"}</div>
+                  <div><i class="fas fa-exclamation-triangle"></i> ${
+                    data.error || "Could not send request"
+                  }</div>
                   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
           document.body.appendChild(alertDiv);
@@ -204,9 +208,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Update header friend request count badge and dropdown content
 function updateHeaderRequestCount() {
+  console.log("[HEADER] Updating friend request count...");
   fetch("/friends/requests")
     .then((response) => response.json())
     .then((data) => {
+      console.log("[HEADER] Received friend request data:", data);
       const countBadge = document.getElementById("headerRequestCount");
       const requestsList = document.getElementById("headerRequestsList");
 
@@ -214,32 +220,40 @@ function updateHeaderRequestCount() {
         if (data.requests.length > 0) {
           countBadge.textContent = data.requests.length;
           countBadge.classList.remove("d-none");
+          console.log(
+            "[HEADER] Updated request count badge:",
+            data.requests.length
+          );
         } else {
           countBadge.classList.add("d-none");
+          console.log("[HEADER] Hidden request count badge");
         }
+      } else {
+        console.warn("[HEADER] Count badge element not found");
       }
 
       if (requestsList) {
         if (data.requests.length === 0) {
           requestsList.innerHTML = `
-                <div class="text-center text-muted p-3">
+                <div class="dropdown-item text-center text-muted p-3">
                   <i class="fas fa-inbox fa-2x mb-2"></i>
                   <p class="mb-0 small">No pending requests</p>
                 </div>
               `;
+          console.log("[HEADER] Set empty requests list");
         } else {
           requestsList.innerHTML = data.requests
             .map(
               (request) => `
-                <div class="dropdown-item p-2">
+                <div class="dropdown-item p-3" data-request-id="${request.id}">
                   <div class="d-flex align-items-center">
-                    <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                    <div class="user-avatar-small me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">
                       ${(request.sender.firstName || "").charAt(0)}${(
                 request.sender.lastName || ""
               ).charAt(0)}
                     </div>
-                    <div class="flex-grow-1">
-                      <div class="fw-bold small">${
+                    <div class="flex-grow-1 me-3">
+                      <div class="fw-bold small mb-1">${
                         request.sender.firstName || ""
                       } ${request.sender.lastName || ""}</div>
                       <div class="text-muted small">@${
@@ -247,14 +261,14 @@ function updateHeaderRequestCount() {
                       }</div>
                     </div>
                     <div class="btn-group btn-group-sm" role="group">
-                      <button class="btn btn-success btn-sm" onclick="acceptRequest('${
+                      <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${
                         request.id
-                      }')" title="Accept">
+                      }" title="Accept">
                         <i class="fas fa-check"></i>
                       </button>
-                      <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${
+                      <button class="btn btn-outline-secondary btn-sm decline-request-btn" data-request-id="${
                         request.id
-                      }')" title="Decline">
+                      }" title="Decline">
                         <i class="fas fa-times"></i>
                       </button>
                     </div>
@@ -263,7 +277,14 @@ function updateHeaderRequestCount() {
               `
             )
             .join("");
+          console.log(
+            "[HEADER] Populated requests list with",
+            data.requests.length,
+            "requests"
+          );
         }
+      } else {
+        console.warn("[HEADER] Requests list element not found");
       }
     })
     .catch((error) => {
@@ -272,6 +293,23 @@ function updateHeaderRequestCount() {
 }
 
 function acceptRequest(requestId) {
+  console.log("[HEADER] Accepting friend request:", requestId);
+
+  // Show loading state
+  const requestElement = document.querySelector(
+    `[data-request-id="${requestId}"]`
+  );
+  const acceptBtn = requestElement?.querySelector(".accept-request-btn");
+  const declineBtn = requestElement?.querySelector(".decline-request-btn");
+
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+    acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  }
+  if (declineBtn) {
+    declineBtn.disabled = true;
+  }
+
   fetch("/friends/accept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -280,6 +318,7 @@ function acceptRequest(requestId) {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
+        console.log("[HEADER] Friend request accepted successfully");
         updateHeaderRequestCount();
         // Refresh friends list on dashboard if we're on the dashboard page
         if (typeof refreshFriendsList === "function") {
@@ -295,32 +334,92 @@ function acceptRequest(requestId) {
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
+
+        // Remove the request from the header dropdown
+        if (requestElement) {
+          requestElement.remove();
+        }
+
+        // Check if there are any requests left
+        const remainingRequests = document.querySelectorAll(
+          "#headerRequestsList .dropdown-item"
+        );
+        if (remainingRequests.length === 0) {
+          const requestsList = document.getElementById("headerRequestsList");
+          if (requestsList) {
+            requestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          }
+        }
       } else {
+        console.error("[HEADER] Failed to accept friend request:", data.error);
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-danger alert-dismissible fade show position-fixed";
         alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not accept request"}</div>
+              <div><i class="fas fa-exclamation-triangle"></i> ${
+                data.error || "Could not accept request"
+              }</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
+
+        // Reset buttons
+        if (acceptBtn) {
+          acceptBtn.disabled = false;
+          acceptBtn.innerHTML = '<i class="fas fa-check"></i>';
+        }
+        if (declineBtn) {
+          declineBtn.disabled = false;
+        }
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error("[HEADER] Error accepting friend request:", error);
       const alertDiv = document.createElement("div");
       alertDiv.className =
         "alert alert-danger alert-dismissible fade show position-fixed";
       alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Could not accept request. Please try again.</div>
+            <div><i class="fas fa-exclamation-triangle"></i> An error occurred while accepting the request</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           `;
       document.body.appendChild(alertDiv);
       setTimeout(() => alertDiv.remove(), 5000);
+
+      // Reset buttons
+      if (acceptBtn) {
+        acceptBtn.disabled = false;
+        acceptBtn.innerHTML = '<i class="fas fa-check"></i>';
+      }
+      if (declineBtn) {
+        declineBtn.disabled = false;
+      }
     });
 }
 
 function declineRequest(requestId) {
+  console.log("[HEADER] Declining friend request:", requestId);
+
+  // Show loading state
+  const requestElement = document.querySelector(
+    `[data-request-id="${requestId}"]`
+  );
+  const acceptBtn = requestElement?.querySelector(".accept-request-btn");
+  const declineBtn = requestElement?.querySelector(".decline-request-btn");
+
+  if (declineBtn) {
+    declineBtn.disabled = true;
+    declineBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  }
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+  }
+
   fetch("/friends/decline", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -329,6 +428,7 @@ function declineRequest(requestId) {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
+        console.log("[HEADER] Friend request declined successfully");
         updateHeaderRequestCount();
         // Show success message
         const alertDiv = document.createElement("div");
@@ -340,28 +440,71 @@ function declineRequest(requestId) {
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
+
+        // Remove the request from the header dropdown
+        if (requestElement) {
+          requestElement.remove();
+        }
+
+        // Check if there are any requests left
+        const remainingRequests = document.querySelectorAll(
+          "#headerRequestsList .dropdown-item"
+        );
+        if (remainingRequests.length === 0) {
+          const requestsList = document.getElementById("headerRequestsList");
+          if (requestsList) {
+            requestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          }
+        }
       } else {
+        console.error("[HEADER] Failed to decline friend request:", data.error);
         const alertDiv = document.createElement("div");
         alertDiv.className =
           "alert alert-danger alert-dismissible fade show position-fixed";
         alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not decline request"}</div>
+              <div><i class="fas fa-exclamation-triangle"></i> ${
+                data.error || "Could not decline request"
+              }</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
+
+        // Reset buttons
+        if (acceptBtn) {
+          acceptBtn.disabled = false;
+        }
+        if (declineBtn) {
+          declineBtn.disabled = false;
+          declineBtn.innerHTML = '<i class="fas fa-times"></i>';
+        }
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error("[HEADER] Error declining friend request:", error);
       const alertDiv = document.createElement("div");
       alertDiv.className =
         "alert alert-danger alert-dismissible fade show position-fixed";
       alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Could not decline request. Please try again.</div>
+            <div><i class="fas fa-exclamation-triangle"></i> An error occurred while declining the request</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           `;
       document.body.appendChild(alertDiv);
       setTimeout(() => alertDiv.remove(), 5000);
+
+      // Reset buttons
+      if (acceptBtn) {
+        acceptBtn.disabled = false;
+      }
+      if (declineBtn) {
+        declineBtn.disabled = false;
+        declineBtn.innerHTML = '<i class="fas fa-times"></i>';
+      }
     });
 }
 
@@ -389,7 +532,9 @@ function sendFriendRequest(userId, userName = "") {
         alertDiv.className =
           "alert alert-success alert-dismissible fade show position-fixed";
         alertDiv.innerHTML = `
-                <div><i class="fas fa-user-plus"></i> Friend request sent to ${userName || "user"}!</div>
+                <div><i class="fas fa-user-plus"></i> Friend request sent to ${
+                  userName || "user"
+                }!</div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
               `;
         document.body.appendChild(alertDiv);
@@ -416,7 +561,9 @@ function sendFriendRequest(userId, userName = "") {
           alertDiv.className =
             "alert alert-danger alert-dismissible fade show position-fixed";
           alertDiv.innerHTML = `
-                  <div><i class="fas fa-exclamation-triangle"></i> ${data.error || "Could not send request"}</div>
+                  <div><i class="fas fa-exclamation-triangle"></i> ${
+                    data.error || "Could not send request"
+                  }</div>
                   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
           document.body.appendChild(alertDiv);
@@ -437,8 +584,24 @@ function sendFriendRequest(userId, userName = "") {
     });
 }
 
+// Add event listeners for friend request actions
 document.addEventListener("DOMContentLoaded", function () {
+  // Event delegation for accept/decline friend request buttons
+  document.addEventListener("click", function (e) {
+    if (e.target.closest(".accept-request-btn")) {
+      const button = e.target.closest(".accept-request-btn");
+      const requestId = button.dataset.requestId;
+      acceptRequest(requestId);
+    } else if (e.target.closest(".decline-request-btn")) {
+      const button = e.target.closest(".decline-request-btn");
+      const requestId = button.dataset.requestId;
+      declineRequest(requestId);
+    }
+  });
+
+  // Update friend request count on page load
   updateHeaderRequestCount();
+
   // Update every 30 seconds for live updates
   setInterval(updateHeaderRequestCount, 30000);
 });

@@ -25,12 +25,27 @@ function switchToAllUsers() {
 }
 
 function sendFriendRequestFromUsersPage(userId, userName = "") {
+  console.log(
+    `[FRIENDS] sendFriendRequestFromUsersPage called for user ${userId} (${userName})`
+  );
+
   const addFriendBtn = document.getElementById(`add-friend-btn-${userId}`);
   const actionsContainer = document.getElementById(`friend-actions-${userId}`);
 
   if (!addFriendBtn) {
+    console.warn(`[FRIENDS] Add friend button not found for user ${userId}`);
     return;
   }
+
+  // Check if button is already disabled (prevent double-clicking)
+  if (addFriendBtn.disabled) {
+    console.log(
+      `[FRIENDS] Button already disabled for user ${userId}, ignoring click`
+    );
+    return;
+  }
+
+  console.log(`[FRIENDS] Sending friend request to user ${userId}`);
 
   // Disable button and show loading state
   addFriendBtn.disabled = true;
@@ -43,6 +58,7 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log(`[FRIENDS] Response received for user ${userId}:`, data);
       if (data.success) {
         showNotification(
           "Friend request sent to " + (userName || "user") + "!",
@@ -50,7 +66,7 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
         );
 
         // Update friend request counters
-        updateFriendRequestCounters(1);
+        updateFriendRequestCounters(1, true); // true = outgoing request
 
         // Update the UI immediately using a more reliable method
         if (actionsContainer) {
@@ -81,14 +97,27 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
 
         // Add card to Friend Requests tab dynamically
         addRequestCardToRequestsTab(userId, userName, data.requestId);
+
+        // Refresh counts dynamically if the function is available
+        if (typeof window.refreshCounts === "function") {
+          window.refreshCounts();
+        }
       } else {
+        console.warn(
+          `[FRIENDS] Failed to send request for user ${userId}:`,
+          data.error
+        );
         // Reset button to original state
         addFriendBtn.disabled = false;
         addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
         showNotification(data.error || "Could not send request", "error");
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error(
+        `[FRIENDS] Error sending friend request for user ${userId}:`,
+        error
+      );
       // Reset button to original state
       addFriendBtn.disabled = false;
       addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
@@ -97,6 +126,22 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
 }
 
 function acceptRequest(requestId) {
+  // Show loading state
+  const acceptBtn = document.querySelector(
+    `[data-request-id="${requestId}"].accept-request-btn`
+  );
+  const declineBtn = document.querySelector(
+    `[data-request-id="${requestId}"].decline-request-btn`
+  );
+
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+    acceptBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Accepting...';
+  }
+  if (declineBtn) {
+    declineBtn.disabled = true;
+  }
+
   fetch("/friends/accept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -106,17 +151,83 @@ function acceptRequest(requestId) {
     .then((data) => {
       if (data.success) {
         showNotification("Friend request accepted!", "success");
-        setTimeout(() => window.location.reload(), 1000);
+
+        // Update friend request counters
+        updateFriendRequestCounters(-1);
+
+        // Remove the request from the UI
+        const requestElement = document
+          .querySelector(`[data-request-id="${requestId}"]`)
+          ?.closest(".card, .dropdown-item");
+        if (requestElement) {
+          requestElement.remove();
+        }
+
+        // Check if there are any requests left
+        const remainingRequests = document.querySelectorAll(
+          "#requestsList .card, #headerRequestsList .dropdown-item"
+        );
+        if (remainingRequests.length === 0) {
+          const requestsList = document.getElementById("requestsList");
+          const noRequests = document.getElementById("noRequests");
+          if (requestsList) requestsList.classList.add("d-none");
+          if (noRequests) noRequests.classList.remove("d-none");
+        }
+
+        // Update request count
+        updateRequestCount();
+
+        // Refresh counts dynamically if the function is available
+        if (typeof window.refreshCounts === "function") {
+          window.refreshCounts();
+        }
+
+        // Refresh the page after a short delay to update all friend statuses
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         showNotification(data.error || "Could not accept request", "error");
+        // Reset buttons
+        if (acceptBtn) {
+          acceptBtn.disabled = false;
+          acceptBtn.innerHTML = '<i class="fas fa-check"></i> Accept';
+        }
+        if (declineBtn) {
+          declineBtn.disabled = false;
+        }
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error("Error accepting friend request:", error);
       showNotification("Could not accept request. Please try again.", "error");
+      // Reset buttons
+      if (acceptBtn) {
+        acceptBtn.disabled = false;
+        acceptBtn.innerHTML = '<i class="fas fa-check"></i> Accept';
+      }
+      if (declineBtn) {
+        declineBtn.disabled = false;
+      }
     });
 }
 
 function declineRequest(requestId) {
+  // Show loading state
+  const acceptBtn = document.querySelector(
+    `[data-request-id="${requestId}"].accept-request-btn`
+  );
+  const declineBtn = document.querySelector(
+    `[data-request-id="${requestId}"].decline-request-btn`
+  );
+
+  if (declineBtn) {
+    declineBtn.disabled = true;
+    declineBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin"></i> Declining...';
+  }
+  if (acceptBtn) {
+    acceptBtn.disabled = true;
+  }
+
   fetch("/friends/decline", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -126,13 +237,62 @@ function declineRequest(requestId) {
     .then((data) => {
       if (data.success) {
         showNotification("Friend request declined", "info");
-        setTimeout(() => window.location.reload(), 1000);
+
+        // Update friend request counters
+        updateFriendRequestCounters(-1);
+
+        // Remove the request from the UI
+        const requestElement = document
+          .querySelector(`[data-request-id="${requestId}"]`)
+          ?.closest(".card, .dropdown-item");
+        if (requestElement) {
+          requestElement.remove();
+        }
+
+        // Check if there are any requests left
+        const remainingRequests = document.querySelectorAll(
+          "#requestsList .card, #headerRequestsList .dropdown-item"
+        );
+        if (remainingRequests.length === 0) {
+          const requestsList = document.getElementById("requestsList");
+          const noRequests = document.getElementById("noRequests");
+          if (requestsList) requestsList.classList.add("d-none");
+          if (noRequests) noRequests.classList.remove("d-none");
+        }
+
+        // Update request count
+        updateRequestCount();
+
+        // Refresh counts dynamically if the function is available
+        if (typeof window.refreshCounts === "function") {
+          window.refreshCounts();
+        }
+
+        // Refresh the page after a short delay to update all friend statuses
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         showNotification(data.error || "Could not decline request", "error");
+        // Reset buttons
+        if (acceptBtn) {
+          acceptBtn.disabled = false;
+        }
+        if (declineBtn) {
+          declineBtn.disabled = false;
+          declineBtn.innerHTML = '<i class="fas fa-times"></i> Decline';
+        }
       }
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error("Error declining friend request:", error);
       showNotification("Could not decline request. Please try again.", "error");
+      // Reset buttons
+      if (acceptBtn) {
+        acceptBtn.disabled = false;
+      }
+      if (declineBtn) {
+        declineBtn.disabled = false;
+        declineBtn.innerHTML = '<i class="fas fa-times"></i> Decline';
+      }
     });
 }
 
@@ -185,8 +345,16 @@ function cancelRequest(requestId) {
 }
 
 function cancelRequestFromAllUsersPage(userId, userName, requestId) {
+  console.log("[FRIENDS] cancelRequestFromAllUsersPage called with:", {
+    userId,
+    userName,
+    requestId,
+  });
+
   const cancelBtn = document.getElementById(`cancel-request-btn-${userId}`);
   const actionsContainer = document.getElementById(`friend-actions-${userId}`);
+
+  console.log("[FRIENDS] Found elements:", { cancelBtn, actionsContainer });
 
   if (!cancelBtn) {
     console.error("Cancel button not found");
@@ -230,6 +398,11 @@ function cancelRequestFromAllUsersPage(userId, userName, requestId) {
 
         // Remove card from Friend Requests tab
         removeRequestCardFromRequestsTab(requestId);
+
+        // Refresh counts dynamically if the function is available
+        if (typeof window.refreshCounts === "function") {
+          window.refreshCounts();
+        }
       } else {
         // Reset cancel button to original state
         cancelBtn.disabled = false;
@@ -251,27 +424,90 @@ function removeFriend(friendId, friendName = "") {
       "Are you sure you want to unfriend " + (friendName || "this user") + "?"
     )
   ) {
+    // Show loading state
+    const removeBtn = document.querySelector(
+      `[onclick="removeFriend('${friendId}', '${friendName}')"]`
+    );
+    if (removeBtn) {
+      removeBtn.disabled = true;
+      removeBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Removing...';
+    }
+
     fetch("/friends/remove", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ friendId }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         if (data.success) {
           showNotification("Friend removed", "info");
-          setTimeout(() => window.location.reload(), 1000);
+
+          // Remove the friend card from the UI
+          const friendCard = document.querySelector(
+            `[data-user-id="${friendId}"]`
+          );
+          if (friendCard) {
+            friendCard.remove();
+          }
+
+          // Refresh the posts feed to remove posts from the removed friend
+          if (typeof loadPosts === "function") {
+            loadPosts(true); // Reset and reload posts
+          } else if (typeof window.loadPosts === "function") {
+            window.loadPosts(true); // Try global function
+          }
+
+          // Update friend count if it exists
+          const friendCountElement = document.querySelector(".friend-count");
+          if (friendCountElement) {
+            const currentCount = parseInt(friendCountElement.textContent) || 0;
+            friendCountElement.textContent = Math.max(0, currentCount - 1);
+          }
+
+          // If we're on the dashboard, refresh posts there too
+          if (window.location.pathname === "/dashboard") {
+            setTimeout(() => {
+              if (typeof loadPosts === "function") {
+                loadPosts(true);
+              }
+            }, 500);
+          }
+
+          // Refresh counts dynamically if the function is available
+          if (typeof window.refreshCounts === "function") {
+            window.refreshCounts();
+          }
         } else {
           showNotification(data.error || "Could not remove friend", "error");
+          // Reset button
+          if (removeBtn) {
+            removeBtn.disabled = false;
+            removeBtn.innerHTML =
+              '<i class="fas fa-user-minus"></i> Remove Friend';
+          }
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Error in removeFriend:", error);
         showNotification("Could not remove friend. Please try again.", "error");
+        // Reset button
+        if (removeBtn) {
+          removeBtn.disabled = false;
+          removeBtn.innerHTML =
+            '<i class="fas fa-user-minus"></i> Remove Friend';
+        }
       });
   }
 }
 
-function updateFriendRequestCounters(change) {
+function updateFriendRequestCounters(change, isOutgoingRequest = false) {
   // Update the tab counter
   const tabCounter = document.querySelector(".badge.bg-warning");
   if (tabCounter) {
@@ -280,18 +516,21 @@ function updateFriendRequestCounters(change) {
     tabCounter.textContent = newCount;
   }
 
-  // Update the header counter
-  const headerCounter = document.getElementById("headerRequestCount");
-  if (headerCounter) {
-    const currentCount = parseInt(headerCounter.textContent) || 0;
-    const newCount = Math.max(0, currentCount + change);
-    headerCounter.textContent = newCount;
+  // Only update the header counter if this is NOT an outgoing request
+  // The header counter should only show inbound friend requests
+  if (!isOutgoingRequest) {
+    const headerCounter = document.getElementById("headerRequestCount");
+    if (headerCounter) {
+      const currentCount = parseInt(headerCounter.textContent) || 0;
+      const newCount = Math.max(0, currentCount + change);
+      headerCounter.textContent = newCount;
 
-    // Show/hide the badge based on count
-    if (newCount > 0) {
-      headerCounter.classList.remove("d-none");
-    } else {
-      headerCounter.classList.add("d-none");
+      // Show/hide the badge based on count
+      if (newCount > 0) {
+        headerCounter.classList.remove("d-none");
+      } else {
+        headerCounter.classList.add("d-none");
+      }
     }
   }
 }
@@ -389,6 +628,8 @@ function removeRequestCardFromRequestsTab(requestId) {
 }
 
 function showNotification(message, type = "info") {
+  console.log("showNotification called:", { message, type });
+
   const alertDiv = document.createElement("div");
   alertDiv.className = `alert alert-${
     type === "error" ? "danger" : type
@@ -446,11 +687,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Cancel request button event listeners
     if (e.target.closest(".cancel-request-btn")) {
+      console.log("[FRIENDS] Cancel request button clicked");
       const button = e.target.closest(".cancel-request-btn");
       const userId = button.getAttribute("data-user-id");
       const userName = button.getAttribute("data-user-name");
       const requestId = button.getAttribute("data-request-id");
+      console.log("[FRIENDS] Button data:", { userId, userName, requestId });
       cancelRequestFromAllUsersPage(userId, userName, requestId);
+    }
+
+    // Remove friend button event listeners
+    if (e.target.closest(".remove-friend-btn")) {
+      console.log("Remove friend button clicked");
+      const button = e.target.closest(".remove-friend-btn");
+      const userId = button.getAttribute("data-user-id");
+      const userName = button.getAttribute("data-user-name");
+      console.log("Button data:", { userId, userName });
+      removeFriend(userId, userName);
     }
   });
 
@@ -629,43 +882,6 @@ function acceptRequest(requestId) {
     })
     .catch(() => {
       alert("Could not accept request. Please try again.");
-    });
-}
-
-function declineRequest(requestId) {
-  fetch("/friends/decline", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ requestId }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        // Remove the request from the UI
-        const requestElement = document
-          .querySelector(`[onclick="declineRequest('${requestId}')"]`)
-          .closest(".card");
-        requestElement.remove();
-
-        // Check if there are any requests left
-        const remainingRequests = document.querySelectorAll(
-          "#requestsList .card"
-        );
-        if (remainingRequests.length === 0) {
-          document.getElementById("requestsList").classList.add("d-none");
-          document.getElementById("noRequests").classList.remove("d-none");
-        }
-
-        // Update request count
-        updateRequestCount();
-
-        alert("Friend request declined");
-      } else {
-        alert(data.error || "Could not decline request");
-      }
-    })
-    .catch(() => {
-      alert("Could not decline request. Please try again.");
     });
 }
 

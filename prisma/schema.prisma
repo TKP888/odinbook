@@ -26,6 +26,7 @@ model User {
   location  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  isSeedUser Boolean @default(false)
 
   sentRequests     FriendRequest[] @relation("SentRequests")
   receivedRequests FriendRequest[] @relation("ReceivedRequests")
@@ -55,6 +56,10 @@ model Post {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Add photo support fields
+  photoUrl        String?
+  cloudinaryPublicId String?
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes     Like[]

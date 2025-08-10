@@ -126,6 +126,7 @@ async function main() {
         birthday: faker.date.birthdate({ min: 18, max: 65, mode: "age" }),
         gender: faker.helpers.arrayElement(["male", "female", "non-binary"]),
         location: faker.location.city() + ", " + faker.location.country(),
+        isSeedUser: true,
       },
     });
     users.push(user);

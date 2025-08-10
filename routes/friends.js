@@ -1,11 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
+const { scheduleAutoAccept, getPendingJobs } = require("../autoAcceptJobs");
 
 const prisma = new PrismaClient();
 
 // Middleware to ensure user is authenticated
 function ensureAuthenticated(req, res, next) {
+  console.log("ensureAuthenticated middleware called:", {
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user ? { id: req.user.id, username: req.user.username } : null,
+  });
+
   if (req.isAuthenticated()) {
     return next();
   }
@@ -18,164 +24,154 @@ router.get("/", ensureAuthenticated, (req, res) => {
   res.redirect("/dashboard");
 });
 
-// Users page - show all users with tabs
-router.get("/users", ensureAuthenticated, async (req, res) => {
+// Check if user has friends
+router.get("/check-friends", ensureAuthenticated, async (req, res) => {
   try {
-    // Ensure user is authenticated and has required properties
-    if (!req.user || !req.user.id) {
-      req.flash("error_msg", "Authentication required");
-      return res.redirect("/auth/login");
-    }
-
-    const { tab = "all", search = "" } = req.query;
-
-    // Validate tab parameter
-    const validTabs = ["all", "friends", "requests"];
-    const currentTab = validTabs.includes(tab) ? tab : "all";
-
-    let users = [];
-    let friends = [];
-    let pendingRequests = [];
-
-    // Get current user's friends
     const currentUser = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
         friends: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            email: true,
-            bio: true,
-            profilePicture: true,
-            useGravatar: true,
-            createdAt: true,
-          },
+          select: { id: true },
+        },
+        friendOf: {
+          select: { id: true },
         },
       },
     });
 
-    friends = currentUser?.friends || [];
+    // Find mutual friends (users who are in both lists)
+    const outgoingFriends =
+      currentUser?.friends?.map((friend) => friend.id) || [];
+    const incomingFriends =
+      currentUser?.friendOf?.map((friend) => friend.id) || [];
+    const mutualFriendIds = outgoingFriends.filter((id) =>
+      incomingFriends.includes(id)
+    );
 
-    // Get pending friend requests
-    const requests = await prisma.friendRequest.findMany({
-      where: {
-        OR: [
-          { senderId: req.user.id, status: "pending" },
-          { receiverId: req.user.id, status: "pending" },
-        ],
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            email: true,
-            bio: true,
-            profilePicture: true,
-            useGravatar: true,
-          },
-        },
-        receiver: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            email: true,
-            bio: true,
-            profilePicture: true,
-            useGravatar: true,
-          },
-        },
-      },
+    res.json({
+      hasFriends: mutualFriendIds.length > 0,
+      friendCount: mutualFriendIds.length,
     });
+  } catch (error) {
+    console.error("Error checking friends:", error);
+    res.status(500).json({ error: "Failed to check friends status" });
+  }
+});
 
-    pendingRequests = requests.map((request) => ({
-      ...request,
-      otherUser:
-        request.senderId === req.user.id ? request.receiver : request.sender,
-      isSent: request.senderId === req.user.id,
-    }));
+// Get all users with friend status
+router.get("/users", ensureAuthenticated, async (req, res) => {
+  // Check if this is an AJAX request (for the API)
+  if (
+    req.xhr ||
+    req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+    (req.headers.accept && req.headers.accept.includes("application/json")) ||
+    req.headers['content-type'] === 'application/json'
+  ) {
+    try {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          friends: {
+            select: { id: true },
+          },
+          friendOf: {
+            select: { id: true },
+          },
+          sentRequests: {
+            where: { status: "pending" },
+            select: { id: true, receiverId: true },
+          },
+          receivedRequests: {
+            where: { status: "pending" },
+            select: { id: true, senderId: true },
+          },
+        },
+      });
 
-    // Get all users based on tab
-    if (currentTab === "all") {
-      const whereClause = {
-        id: { not: req.user.id }, // Exclude current user
-      };
+      // Find mutual friends (users who are in both lists)
+      const outgoingFriends =
+        currentUser?.friends?.map((friend) => friend.id) || [];
+      const incomingFriends =
+        currentUser?.friendOf?.map((friend) => friend.id) || [];
+      const mutualFriendIds = outgoingFriends.filter((id) =>
+        incomingFriends.includes(id)
+      );
 
-      if (search && search.trim()) {
-        whereClause.OR = [
-          { firstName: { contains: search.trim(), mode: "insensitive" } },
-          { lastName: { contains: search.trim(), mode: "insensitive" } },
-          { username: { contains: search.trim(), mode: "insensitive" } },
-          { email: { contains: search.trim(), mode: "insensitive" } },
-        ];
-      }
+      // Get outgoing and incoming request IDs with their request IDs
+      const outgoingRequests = currentUser?.sentRequests || [];
+      const incomingRequests = currentUser?.receivedRequests || [];
 
-      users = await prisma.user.findMany({
-        where: whereClause,
+      // Get all users except the current user
+      const users = await prisma.user.findMany({
+        where: { id: { not: req.user.id } },
         select: {
           id: true,
+          username: true,
           firstName: true,
           lastName: true,
-          username: true,
-          email: true,
           bio: true,
           profilePicture: true,
           useGravatar: true,
-          createdAt: true,
+          email: true,
+          isSeedUser: true,
         },
-        orderBy: { createdAt: "desc" },
       });
 
-      // Check for existing friend requests for each user
-      for (let user of users) {
-        const existingRequest = await prisma.friendRequest.findFirst({
-          where: {
-            OR: [
-              {
-                senderId: req.user.id,
-                receiverId: user.id,
-                status: "pending",
-              },
-              {
-                senderId: user.id,
-                receiverId: req.user.id,
-                status: "pending",
-              },
-            ],
-          },
-        });
+      // Add friend status to each user
+      const usersWithStatus = users.map((user) => {
+        const isFriend = mutualFriendIds.includes(user.id);
+        const outgoingRequest = outgoingRequests.find(
+          (req) => req.receiverId === user.id
+        );
+        const incomingRequest = incomingRequests.find(
+          (req) => req.senderId === user.id
+        );
 
-        if (existingRequest) {
-          user.hasPendingRequest = true;
-          user.requestId = existingRequest.id;
-          user.isSentByMe = existingRequest.senderId === req.user.id;
-        } else {
-          user.hasPendingRequest = false;
+        let status = "none";
+        let requestId = null;
+
+        if (isFriend) {
+          status = "friend";
+        } else if (outgoingRequest) {
+          status = "request_sent";
+          requestId = outgoingRequest.id;
+        } else if (incomingRequest) {
+          status = "request_received";
+          requestId = incomingRequest.id;
         }
-      }
-    }
 
+        // Generate gravatar URL if user uses gravatar
+        let gravatarUrl = null;
+        if (user.useGravatar && user.email) {
+          const crypto = require('crypto');
+          const hash = crypto
+            .createHash("md5")
+            .update(user.email.toLowerCase().trim())
+            .digest("hex");
+          gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=50&d=identicon&r=pg`;
+        }
+
+        return {
+          ...user,
+          status,
+          requestId,
+          gravatarUrl,
+        };
+      });
+
+      res.json(usersWithStatus);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  } else {
+    // Regular page request - render the users view
     res.render("friends/users", {
       title: "Users",
-      activePage: "users",
       user: req.user,
-      users,
-      friends,
-      pendingRequests,
-      currentTab: currentTab,
-      searchTerm: search,
+      layout: "layouts/main",
+      activePage: "users",
     });
-  } catch (error) {
-    console.error("Error loading users page:", error);
-    req.flash("error_msg", "Failed to load users page");
-    res.redirect("/dashboard");
   }
 });
 
@@ -227,7 +223,26 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
     });
 
     console.log(`Found ${users.length} users matching "${searchTerm}"`);
-    res.json({ users });
+    
+    // Add gravatar URLs to search results
+    const usersWithGravatar = users.map(user => {
+      let gravatarUrl = null;
+      if (user.useGravatar && user.email) {
+        const crypto = require('crypto');
+        const hash = crypto
+          .createHash("md5")
+          .update(user.email.toLowerCase().trim())
+          .digest("hex");
+        gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=50&d=identicon&r=pg`;
+      }
+      
+      return {
+        ...user,
+        gravatarUrl,
+      };
+    });
+    
+    res.json({ users: usersWithGravatar });
   } catch (error) {
     console.error("Search error:", error);
     res.status(500).json({ error: "Search failed" });
@@ -236,64 +251,85 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
 
 // Send friend request endpoint
 router.post("/request", ensureAuthenticated, async (req, res) => {
-  const { receiverId } = req.body;
-  if (!receiverId) return res.status(400).json({ error: "No receiverId" });
+  try {
+    const { receiverId } = req.body;
+    if (!receiverId) return res.status(400).json({ error: "No receiverId" });
 
-  // Prevent self-request
-  if (receiverId === req.user.id)
-    return res.status(400).json({ error: "Cannot add yourself" });
+    // Prevent self-request
+    if (receiverId === req.user.id)
+      return res.status(400).json({ error: "Cannot add yourself" });
 
-  // Prevent duplicate pending requests (check both directions)
-  const existingRequest = await prisma.friendRequest.findFirst({
-    where: {
-      OR: [
-        {
-          senderId: req.user.id,
-          receiverId,
-          status: "pending",
-        },
-        {
-          senderId: receiverId,
-          receiverId: req.user.id,
-          status: "pending",
-        },
-      ],
-    },
-  });
-  if (existingRequest) {
-    if (existingRequest.senderId === req.user.id) {
-      return res.status(400).json({ error: "Request already sent" });
-    } else {
-      return res
-        .status(400)
-        .json({ error: "You already have a pending request from this user" });
+    // Check if users are already friends
+    const existingFriendship = await prisma.user.findFirst({
+      where: {
+        id: req.user.id,
+        friends: { some: { id: receiverId } },
+      },
+    });
+
+    if (existingFriendship) {
+      return res.status(400).json({ error: "Already friends" });
     }
+
+    // Check if there's already a pending request in either direction
+    const existingRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          {
+            senderId: req.user.id,
+            receiverId,
+            status: "pending",
+          },
+          {
+            senderId: receiverId,
+            receiverId: req.user.id,
+            status: "pending",
+          },
+        ],
+      },
+    });
+
+    if (existingRequest) {
+      if (existingRequest.senderId === req.user.id) {
+        return res.status(400).json({ error: "Request already sent" });
+      } else {
+        return res
+          .status(400)
+          .json({ error: "You already have a pending request from this user" });
+      }
+    }
+
+    // Get receiver info to check if they're a seed user
+    const receiver = await prisma.user.findUnique({
+      where: { id: receiverId },
+      select: { isSeedUser: true, username: true },
+    });
+
+    if (!receiver) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const newRequest = await prisma.friendRequest.create({
+      data: {
+        senderId: req.user.id,
+        receiverId,
+      },
+    });
+
+    // If receiver is a seed user, schedule auto-acceptance after 30-60 seconds
+    if (receiver && receiver.isSeedUser) {
+      const delayMs = Math.floor(Math.random() * 30000) + 30000; // Random delay between 30-60 seconds
+      scheduleAutoAccept(newRequest.id, delayMs);
+      console.log(
+        `Scheduled auto-accept for friend request to seed user ${receiver.username} in ${delayMs}ms`
+      );
+    }
+
+    res.json({ success: true, requestId: newRequest.id });
+  } catch (error) {
+    console.error("Error sending friend request:", error);
+    res.status(500).json({ error: "Failed to send friend request" });
   }
-
-  // Prevent duplicate accepted friendships (check both directions)
-  const alreadyFriends = await prisma.user.findFirst({
-    where: {
-      OR: [
-        {
-          id: req.user.id,
-          friends: { some: { id: receiverId } },
-        },
-        {
-          id: receiverId,
-          friends: { some: { id: req.user.id } },
-        },
-      ],
-    },
-  });
-  if (alreadyFriends) return res.status(400).json({ error: "Already friends" });
-
-  const newRequest = await prisma.friendRequest.create({
-    data: {
-      senderId: req.user.id,
-      receiverId,
-    },
-  });
-  res.json({ success: true, requestId: newRequest.id });
 });
 
 // Get received friend requests
@@ -379,14 +415,15 @@ router.post("/accept", ensureAuthenticated, async (req, res) => {
     }
 
     // Use a transaction to update the request, clean up duplicates, and create the bidirectional friendship
-    await prisma.$transaction([
+    await prisma.$transaction(async (tx) => {
       // Update the friend request status
-      prisma.friendRequest.update({
+      await tx.friendRequest.update({
         where: { id: requestId },
         data: { status: "accepted" },
-      }),
+      });
+
       // Decline any reverse requests to prevent duplicates
-      prisma.friendRequest.updateMany({
+      await tx.friendRequest.updateMany({
         where: {
           senderId: req.user.id,
           receiverId: friendRequest.senderId,
@@ -394,26 +431,29 @@ router.post("/accept", ensureAuthenticated, async (req, res) => {
           id: { not: requestId }, // Don't update the current request
         },
         data: { status: "declined" },
-      }),
-      // Add sender to receiver's friends list
-      prisma.user.update({
+      });
+
+      // Create the bidirectional friendship using the many-to-many relationship
+      // First, add the sender to the current user's friends list
+      await tx.user.update({
         where: { id: req.user.id },
         data: {
           friends: {
             connect: { id: friendRequest.senderId },
           },
         },
-      }),
-      // Add receiver to sender's friends list
-      prisma.user.update({
+      });
+
+      // Then, add the current user to the sender's friends list to ensure mutual friendship
+      await tx.user.update({
         where: { id: friendRequest.senderId },
         data: {
           friends: {
             connect: { id: req.user.id },
           },
         },
-      }),
-    ]);
+      });
+    });
 
     res.json({ success: true });
   } catch (error) {
@@ -459,8 +499,9 @@ router.post("/decline", ensureAuthenticated, async (req, res) => {
 router.post("/remove", ensureAuthenticated, async (req, res) => {
   try {
     const { friendId } = req.body;
-    if (!friendId)
+    if (!friendId) {
       return res.status(400).json({ error: "No friendId provided" });
+    }
 
     // Verify they are actually friends
     const friendship = await prisma.user.findFirst({
@@ -474,7 +515,7 @@ router.post("/remove", ensureAuthenticated, async (req, res) => {
       return res.status(404).json({ error: "Friendship not found" });
     }
 
-    // Remove friendship from both sides
+    // Remove friendship from both sides using the many-to-many relationship
     await prisma.$transaction([
       // Remove friend from user's friends list
       prisma.user.update({
@@ -550,6 +591,27 @@ router.post("/cleanup-duplicates", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     console.error("Error cleaning up duplicates:", error);
     res.status(500).json({ error: "Failed to cleanup duplicates" });
+  }
+});
+
+// Debug route to check auto-accept job status (admin only)
+router.get("/auto-accept-status", ensureAuthenticated, async (req, res) => {
+  try {
+    // Check if user is admin (you can modify this logic as needed)
+    if (req.user.username !== "admin") {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+
+    const pendingJobs = getPendingJobs();
+    res.json({
+      success: true,
+      pendingJobsCount: pendingJobs.length,
+      pendingJobs: pendingJobs,
+      message: `There are ${pendingJobs.length} pending auto-accept jobs`,
+    });
+  } catch (error) {
+    console.error("Error getting auto-accept status:", error);
+    res.status(500).json({ error: "Failed to get auto-accept status" });
   }
 });
 

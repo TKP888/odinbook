@@ -4,8 +4,8 @@
   "description": "A social media clone built with Node.js, Express, EJS, and PostgreSQL",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node --no-deprecation app.js",
+    "dev": "nodemon --no-deprecation app.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",

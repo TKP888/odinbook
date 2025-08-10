@@ -108,7 +108,12 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     // Get current user's posts
     const posts = await prisma.post.findMany({
       where: { userId: req.user.id },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        photoUrl: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,
@@ -163,6 +168,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
       posts: posts,
       layout: "layouts/main",
       activePage: "profile",
+      getGravatarUrl: getGravatarUrl,
     });
   } catch (error) {
     console.error("Error loading profile page:", error);
@@ -281,11 +287,11 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
         friends: {
           select: { id: true },
         },
-        sentFriendRequests: {
+        sentRequests: {
           where: { receiverId: profileUserId },
           select: { id: true, status: true },
         },
-        receivedFriendRequests: {
+        receivedRequests: {
           where: { senderId: profileUserId },
           select: { id: true, status: true },
         },
@@ -323,11 +329,11 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
     // Check for pending friend requests
     let pendingRequest = null;
     if (!isFriend) {
-      const sentRequest = currentUser.sentFriendRequests.find(
-        (req) => req.status === "PENDING"
+      const sentRequest = currentUser.sentRequests.find(
+        (req) => req.status === "pending"
       );
-      const receivedRequest = currentUser.receivedFriendRequests.find(
-        (req) => req.status === "PENDING"
+      const receivedRequest = currentUser.receivedRequests.find(
+        (req) => req.status === "pending"
       );
 
       if (sentRequest) {
@@ -345,6 +351,90 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
       }
     }
 
+    // Get profile user's posts
+    const posts = await prisma.post.findMany({
+      where: { userId: profileUserId },
+      select: {
+        id: true,
+        content: true,
+        photoUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            profilePicture: true,
+            useGravatar: true,
+            email: true,
+          },
+        },
+        likes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
+              },
+            },
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Get profile user's friends
+    const friends = await prisma.user.findMany({
+      where: {
+        friends: {
+          some: {
+            id: profileUserId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        email: true,
+        bio: true,
+        profilePicture: true,
+        useGravatar: true,
+        birthday: true,
+        gender: true,
+        location: true,
+        createdAt: true,
+      },
+    });
+
     res.render("profile/index", {
       title: `${profileUser.firstName} ${profileUser.lastName}`,
       user: req.user,
@@ -354,6 +444,9 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
       currentUser: req.user,
       isFriend: isFriend,
       pendingRequest: pendingRequest,
+      posts: posts,
+      friends: friends,
+      getGravatarUrl: getGravatarUrl,
     });
   } catch (error) {
     console.error("Error fetching profile:", error);

@@ -44,7 +44,23 @@ document.addEventListener("DOMContentLoaded", function () {
   loadPosts();
   initializeModals();
   initializeInlinePost();
+  handlePhotoSelection(); // Add this line
 });
+
+// Function to refresh posts (force reload)
+function refreshPosts() {
+  console.log("[DASHBOARD] Refreshing posts...");
+
+  // Clear any cached data
+  currentPage = 1;
+  hasNextPage = true;
+
+  // Force reload posts
+  loadPosts(true);
+
+  // Show feedback to user
+  showNotification("Posts refreshed!", "success");
+}
 
 function initializeModals() {
   // Initialize modals
@@ -153,13 +169,15 @@ function openCreatePostModal() {
 
 function createInlinePost() {
   const content = document.getElementById("inlinePostContent").value.trim();
+  const photoFile = document.getElementById("postPhoto").files[0];
 
-  if (!content) {
-    alert("Please enter some content for your post.");
+  // Allow posts with just photos (no text required)
+  if (!content && !photoFile) {
+    alert("Please add some content or a photo to your post.");
     return;
   }
 
-  if (content.length > 250) {
+  if (content && content.length > 250) {
     alert("Post content cannot exceed 250 characters.");
     return;
   }
@@ -169,12 +187,18 @@ function createInlinePost() {
   createPostBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
   createPostBtn.disabled = true;
 
+  // Use FormData for file uploads
+  const formData = new FormData();
+  if (content) {
+    formData.append("content", content);
+  }
+  if (photoFile) {
+    formData.append("photo", photoFile);
+  }
+
   fetch("/posts", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content }),
+    body: formData,
   })
     .then((response) => response.json())
     .then((data) => {
@@ -183,6 +207,9 @@ function createInlinePost() {
         document.getElementById("inlinePostContent").value = "";
         document.getElementById("inlineCharCount").textContent = "0";
         document.getElementById("inlineCharCount").style.color = "#6c757d";
+
+        // Clear photo
+        removePhoto();
 
         loadPosts(); // Refresh posts list
 
@@ -270,6 +297,10 @@ function createPost() {
 }
 
 function loadPosts(reset = true) {
+  // if (noPosts) {
+  //   noPosts.classList.add("d-none");
+  // }
+
   if (isLoading) return Promise.resolve();
 
   const postsLoading = document.getElementById("postsLoading");
@@ -292,7 +323,20 @@ function loadPosts(reset = true) {
   postsList.classList.remove("d-none");
   noPosts.classList.add("d-none");
 
-  return fetch(`/posts?page=${currentPage}&limit=10`)
+  console.log(
+    `[DASHBOARD] Loading posts, page: ${currentPage}, reset: ${reset}`
+  );
+
+  return fetch(
+    `/dashboard/posts?page=${currentPage}&limit=10&_t=${Date.now()}`,
+    {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -303,7 +347,10 @@ function loadPosts(reset = true) {
       postsLoading.classList.add("d-none");
       isLoading = false;
 
+      console.log(`[DASHBOARD] Posts API response:`, data);
+
       if (data.posts && data.posts.length > 0) {
+        console.log(`[DASHBOARD] Displaying ${data.posts.length} posts`);
         if (reset) {
           displayPosts(data.posts);
         } else {
@@ -317,7 +364,9 @@ function loadPosts(reset = true) {
         // Show/hide load more button
         updateLoadMoreButton();
       } else if (reset) {
-        noPosts.classList.remove("d-none");
+        console.log(`[DASHBOARD] No posts found, showing no posts message`);
+        // Show appropriate message based on whether user has friends
+        showNoPostsMessage();
       }
     })
     .catch((error) => {
@@ -325,7 +374,7 @@ function loadPosts(reset = true) {
       postsLoading.classList.add("d-none");
       isLoading = false;
       if (reset) {
-        noPosts.classList.remove("d-none");
+        showNoPostsMessage();
       }
       throw error;
     });
@@ -335,12 +384,16 @@ function displayPosts(posts) {
   const postsList = document.getElementById("postsList");
   const noPosts = document.getElementById("noPosts");
 
+  console.log(`[DASHBOARD] displayPosts called with ${posts.length} posts`);
+
   if (posts.length === 0) {
+    console.log(`[DASHBOARD] No posts to display, showing no posts message`);
     postsList.classList.add("d-none");
     noPosts.classList.remove("d-none");
     return;
   }
 
+  console.log(`[DASHBOARD] Displaying posts, hiding no posts message`);
   noPosts.classList.add("d-none");
   postsList.classList.remove("d-none");
 
@@ -389,10 +442,44 @@ function displayPosts(posts) {
       </div>
     </div>
   </div>
-  <div class="post-content">${post.content.replace(/\n/g, "<br>")}</div>
+  ${
+    post.content || post.photoUrl
+      ? `
+  <div class="post-content">
+    ${
+      post.content
+        ? `<p class="${post.photoUrl ? "" : "mb-0"}">${post.content.replace(
+            /\n/g,
+            post.photoUrl ? "" : "<br>"
+          )}</p>`
+        : ""
+    }
+    
+    <!-- Display photo if present -->
+    ${
+      post.photoUrl
+        ? `
+      <div class="post-photo">
+        <img 
+          src="${post.photoUrl}" 
+          alt="Post photo" 
+          class="img-fluid rounded"
+          style="width: 100%; height: 400px; max-height: 400px; object-fit: cover; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;"
+          onclick="openPhotoModal('${post.photoUrl}')"
+        />
+      </div>
+    `
+        : ""
+    }
+  </div>
+  `
+      : ""
+  }
 
   <!-- Post Actions -->
-  <div class="post-actions mt-3 pt-3 border-top">
+  <div class="post-actions ${
+    post.content || post.photoUrl ? "mt-3 pt-3" : "mt-2 pt-2"
+  } border-top">
     <div class="d-flex justify-content-between align-items-center">
       <!-- Action Buttons -->
       <div class="d-flex gap-2">
@@ -552,10 +639,44 @@ function appendPosts(posts) {
       </div>
     </div>
   </div>
-  <div class="post-content">${post.content.replace(/\n/g, "<br>")}</div>
+  ${
+    post.content || post.photoUrl
+      ? `
+  <div class="post-content">
+    ${
+      post.content
+        ? `<p class="${post.photoUrl ? "" : "mb-0"}">${post.content.replace(
+            /\n/g,
+            post.photoUrl ? "" : "<br>"
+          )}</p>`
+        : ""
+    }
+    
+    <!-- Display photo if present -->
+    ${
+      post.photoUrl
+        ? `
+      <div class="post-photo">
+        <img 
+          src="${post.photoUrl}" 
+          alt="Post photo" 
+          class="img-fluid rounded"
+          style="width: 100%; height: 400px; max-height: 400px; object-fit: cover; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;"
+          onclick="openPhotoModal('${post.photoUrl}')"
+        />
+      </div>
+    `
+        : ""
+    }
+  </div>
+  `
+      : ""
+  }
 
   <!-- Post Actions -->
-  <div class="post-actions mt-3 pt-3 border-top">
+  <div class="post-actions ${
+    post.content || post.photoUrl ? "mt-3 pt-3" : "mt-2 pt-2"
+  } border-top">
     <div class="d-flex justify-content-between align-items-center">
       <!-- Action Buttons -->
       <div class="d-flex gap-2">
@@ -648,7 +769,7 @@ function appendPosts(posts) {
       `
               )
               .join("")
-          : ""
+          : '<p class="text-muted text-center">No comments yet</p>'
       }
     </div>
     <div class="comment-form">
@@ -723,6 +844,118 @@ function updatePostsCount(count) {
   if (postsCountElement) {
     postsCountElement.textContent = `${count} post${count !== 1 ? "s" : ""}`;
   }
+}
+
+function showNoPostsMessage() {
+  const noPosts = document.getElementById("noPosts");
+  const postsList = document.getElementById("postsList");
+
+  // Hide posts list and show no posts message
+  postsList.classList.add("d-none");
+  noPosts.classList.remove("d-none");
+
+  // Check if user has any posts of their own
+  checkUserPosts();
+}
+
+function checkUserPosts() {
+  // First check if user has friends
+  fetch("/friends/check-friends")
+    .then((response) => response.json())
+    .then((friendsData) => {
+      // Then check user's own posts
+      return fetch("/posts/my-posts")
+        .then((response) => response.json())
+        .then((postsData) => {
+          return { friendsData, postsData };
+        });
+    })
+    .then(({ friendsData, postsData }) => {
+      const noPosts = document.getElementById("noPosts");
+      const hasFriends = friendsData.hasFriends;
+      const hasPosts = postsData.posts && postsData.posts.length > 0;
+
+      if (hasFriends && !hasPosts) {
+        // User has friends but no posts from anyone (including friends)
+        noPosts.innerHTML = `
+          <div class="py-5">
+            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No posts yet</h5>
+            <p class="text-muted">
+              Your friends haven't posted anything yet.<br>
+              Be the first to share something!
+            </p>
+            <div class="mt-3">
+              <button class="btn btn-primary" onclick="openCreatePostModal()">
+                <i class="fas fa-plus"></i> Create Post
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (!hasFriends && hasPosts) {
+        // User has posts but no friends
+        noPosts.innerHTML = `
+          <div class="py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No posts to show</h5>
+            <p class="text-muted">
+              You don't have any friends yet, so you can only see your own posts.<br>
+              Add some friends to see their posts in your feed!
+            </p>
+            <div class="mt-3">
+              <button class="btn btn-primary me-2" onclick="openCreatePostModal()">
+                <i class="fas fa-plus"></i> Create Post
+              </button>
+              <a href="/friends/users" class="btn btn-outline-primary">
+                <i class="fas fa-user-plus"></i> Find Friends
+              </a>
+            </div>
+          </div>
+        `;
+      } else if (!hasFriends && !hasPosts) {
+        // User has no posts and no friends
+        noPosts.innerHTML = `
+          <div class="py-5">
+            <i class="fas fa-rocket fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Welcome to your feed!</h5>
+            <p class="text-muted">
+              Start by creating your first post or finding some friends!
+            </p>
+            <div class="mt-3">
+              <button class="btn btn-primary me-2" onclick="openCreatePostModal()">
+                <i class="fas fa-plus"></i> Create Post
+              </button>
+              <a href="/friends/users" class="btn btn-outline-primary">
+                <i class="fas fa-user-plus"></i> Find Friends
+              </a>
+            </div>
+          </div>
+        `;
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking user status:", error);
+      // Fallback to default message
+      const noPosts = document.getElementById("noPosts");
+      noPosts.innerHTML = `
+        <div class="py-5">
+          <i class="fas fa-users fa-3x text-muted mb-3"></i>
+          <h5 class="text-muted">No posts to show</h5>
+          <p class="text-muted">
+            You don't have any friends yet, so you can only see your own posts.<br>
+            Add some friends to see their posts in your feed!
+          </p>
+          <div class="mt-3">
+            <button class="btn btn-primary me-2" onclick="openCreatePostModal()">
+              <i class="fas fa-plus"></i> Create Post
+            </button>
+            <a href="/friends/users" class="btn btn-outline-primary">
+              <i class="fas fa-user-plus"></i> Find Friends
+            </a>
+          </div>
+        </div>
+      `;
+    });
 }
 
 function formatDateTime(dateString) {
@@ -1323,4 +1556,102 @@ function showNotification(message, type = "info") {
 `;
   document.body.appendChild(alertDiv);
   setTimeout(() => alertDiv.remove(), 3000);
+}
+
+// Photo handling functions
+function handlePhotoSelection() {
+  const fileInput = document.getElementById("postPhoto");
+  const fileName = document.getElementById("photoFileName");
+  const removeBtn = document.getElementById("removePhotoBtn");
+
+  if (fileInput) {
+    fileInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          alert("Photo size must be less than 10MB");
+          this.value = "";
+          return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith("image/")) {
+          alert("Please select an image file");
+          this.value = "";
+          return;
+        }
+
+        fileName.textContent = file.name;
+        removeBtn.style.display = "inline-block";
+      }
+    });
+  }
+}
+
+function removePhoto() {
+  const fileInput = document.getElementById("postPhoto");
+  const fileName = document.getElementById("photoFileName");
+  const removeBtn = document.getElementById("removePhotoBtn");
+
+  if (fileInput) {
+    fileInput.value = "";
+    fileName.textContent = "";
+    removeBtn.style.display = "none";
+  }
+}
+
+// Photo modal function
+function openPhotoModal(photoUrl) {
+  // Create modal HTML
+  const modalHTML = `
+    <div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Photo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img src="${photoUrl}" alt="Post photo" class="img-fluid" style="max-width: 100%;">
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Remove existing modal if any
+  const existingModal = document.getElementById("photoModal");
+  if (existingModal) {
+    existingModal.remove();
+  }
+
+  // Add modal to page
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+  // Show modal
+  const photoModal = new bootstrap.Modal(document.getElementById("photoModal"));
+  photoModal.show();
+
+  // Clean up modal when hidden
+  document
+    .getElementById("photoModal")
+    .addEventListener("hidden.bs.modal", function () {
+      this.remove();
+    });
+}
+
+// Function to refresh friends list on dashboard
+function refreshFriendsList() {
+  console.log("[DASHBOARD] Refreshing friends list...");
+
+  // If we're on the dashboard, refresh posts to show/hide friend posts
+  if (typeof loadPosts === "function") {
+    loadPosts(true);
+  }
+
+  // Update friend request count in header
+  if (typeof updateHeaderRequestCount === "function") {
+    updateHeaderRequestCount();
+  }
 }

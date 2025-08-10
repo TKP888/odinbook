@@ -1,4 +1,4 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
 // Configure Cloudinary
 cloudinary.config({
@@ -12,10 +12,10 @@ const uploadToCloudinary = async (file, options = {}) => {
   try {
     // Convert buffer to base64 if file is a buffer
     let uploadData;
-    
+
     if (file.buffer) {
       // If file is a buffer (from memory storage)
-      const b64 = Buffer.from(file.buffer).toString('base64');
+      const b64 = Buffer.from(file.buffer).toString("base64");
       const dataURI = `data:${file.mimetype};base64,${b64}`;
       uploadData = dataURI;
     } else {
@@ -24,13 +24,13 @@ const uploadToCloudinary = async (file, options = {}) => {
     }
 
     const result = await cloudinary.uploader.upload(uploadData, {
-      folder: 'odinbook/profile-pictures',
-      resource_type: 'image',
+      folder: "odinbook/profile-pictures",
+      resource_type: "image",
       transformation: [
-        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-        { quality: 'auto', fetch_format: 'auto' }
+        { width: 400, height: 400, crop: "fill", gravity: "face" },
+        { quality: "auto", fetch_format: "auto" },
       ],
-      ...options
+      ...options,
     });
 
     return {
@@ -38,13 +38,13 @@ const uploadToCloudinary = async (file, options = {}) => {
       url: result.secure_url,
       public_id: result.public_id,
       width: result.width,
-      height: result.height
+      height: result.height,
     };
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    console.error("Cloudinary upload error:", error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 };
@@ -53,17 +53,56 @@ const uploadToCloudinary = async (file, options = {}) => {
 const deleteFromCloudinary = async (publicId) => {
   try {
     if (!publicId) return { success: true };
-    
+
     const result = await cloudinary.uploader.destroy(publicId);
     return {
-      success: result.result === 'ok',
-      result: result.result
+      success: result.result === "ok",
+      result: result.result,
     };
   } catch (error) {
-    console.error('Cloudinary delete error:', error);
+    console.error("Cloudinary delete error:", error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
+    };
+  }
+};
+
+// Specific function for uploading post photos
+const uploadPostPhoto = async (file, options = {}) => {
+  try {
+    let uploadData;
+
+    if (file.buffer) {
+      const b64 = Buffer.from(file.buffer).toString("base64");
+      const dataURI = `data:${file.mimetype};base64,${b64}`;
+      uploadData = dataURI;
+    } else {
+      uploadData = file.path;
+    }
+
+    const result = await cloudinary.uploader.upload(uploadData, {
+      folder: "odinbook/post-photos", // Separate folder for post photos
+      resource_type: "image",
+      transformation: [
+        { width: 800, height: 600, crop: "limit" }, // Better dimensions for posts
+        { quality: "auto", fetch_format: "auto" },
+      ],
+      ...options,
+    });
+
+    return {
+      success: true,
+      url: result.secure_url,
+      public_id: result.public_id,
+      width: result.width,
+      height: result.height,
+    };
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    return {
+      success: false,
+      error: error.message,
     };
   }
 };
@@ -71,5 +110,6 @@ const deleteFromCloudinary = async (publicId) => {
 module.exports = {
   cloudinary,
   uploadToCloudinary,
-  deleteFromCloudinary
-}; 
+  deleteFromCloudinary,
+  uploadPostPhoto, // Add this export
+};

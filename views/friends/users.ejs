@@ -1,367 +1,87 @@
-<div class="container-fluid">
+<div class="container mt-4">
   <div class="row">
-    <!-- Navigation Tabs -->
-    <div class="col-12 mb-4">
-      <div class="card">
-        <div class="card-body p-0">
-          <ul class="nav nav-tabs" id="usersTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link <%= currentTab === 'all' ? 'active' : '' %>"
-                id="all-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#all"
-                type="button"
-                role="tab"
-                aria-controls="all"
-                aria-selected="<%= currentTab === 'all' ? 'true' : 'false' %>"
-              >
-                <!-- <i class="fas fa-globe"></i> -->
-                 All Users
-                <span class="badge bg-secondary ms-1"
-                  ><%= users.length %></span
-                >
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link <%= currentTab === 'friends' ? 'active' : '' %>"
-                id="friends-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#friends"
-                type="button"
-                role="tab"
-                aria-controls="friends"
-                aria-selected="<%= currentTab === 'friends' ? 'true' : 'false' %>"
-              >
-                <!-- <i class="fas fa-user-friends"></i> -->
-                Friends
-                <span class="badge bg-success ms-1"
-                  ><%= friends.length %></span
-                >
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button
-                class="nav-link <%= currentTab === 'requests' ? 'active' : '' %>"
-                id="requests-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#requests"
-                type="button"
-                role="tab"
-                aria-controls="requests"
-                aria-selected="<%= currentTab === 'requests' ? 'true' : 'false' %>"
-              >
-                <!-- <i class="fas fa-user-plus"></i> -->
-                Friend Requests
-                <span class="badge bg-warning ms-1"
-                  ><%= pendingRequests.length %></span
-                >
-              </button>
-            </li>
-          </ul>
-        </div>
+    <div class="col-md-12">
+      <h2>Users</h2>
+
+      <!-- Search Bar -->
+      <div class="mb-3">
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control"
+          placeholder="Search users..."
+        />
       </div>
-    </div>
-  </div>
-</div>
 
-    <!-- Tab Content -->
-    <div class="col-12">
-      <div class="tab-content" id="usersTabContent">
+      <!-- Tabs -->
+      <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="all-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#all"
+            type="button"
+            role="tab"
+          >
+            All Users
+            <span class="badge bg-primary ms-1" id="allUsersCount">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="friends-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#friends"
+            type="button"
+            role="tab"
+          >
+            Friends
+            <span class="badge bg-success ms-1" id="friendsCount">0</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="requests-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#requests"
+            type="button"
+            role="tab"
+          >
+            Friend Requests
+            <span class="badge bg-warning ms-1" id="requestCount">0</span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content" id="userTabsContent">
         <!-- All Users Tab -->
-        <div
-          class="tab-pane fade <%= currentTab === 'all' ? 'show active' : '' %>"
-          id="all"
-          role="tabpanel"
-          aria-labelledby="all-tab"
-        >
-          <div class="card">
-            <div class="card-header">
-              <div class="row align-items-center">
-                <div class="col-md-6">
-                  <h5 class="mb-0">All Users</h5>
-                </div>
-                <div class="col-md-6">
-                  <div class="input-group">
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="searchInput"
-                      placeholder="Search users..."
-                      value="<%= searchTerm %>"
-                      autocomplete="off"
-                    />
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      onclick="searchUsers()"
-                    >
-                      <i class="fas fa-search"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div id="usersList">
-                <% if (users.length === 0) { %>
-                <div class="text-center text-muted py-5">
-                  <i class="fas fa-users fa-3x mb-3"></i>
-                  <h5>No users found</h5>
-                  <p>Try adjusting your search terms or browse all users.</p>
-                </div>
-                <% } else { %>
-                <div class="row">
-                  <% users.forEach(user => { %>
-                  <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="card h-100">
-                      <div class="card-body">
-                        <div class="d-flex align-items-center mb-3">
-                          <div class="user-avatar-medium me-3">
-                            <% if (user.useGravatar && user.email) { %>
-                              <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
-                            <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) { %>
-                              <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
-                            <% } else { %>
-                              <%= (user.firstName || '').charAt(0) %><%= (user.lastName || '').charAt(0) %>
-                            <% } %>
-                          </div>
-                          <div class="flex-grow-1">
-                            <h6 class="mb-1">
-                              <a href="/profile/<%= user.id %>" class="text-decoration-none">
-                                <%= user.firstName || '' %> <%= user.lastName ||
-                                '' %> <% if (!user.firstName && !user.lastName) {
-                                %>
-                                <span class="text-muted">(No name)</span>
-                                <% } %>
-                              </a>
-                            </h6>
-                            <p class="text-muted mb-0 small">
-                              @<%= user.username %>
-                            </p>
-                          </div>
-                        </div>
-
-                        <div
-                          class="d-flex justify-content-between align-items-center"
-                          id="friend-actions-<%= user.id %>"
-                        >
-                          <% if (user.hasPendingRequest && user.isSentByMe) { %>
-                            <!-- Request Sent State -->
-                            <button
-                              class="btn btn-success btn-sm me-2"
-                              id="add-friend-btn-<%= user.id %>"
-                              disabled
-                            >
-                              <i class="fas fa-check"></i> Request Sent
-                            </button>
-                            <button
-                              class="btn btn-outline-secondary btn-sm cancel-request-btn"
-                              id="cancel-request-btn-<%= user.id %>"
-                              data-user-id="<%= user.id %>"
-                              data-user-name="<%= user.firstName || '' %> <%= user.lastName || '' %>"
-                              data-request-id="<%= user.requestId %>"
-                            >
-                              <i class="fas fa-times"></i> Cancel Request
-                            </button>
-                          <% } else if (user.hasPendingRequest && !user.isSentByMe) { %>
-                            <!-- Request Received State -->
-                            <button
-                              class="btn btn-warning btn-sm"
-                              disabled
-                            >
-                              <i class="fas fa-clock"></i> Request Pending
-                            </button>
-                          <% } else { %>
-                            <!-- Add Friend State -->
-                            <button
-                              class="btn btn-primary btn-sm add-friend-btn"
-                              id="add-friend-btn-<%= user.id %>"
-                              data-user-id="<%= user.id %>"
-                              data-user-name="<%= user.firstName || '' %> <%= user.lastName || '' %>"
-                            >
-                              <i class="fas fa-user-plus"></i> Add Friend
-                            </button>
-                          <% } %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <% }); %>
-                </div>
-                <% } %>
-              </div>
-            </div>
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+          <div id="allUsersList" class="row">
+            <!-- Users will be loaded here -->
           </div>
         </div>
 
         <!-- Friends Tab -->
-        <div
-          class="tab-pane fade <%= currentTab === 'friends' ? 'show active' : '' %>"
-          id="friends"
-          role="tabpanel"
-          aria-labelledby="friends-tab"
-        >
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Your Friends</h5>
-            </div>
-            <div class="card-body">
-              <% if (friends.length === 0) { %>
-              <div class="text-center text-muted py-5">
-                <!-- <i class="fas fa-user-friends fa-3x mb-3"></i> -->
-                <h5>No friends yet</h5>
-                <p>Start connecting with people to build your network!</p>
-                <button class="btn btn-primary" onclick="switchToAllUsers()">
-                  <!-- <i class="fas fa-search"></i> -->
-                   Find Friends
-                </button>
-              </div>
-              <% } else { %>
-              <div class="row">
-                <% friends.forEach(friend => { %>
-                <div class="col-md-6 col-lg-4 mb-3">
-                  <div class="card h-100">
-                    <div class="card-body">
-                      <div class="d-flex align-items-center mb-3">
-                        <div class="user-avatar-medium me-3">
-                          <% if (friend.useGravatar && friend.email) { %>
-                            <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
-                          <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
-                            <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
-                          <% } else { %>
-                            <%= (friend.firstName || '').charAt(0) %><%= (friend.lastName || '').charAt(0) %>
-                          <% } %>
-                        </div>
-                        <div class="flex-grow-1">
-                          <h6 class="mb-1">
-                            <a href="/profile/<%= friend.id %>" class="text-decoration-none">
-                              <%= friend.firstName || '' %> <%= friend.lastName ||
-                              '' %> <% if (!friend.firstName && !friend.lastName)
-                              { %>
-                              <span class="text-muted">(No name)</span>
-                              <% } %>
-                            </a>
-                          </h6>
-                          <p class="text-muted mb-0 small">
-                            @<%= friend.username %>
-                          </p>
-                        </div>
-                      </div>
-                      <% if (friend.bio) { %>
-                      <p class="card-text small text-muted mb-3">
-                        <%= friend.bio %>
-                      </p>
-                      <% } %>
-                      <div
-                        class="d-flex justify-content-between align-items-center"
-                      >
-                        <small class="text-muted">
-                          Friends since <%= new Date(friend.createdAt).toLocaleDateString() %>
-                        </small>
-                        <button
-                          class="btn btn-outline-danger btn-sm"
-                          onclick="removeFriend('<%= friend.id %>', '<%= (friend.firstName || '') + ' ' + (friend.lastName || '') %>')"
-                        >
-                          <i class="fas fa-user-minus"></i> Unfriend
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <% }); %>
-              </div>
-              <% } %>
-            </div>
+        <div class="tab-pane fade" id="friends" role="tabpanel">
+          <div id="friendsList" class="row">
+            <!-- Friends will be loaded here -->
           </div>
         </div>
 
-        <!-- Friend Requests Tab -->
-        <div
-          class="tab-pane fade <%= currentTab === 'requests' ? 'show active' : '' %>"
-          id="requests"
-          role="tabpanel"
-          aria-labelledby="requests-tab"
-        >
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Friend Requests</h5>
-            </div>
-            <div class="card-body">
-              <% if (pendingRequests.length === 0) { %>
-              <div class="text-center text-muted py-5">
-                <i class="fas fa-inbox fa-3x mb-3"></i>
-                <h5>No pending requests</h5>
-              </div>
-              <% } else { %>
-              <div class="row">
-                <% pendingRequests.forEach(request => { %>
-                <div class="col-md-6 col-lg-4 mb-3">
-                  <div class="card h-100">
-                    <div class="card-body">
-                      <div class="d-flex align-items-center mb-3">
-                        <div class="user-avatar-medium me-3">
-                          <% if (request.otherUser.useGravatar && request.otherUser.email) { %>
-                            <img src="<%= getGravatarUrl(request.otherUser.email, 200) %>" alt="Profile Picture" class="profile-image">
-                          <% } else if (request.otherUser.profilePicture && (request.otherUser.profilePicture.startsWith('http') || request.otherUser.profilePicture.startsWith('/uploads/') || request.otherUser.profilePicture.includes('cloudinary.com'))) { %>
-                            <img src="<%= request.otherUser.profilePicture %>" alt="Profile Picture" class="profile-image">
-                          <% } else { %>
-                            <%= (request.otherUser.firstName || '').charAt(0) %><%= (request.otherUser.lastName || '').charAt(0) %>
-                          <% } %>
-                        </div>
-                        <div class="flex-grow-1">
-                          <h6 class="mb-1">
-                            <a href="/profile/<%= request.otherUser.id %>" class="text-decoration-none">
-                              <%= request.otherUser.firstName || '' %> <%= request.otherUser.lastName || '' %><% if (!request.otherUser.firstName && !request.otherUser.lastName) { %><span class="text-muted">(No name)</span><% } %>
-                            </a>
-                          </h6>
-                          <p class="text-muted mb-0 small">
-                            @<%= request.otherUser.username %>
-                          </p>
-                        </div>
-                      </div>
-                      <% if (request.otherUser.bio) { %>
-                      <p class="card-text small text-muted mb-3">
-                        <%= request.otherUser.bio %>
-                      </p>
-                      <% } %>
-                      <div
-                        class="d-flex justify-content-between align-items-center"
-                      >
-                        <small class="text-muted">
-                          <% if (request.isSent) { %>Request sent <%= new Date(request.createdAt).toLocaleDateString() %><% } else { %>Request received <%= new Date(request.createdAt).toLocaleDateString() %><% } %>
-                        </small>
-                        <div class="btn-group" role="group">
-                          <% if (!request.isSent) { %>
-                          <button
-                            class="btn btn-success btn-sm"
-                            onclick="acceptRequest('<%= request.id %>')"
-                          >
-                            <i class="fas fa-check"></i> Accept
-                          </button>
-                          <button
-                            class="btn btn-outline-secondary btn-sm"
-                            onclick="declineRequest('<%= request.id %>')"
-                          >
-                            <i class="fas fa-times"></i> Decline
-                          </button>
-                          <% } else { %>
-                          <button
-                            class="btn btn-outline-secondary btn-sm"
-                            onclick="cancelRequest('<%= request.id %>')"
-                          >
-                            <i class="fas fa-times"></i> Cancel
-                          </button>
-                          <% } %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <% }); %>
-              </div>
-              <% } %>
+        <!-- Requests Tab -->
+        <div class="tab-pane fade" id="requests" role="tabpanel">
+          <div id="requestsList" class="row">
+            <!-- Requests will be loaded here -->
+          </div>
+          <div id="noRequests" class="text-center text-muted d-none">
+            <div class="py-5">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No pending friend requests</h5>
+              <p class="text-muted">You're all caught up!</p>
             </div>
           </div>
         </div>
@@ -370,4 +90,276 @@
   </div>
 </div>
 
-  <script src="/js/friends.js"></script>
+<script src="/js/friends.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let allUsers = [];
+    let friends = [];
+    let requests = [];
+
+    // Load users on page load
+    loadUsers();
+
+    // Search functionality
+    document
+      .getElementById("searchInput")
+      .addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        filterUsers(searchTerm);
+      });
+
+    async function loadUsers() {
+      try {
+        const response = await fetch("/friends/users", {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            Accept: "application/json",
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch users");
+
+        allUsers = await response.json();
+
+        // Categorize users
+        friends = allUsers.filter((user) => user.status === "friend");
+        requests = allUsers.filter(
+          (user) => user.status === "request_received"
+        );
+
+        // Render all tabs
+        renderUsers("allUsersList", allUsers);
+        renderUsers("friendsList", friends);
+        renderRequests("requestsList", requests);
+
+        // Update all counts
+        updateAllCounts();
+      } catch (error) {
+        console.error("Error loading users:", error);
+        showError("Failed to load users. Please try again.");
+      }
+    }
+
+    function filterUsers(searchTerm) {
+      const filtered = allUsers.filter(
+        (user) =>
+          user.username.toLowerCase().includes(searchTerm) ||
+          (user.firstName &&
+            user.firstName.toLowerCase().includes(searchTerm)) ||
+          (user.lastName && user.lastName.toLowerCase().includes(searchTerm))
+      );
+      renderUsers("allUsersList", filtered);
+    }
+
+    function renderUsers(containerId, users) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (users.length === 0) {
+        container.innerHTML =
+          '<div class="col-12"><p class="text-muted">No users found.</p></div>';
+        return;
+      }
+
+      container.innerHTML = users
+        .map(
+          (user) => `
+      <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
+        <div class="card user-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <div class="user-avatar-large me-3">
+                ${getUserAvatar(user)}
+              </div>
+              <div class="user-info">
+                <h6 class="mb-0 user-name">${
+                  user.firstName || user.lastName
+                    ? `${user.firstName || ""} ${user.lastName || ""}`
+                    : user.username
+                }</h6>
+                <p class="text-muted mb-0 small username">@${user.username}</p>
+              </div>
+            </div>
+            <div id="friend-actions-${user.id}">
+              ${getActionButton(user)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+        )
+        .join("");
+
+      // Add event listeners for buttons
+      // addButtonEventListeners(); // This line is removed as per the edit hint
+    }
+
+    function getUserAvatar(user) {
+      if (user.gravatarUrl) {
+        return `<img src="${user.gravatarUrl}" alt="${user.username}" class="rounded-circle profile-image" style="width: 100%; height: 100%; object-fit: cover;">`;
+      }
+
+      if (user.profilePicture) {
+        return `<img src="${user.profilePicture}" alt="${user.username}" class="rounded-circle profile-image" style="width: 100%; height: 100%; object-fit: cover;">`;
+      } else {
+        const firstName = user.firstName || "";
+        const lastName = user.lastName || "";
+        const initials = (
+          firstName.charAt(0) + lastName.charAt(0)
+        ).toUpperCase();
+        return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">${initials}</div>`;
+      }
+    }
+
+    function renderRequests(containerId, requests) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      if (requests.length === 0) {
+        container.innerHTML = "";
+        document.getElementById("noRequests").classList.remove("d-none");
+        return;
+      }
+
+      document.getElementById("noRequests").classList.add("d-none");
+      container.innerHTML = requests
+        .map(
+          (user) => `
+      <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
+        <div class="card user-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <div class="user-avatar-large me-3">
+                ${getUserAvatar(user)}
+              </div>
+              <div class="user-info">
+                <h6 class="mb-0 user-name">${
+                  user.firstName || user.lastName
+                    ? `${user.firstName || ""} ${user.lastName || ""}`
+                    : user.username
+                }</h6>
+                <p class="text-muted mb-0 small username">@${user.username}</p>
+                <small class="text-muted">Wants to be your friend</small>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${
+                user.requestId
+              }">
+                <i class="fas fa-check"></i> Accept
+              </button>
+              <button class="btn btn-danger btn-sm decline-request-btn" data-request-id="${
+                user.requestId
+              }">
+                <i class="fas fa-times"></i> Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+        )
+        .join("");
+
+      // Add event listeners for request buttons
+      // addRequestButtonEventListeners(); // This line is removed as per the edit hint
+    }
+
+    function getActionButton(user) {
+      switch (user.status) {
+        case "friend":
+          return `<button class="btn btn-outline-danger btn-sm remove-friend-btn" data-user-id="${
+            user.id
+          }" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}">
+            <i class="fas fa-user-minus"></i> Remove Friend
+          </button>`;
+        case "request_sent":
+          return `<div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm" disabled>
+              <i class="fas fa-check"></i> Request Sent
+            </button>
+            <button class="btn btn-outline-secondary btn-sm cancel-request-btn" id="cancel-request-btn-${
+              user.id
+            }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}" data-request-id="${user.requestId}">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>`;
+        case "request_received":
+          return `<div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${user.requestId}">
+              <i class="fas fa-check"></i> Accept
+            </button>
+            <button class="btn btn-danger btn-sm decline-request-btn" data-request-id="${user.requestId}">
+              <i class="fas fa-times"></i> Decline
+            </button>
+          </div>`;
+        default:
+          return `<button class="btn btn-primary btn-sm add-friend-btn" id="add-friend-btn-${
+            user.id
+          }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}">
+            <i class="fas fa-user-plus"></i> Add Friend
+          </button>`;
+      }
+    }
+
+    // Event delegation is handled by friends.js - no need to duplicate here
+
+    // Remove the old event listener functions since we're using event delegation
+    // function addButtonEventListeners() { ... }
+    // function addRequestButtonEventListeners() { ... }
+
+    function updateAllCounts() {
+      const allUsersCountBadge = document.getElementById("allUsersCount");
+      const friendsCountBadge = document.getElementById("friendsCount");
+      const requestCountBadge = document.getElementById("requestCount");
+
+      allUsersCountBadge.textContent = allUsers.length;
+      friendsCountBadge.textContent = friends.length;
+      requestCountBadge.textContent = requests.length;
+
+      if (allUsers.length > 0) {
+        allUsersCountBadge.classList.remove("d-none");
+      } else {
+        allUsersCountBadge.classList.add("d-none");
+      }
+
+      if (friends.length > 0) {
+        friendsCountBadge.classList.remove("d-none");
+      } else {
+        friendsCountBadge.classList.add("d-none");
+      }
+
+      if (requests.length > 0) {
+        requestCountBadge.classList.remove("d-none");
+      } else {
+        requestCountBadge.classList.add("d-none");
+      }
+    }
+
+    // Function to refresh counts after friend status changes
+    function refreshCounts() {
+      // Re-categorize users based on current status
+      friends = allUsers.filter((user) => user.status === "friend");
+      requests = allUsers.filter((user) => user.status === "request_received");
+
+      // Update the display
+      updateAllCounts();
+    }
+
+    // Make refreshCounts available globally so friends.js can call it
+    window.refreshCounts = refreshCounts;
+
+    function showError(message) {
+      // Create error alert
+      const errorAlert = document.createElement("div");
+      errorAlert.className = "alert alert-danger alert-dismissible fade show";
+      errorAlert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      // Insert at the top of the container
+      const container = document.querySelector(".container");
+      container.insertBefore(errorAlert, container.firstChild);
+    }
+  });
+</script>

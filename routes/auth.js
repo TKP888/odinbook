@@ -167,11 +167,38 @@ router.post("/auth/guest-login", (req, res, next) => {
   // Use passport authentication with guest credentials
   req.body.email = "guest@odinbook.com";
   req.body.password = "qwerty";
-  
-  passport.authenticate("local", {
-    successRedirect: "/dashboard",
-    failureRedirect: "/auth/login",
-    failureFlash: true,
+
+  passport.authenticate("local", async (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      req.flash("error_msg", info.message);
+      return res.redirect("/auth/login");
+    }
+
+    // Log in the user
+    req.logIn(user, async (err) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Ensure guest user has useGravatar set to false
+      if (user.email === "guest@odinbook.com" && user.useGravatar) {
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { useGravatar: false },
+          });
+          // Update the user object in the request
+          req.user.useGravatar = false;
+        } catch (error) {
+          console.error("Error updating guest user settings:", error);
+        }
+      }
+
+      res.redirect("/dashboard");
+    });
   })(req, res, next);
 });
 

@@ -20,9 +20,6 @@
                     <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
                   <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com') || user.profilePicture.includes('gravatar.com'))) { %>
                     <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
-                  <% } else if (user.email) { %>
-                    <!-- Fallback: Generate Gravatar URL even if useGravatar is not set -->
-                    <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
                   <% } else { %>
                     <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
                   <% } %>
@@ -58,8 +55,14 @@
           <% } else { %>
             <!-- Other user's profile - show friend actions -->
             <% if (isFriend) { %>
-              <button class="btn btn-success btn-lg" disabled>
+              <button class="btn btn-success btn-lg me-2" disabled>
                 <i class="fas fa-user-check me-2"></i> Friends
+              </button>
+              <button
+                class="btn btn-outline-danger btn-lg"
+                onclick="removeFriend('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')"
+              >
+                <i class="fas fa-user-minus me-2"></i> Unfriend
               </button>
             <% } else if (pendingRequest) { %>
               <% if (pendingRequest.senderId === user.id) { %>
@@ -305,7 +308,7 @@
             <div class="mb-2">
               <h6 class="mb-0 text-muted">Welcome back, <%= user.firstName %>!</h6>
             </div>
-            <form id="inlineCreatePostForm">
+            <form id="inlineCreatePostForm" enctype="multipart/form-data">
               <div class="mb-3">
                 <textarea
                   id="inlinePostContent"
@@ -314,6 +317,39 @@
                   placeholder="What's on your mind, <%= user.firstName %>?"
                   maxlength="250"
                 ></textarea>
+                
+                <!-- Photo upload section -->
+                <div class="mt-2">
+                  <input
+                    type="file"
+                    id="inlinePostPhoto"
+                    name="photo"
+                    accept="image/*"
+                    class="form-control form-control-sm"
+                    style="display: none"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm me-2"
+                    onclick="document.getElementById('inlinePostPhoto').click()"
+                  >
+                    <i class="fas fa-camera"></i> Add Photo
+                  </button>
+                  <span
+                    id="inlinePhotoFileName"
+                    class="text-muted small"
+                  ></span>
+                  <button
+                    type="button"
+                    id="inlineRemovePhotoBtn"
+                    class="btn btn-outline-danger btn-sm ms-2"
+                    style="display: none"
+                    onclick="removeInlinePhoto()"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                
                 <div class="form-text text-end">
                   <span id="inlineCharCount">0</span>/250
                 </div>
@@ -416,6 +452,13 @@
             <!-- Post Content -->
             <div class="post-content mb-3">
               <p class="mb-0" style="line-height: 1.5;"><%= post.content.replace(/\n/g, "<br>") %></p>
+              
+              <!-- Post Image -->
+              <% if (post.photoUrl) { %>
+                <div class="post-image-container mt-3">
+                  <img src="<%= post.photoUrl %>" alt="Post image" class="post-image img-fluid rounded" style="max-width: 100%; max-height: 500px; object-fit: contain;">
+                </div>
+              <% } %>
             </div>
 
             <!-- Post Actions -->
@@ -593,7 +636,7 @@
         ></button>
       </div>
       <div class="modal-body">
-        <form id="createPostForm">
+        <form id="createPostForm" enctype="multipart/form-data">
           <div class="mb-3">
             <textarea
               id="postContent"
@@ -602,6 +645,39 @@
               placeholder="What's on your mind, <%= user.firstName.charAt(0) %>?"
               maxlength="250"
             ></textarea>
+            
+            <!-- Photo upload section -->
+            <div class="mt-2">
+              <input
+                type="file"
+                id="postPhoto"
+                name="photo"
+                accept="image/*"
+                class="form-control form-control-sm"
+                style="display: none"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm me-2"
+                onclick="document.getElementById('postPhoto').click()"
+              >
+                <i class="fas fa-camera"></i> Add Photo
+              </button>
+              <span
+                id="photoFileName"
+                class="text-muted small"
+              ></span>
+              <button
+                type="button"
+                id="removePhotoBtn"
+                class="btn btn-outline-danger btn-sm ms-2"
+                style="display: none"
+                onclick="removePhoto()"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+            
             <div class="form-text"><span id="charCount">0</span>/250</div>
           </div>
         </form>

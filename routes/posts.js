@@ -1,8 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
+const multer = require("multer");
+const {
+  uploadPostPhoto,
+  deleteFromCloudinary,
+} = require("../config/cloudinary");
 
 const prisma = new PrismaClient();
+
+// Configure multer for post photo uploads
+const uploadPostPhotoMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for post photos
+  },
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"), false);
+    }
+  },
+});
 
 // Middleware to ensure user is authenticated
 function ensureAuthenticated(req, res, next) {
@@ -22,25 +42,57 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 
     let whereClause = {};
 
-    // Get current user's friends
+    console.log(
+      `[POSTS] Fetching posts for user: ${req.user.username} (${req.user.id})`
+    );
+    console.log(`[POSTS] Request query:`, req.query);
+
+    // Get current user's friends using the correct relationship
     const currentUser = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
         friends: {
           select: { id: true },
         },
+        friendOf: {
+          select: { id: true },
+        },
       },
     });
 
-    // Create array of user IDs to include (current user + friends)
-    const allowedUserIds = [
-      req.user.id,
-      ...(currentUser?.friends?.map((friend) => friend.id) || []),
-    ];
+    // Create array of user IDs to include (current user + MUTUAL friends only)
+    // A mutual friendship means both users have each other in their friends list
+    const outgoingFriends =
+      currentUser?.friends?.map((friend) => friend.id) || [];
+    const incomingFriends =
+      currentUser?.friendOf?.map((friend) => friend.id) || [];
 
-    // If user has no friends, show all posts for now (for demo purposes)
-    whereClause =
-      allowedUserIds.length > 1 ? { userId: { in: allowedUserIds } } : {}; // Show all posts if user has no friends
+    // Find mutual friends (users who are in both lists)
+    const mutualFriendIds = outgoingFriends.filter((id) =>
+      incomingFriends.includes(id)
+    );
+
+    console.log(
+      `[POSTS] Outgoing friends: ${outgoingFriends.length}, Incoming friends: ${incomingFriends.length}`
+    );
+    console.log(`[POSTS] Mutual friends: ${mutualFriendIds.length}`);
+    console.log(`[POSTS] Mutual friend IDs:`, mutualFriendIds);
+
+    // Only show posts from current user and their MUTUAL friends
+    // If user has no mutual friends, only show their own posts
+    if (mutualFriendIds.length === 0) {
+      whereClause = { userId: req.user.id };
+      console.log(
+        `[POSTS] No mutual friends found, only showing user's own posts`
+      );
+    } else {
+      whereClause = { userId: { in: [req.user.id, ...mutualFriendIds] } };
+      console.log(
+        `[POSTS] Including posts from user and ${mutualFriendIds.length} mutual friends`
+      );
+    }
+
+    console.log(`[POSTS] Final where clause:`, whereClause);
 
     const posts = await prisma.post.findMany({
       where: whereClause,
@@ -64,6 +116,9 @@ router.get("/", ensureAuthenticated, async (req, res) => {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
               },
             },
           },
@@ -94,6 +149,19 @@ router.get("/", ensureAuthenticated, async (req, res) => {
       take: limit,
     });
 
+    console.log(
+      `[POSTS] Found ${posts.length} posts for user ${req.user.username}`
+    );
+
+    // Log details about each post being returned
+    posts.forEach((post, index) => {
+      console.log(
+        `[POSTS] Post ${index + 1}: User ${post.user.username} (${
+          post.user.firstName
+        } ${post.user.lastName}) - Content: ${post.content.substring(0, 50)}...`
+      );
+    });
+
     const totalPosts = await prisma.post.count({
       where: whereClause,
     });
@@ -101,9 +169,12 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 
     res.json({
       posts: posts,
-      totalPosts: totalPosts,
-      totalPages: totalPages,
-      currentPage: page,
+      pagination: {
+        totalPosts: totalPosts,
+        totalPages: totalPages,
+        currentPage: page,
+        hasNextPage: page < totalPages,
+      },
     });
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -111,6 +182,90 @@ router.get("/", ensureAuthenticated, async (req, res) => {
       success: false,
       message: "Error fetching posts",
     });
+  }
+});
+
+// Get posts for a specific user
+router.get("/user/:userId", ensureAuthenticated, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        friends: {
+          select: { id: true },
+        },
+        friendOf: {
+          select: { id: true },
+        },
+      },
+    });
+
+    // Find mutual friends (users who are in both lists)
+    const outgoingFriends =
+      currentUser?.friends?.map((friend) => friend.id) || [];
+    const incomingFriends =
+      currentUser?.friendOf?.map((friend) => friend.id) || [];
+    const mutualFriendIds = outgoingFriends.filter((id) =>
+      incomingFriends.includes(id)
+    );
+
+    // Check if the target user is a friend
+    const isFriend = mutualFriendIds.includes(parseInt(userId));
+
+    // Get posts from the target user
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: parseInt(userId),
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            profilePicture: true,
+            gravatarHash: true,
+          },
+        },
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+        comments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                profilePicture: true,
+                gravatarHash: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Add friend status to each post
+    const postsWithFriendStatus = posts.map((post) => ({
+      ...post,
+      author: {
+        ...post.author,
+        isFriend,
+      },
+    }));
+
+    res.json(postsWithFriendStatus);
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    res.status(500).json({ error: "Failed to fetch posts" });
   }
 });
 
@@ -141,6 +296,9 @@ router.get("/my-posts", ensureAuthenticated, async (req, res) => {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
               },
             },
           },
@@ -204,6 +362,9 @@ router.get("/all", ensureAuthenticated, async (req, res) => {
                 firstName: true,
                 lastName: true,
                 username: true,
+                profilePicture: true,
+                useGravatar: true,
+                email: true,
               },
             },
           },
@@ -314,87 +475,114 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
 });
 
 // Create a new post
-router.post("/", ensureAuthenticated, async (req, res) => {
-  try {
-    const { content } = req.body;
+router.post(
+  "/",
+  ensureAuthenticated,
+  uploadPostPhotoMiddleware.single("photo"),
+  async (req, res) => {
+    try {
+      const { content } = req.body;
+      let photoUrl = null;
+      let cloudinaryPublicId = null;
 
-    if (!content || content.trim().length === 0) {
-      return res.status(400).json({
+      // Handle photo upload if present
+      if (req.file) {
+        const uploadResult = await uploadPostPhoto(req.file);
+        if (uploadResult.success) {
+          photoUrl = uploadResult.url;
+          cloudinaryPublicId = uploadResult.public_id;
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "Failed to upload photo",
+          });
+        }
+      }
+
+      // Allow posts with just photos (no text required)
+      if ((!content || content.trim().length === 0) && !req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Post must contain content or a photo",
+        });
+      }
+
+      // Regular user - create post in database
+      const newPost = await prisma.post.create({
+        data: {
+          content: content ? content.trim() : "",
+          userId: req.user.id,
+          photoUrl,
+          cloudinaryPublicId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              username: true,
+              profilePicture: true,
+              useGravatar: true,
+              email: true,
+            },
+          },
+          likes: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true,
+                  profilePicture: true,
+                  useGravatar: true,
+                  email: true,
+                },
+              },
+            },
+          },
+          comments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true,
+                  profilePicture: true,
+                  useGravatar: true,
+                  email: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        success: true,
+        message: "Post created successfully",
+        post: newPost,
+      });
+    } catch (error) {
+      console.error("Error creating post:", error);
+      res.status(500).json({
         success: false,
-        message: "Post content cannot be empty",
+        message: "Error creating post",
       });
     }
-
-    // Regular user - create post in database
-    const newPost = await prisma.post.create({
-      data: {
-        content: content.trim(),
-        userId: req.user.id,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            profilePicture: true,
-            useGravatar: true,
-            email: true,
-          },
-        },
-        likes: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-              },
-            },
-          },
-        },
-        comments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-                profilePicture: true,
-                useGravatar: true,
-                email: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-        _count: {
-          select: {
-            likes: true,
-            comments: true,
-          },
-        },
-      },
-    });
-
-    res.json({
-      success: true,
-      message: "Post created successfully",
-      post: newPost,
-    });
-  } catch (error) {
-    console.error("Error creating post:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error creating post",
-    });
   }
-});
+);
 
 // Update a post (only by the post owner)
 router.put("/:id", ensureAuthenticated, async (req, res) => {
@@ -578,6 +766,9 @@ router.get("/:id/likes", ensureAuthenticated, async (req, res) => {
             firstName: true,
             lastName: true,
             username: true,
+            profilePicture: true,
+            useGravatar: true,
+            email: true,
           },
         },
       },
@@ -586,7 +777,7 @@ router.get("/:id/likes", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    res.json({ likes });
+    res.json({ success: true, likes });
   } catch (error) {
     console.error("Error fetching likes:", error);
     res.status(500).json({ error: "Failed to fetch likes" });

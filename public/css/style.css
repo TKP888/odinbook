@@ -1,0 +1,110 @@
+/* User Avatar Styles */
+.user-avatar-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Friend Action Button Styles */
+.friend-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.friend-actions .btn {
+  flex-shrink: 0;
+}
+
+/* Search Result Styles */
+.search-result-item {
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: #f8f9fa;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+/* Friend Request Dropdown Styles */
+.friend-requests .dropdown-menu {
+  min-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.friend-requests .dropdown-menu .dropdown-item {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0.75rem;
+}
+
+.friend-requests .dropdown-menu .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.friend-requests .btn-group .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.friend-requests .user-avatar-small {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Header right positioning */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Friend request count badge positioning */
+.friend-requests .btn {
+  position: relative;
+}
+
+.friend-requests .badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  border-radius: 9px;
+}

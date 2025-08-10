@@ -48,6 +48,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("editProfileModal")
   );
 
+  // Initialize photo handling
+  initializePhotoHandling();
+
   // Character count for create post modal
   const postContent = document.getElementById("postContent");
   if (postContent) {
@@ -725,10 +728,8 @@ function showLikes(postId) {
             .map(
               (like) => `
                 <div class="d-flex align-items-center p-2">
-                  <div class="user-avatar-small me-2">
-                    ${(like.user.firstName || "").charAt(0)}${(
-                like.user.lastName || ""
-              ).charAt(0)}
+                  <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                    ${getUserAvatar(like.user)}
                   </div>
                   <div>
                     <div class="fw-bold">${like.user.firstName || ""} ${
@@ -796,7 +797,36 @@ function removeFriend(friendId, friendName) {
           document.body.appendChild(alertDiv);
           setTimeout(() => alertDiv.remove(), 3000);
 
-          location.reload(); // Refresh the page to update the friends list
+          // Remove the friend card from the UI
+          const friendCard = document.querySelector(
+            `[data-user-id="${friendId}"]`
+          );
+          if (friendCard) {
+            friendCard.remove();
+          }
+
+          // Refresh the posts feed to remove posts from the removed friend
+          if (typeof loadPosts === "function") {
+            loadPosts(true); // Reset and reload posts
+          } else if (typeof window.loadPosts === "function") {
+            window.loadPosts(true); // Try global function
+          }
+
+          // Update friend count if it exists
+          const friendCountElement = document.querySelector(".friend-count");
+          if (friendCountElement) {
+            const currentCount = parseInt(friendCountElement.textContent) || 0;
+            friendCountElement.textContent = Math.max(0, currentCount - 1);
+          }
+
+          // If we're on the dashboard, refresh posts there too
+          if (window.location.pathname === "/dashboard") {
+            setTimeout(() => {
+              if (typeof loadPosts === "function") {
+                loadPosts(true);
+              }
+            }, 500);
+          }
         } else {
           const alertDiv = document.createElement("div");
           alertDiv.className =
@@ -941,13 +971,15 @@ function saveBio() {
 
 function createInlinePost() {
   const content = document.getElementById("inlinePostContent").value.trim();
+  const photoFile = document.getElementById("inlinePostPhoto").files[0];
 
-  if (!content) {
+  // Allow posts with just photos (no text required)
+  if (!content && !photoFile) {
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-warning alert-dismissible fade show position-fixed";
     alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content for your post.</div>
+          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content or add a photo for your post.</div>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
     document.body.appendChild(alertDiv);
@@ -955,7 +987,7 @@ function createInlinePost() {
     return;
   }
 
-  if (content.length > 250) {
+  if (content && content.length > 250) {
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-warning alert-dismissible fade show position-fixed";
@@ -973,16 +1005,130 @@ function createInlinePost() {
   createPostBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
   createPostBtn.disabled = true;
 
+  // Create FormData for photo upload
+  const formData = new FormData();
+  if (content) formData.append("content", content);
+  if (photoFile) formData.append("photo", photoFile);
+
   fetch("/posts", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content }),
+    body: formData, // Don't set Content-Type header for FormData
   })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
         document.getElementById("inlinePostContent").value = "";
         document.getElementById("inlineCharCount").textContent = "0";
+
+        // Clear photo fields
+        removeInlinePhoto();
+
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-check"></i> Post created successfully!</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Reload after a short delay to show the new post
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
+      } else {
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> ${
+                data.error || "Failed to create post"
+              }</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> Failed to create post. Please try again.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    })
+    .finally(() => {
+      createPostBtn.innerHTML = originalText;
+      createPostBtn.disabled = false;
+    });
+}
+
+function createModalPost() {
+  const content = document.getElementById("modalPostContent").value.trim();
+  const photoFile = document.getElementById("modalPostPhoto").files[0];
+
+  // Allow posts with just photos (no text required)
+  if (!content && !photoFile) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-warning alert-dismissible fade show position-fixed";
+    alertDiv.innerHTML = `
+          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content or add a photo for your post.</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+    return;
+  }
+
+  if (content && content.length > 250) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-warning alert-dismissible fade show position-fixed";
+    alertDiv.innerHTML = `
+          <div><i class="fas fa-exclamation-triangle"></i> Post content cannot exceed 250 characters.</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+    return;
+  }
+
+  const createPostBtn = document.getElementById("modalCreatePostBtn");
+  const originalText = createPostBtn.innerHTML;
+  createPostBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
+  createPostBtn.disabled = true;
+
+  // Create FormData for photo upload
+  const formData = new FormData();
+  if (content) formData.append("content", content);
+  if (photoFile) formData.append("photo", photoFile);
+
+  fetch("/posts", {
+    method: "POST",
+    body: formData, // Don't set Content-Type header for FormData
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        document.getElementById("modalPostContent").value = "";
+        document.getElementById("modalCharCount").textContent = "0";
+
+        // Clear photo fields
+        removeModalPhoto();
+
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("createPostModal")
+        );
+        modal.hide();
 
         // Show success notification
         const alertDiv = document.createElement("div");
@@ -1424,4 +1570,88 @@ function handleProfilePictureUpload(event) {
       document.body.appendChild(alertDiv);
       setTimeout(() => alertDiv.remove(), 5000);
     });
+}
+
+// Photo handling functions for posts
+function initializePhotoHandling() {
+  // Handle photo selection for inline post form
+  const inlinePostPhoto = document.getElementById("inlinePostPhoto");
+  if (inlinePostPhoto) {
+    inlinePostPhoto.addEventListener("change", function (event) {
+      handleInlinePhotoSelection(event);
+    });
+  }
+
+  // Handle photo selection for create post modal
+  const postPhoto = document.getElementById("postPhoto");
+  if (postPhoto) {
+    postPhoto.addEventListener("change", function (event) {
+      handlePhotoSelection(event);
+    });
+  }
+}
+
+function handleInlinePhotoSelection(event) {
+  const file = event.target.files[0];
+  if (file) {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      event.target.value = "";
+      return;
+    }
+
+    // Validate file size (max 10MB for post photos)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image size must be less than 10MB.");
+      event.target.value = "";
+      return;
+    }
+
+    // Show filename and remove button
+    document.getElementById("inlinePhotoFileName").textContent = file.name;
+    document.getElementById("inlineRemovePhotoBtn").style.display =
+      "inline-block";
+  }
+}
+
+function handlePhotoSelection(event) {
+  const file = event.target.files[0];
+  if (file) {
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      event.target.value = "";
+      return;
+    }
+
+    // Validate file size (max 10MB for post photos)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Image size must be less than 10MB.");
+      event.target.value = "";
+      return;
+    }
+
+    // Show filename and remove button
+    document.getElementById("photoFileName").textContent = file.name;
+    document.getElementById("removePhotoBtn").style.display = "inline-block";
+  }
+}
+
+function removeInlinePhoto() {
+  document.getElementById("inlinePostPhoto").value = "";
+  document.getElementById("inlinePhotoFileName").textContent = "";
+  document.getElementById("inlineRemovePhotoBtn").style.display = "none";
+}
+
+function removeModalPhoto() {
+  document.getElementById("modalPostPhoto").value = "";
+  document.getElementById("modalPhotoFileName").textContent = "";
+  document.getElementById("modalRemovePhotoBtn").style.display = "none";
+}
+
+function removePhoto() {
+  document.getElementById("postPhoto").value = "";
+  document.getElementById("photoFileName").textContent = "";
+  document.getElementById("removePhotoBtn").style.display = "none";
 }

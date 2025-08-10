@@ -7,6 +7,9 @@ const crypto = require("crypto");
 require("dotenv").config();
 const expressLayouts = require("express-ejs-layouts");
 
+// Initialize auto-accept system for seed users
+const { getPendingJobs } = require("./autoAcceptJobs");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -99,4 +102,6 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log("🤖 Auto-accept system for seed users is active");
+  console.log(`📊 Current pending auto-accept jobs: ${getPendingJobs().length}`);
 });
