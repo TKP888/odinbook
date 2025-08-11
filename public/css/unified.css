@@ -1210,11 +1210,10 @@ body.error-page {
    DASHBOARD LAYOUT
    ======================================== */
 .main-content {
-  padding: var(--spacing-xl);
+  padding: 30px 20px;
   max-width: 1200px;
   margin: 0 auto;
-  background: var(--white);
-  border: 1px solid var(--medium-gray);
+  background-color: rgb(232, 232, 232);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-md);
   margin-top: var(--spacing-lg);
@@ -2075,6 +2074,36 @@ button.like-btn:focus {
   width: 50px;
   height: 50px;
   flex-shrink: 0;
+}
+
+/* Clickable friend card styling */
+.clickable-friend-card {
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.clickable-friend-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.clickable-friend-card .card-body {
+  position: relative;
+}
+
+/* Make friend cards clickable, other cards just have hover effects */
+.user-card {
+  transition: var(--transition-normal);
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Only show pointer cursor for friend cards */
+.clickable-friend-card {
+  cursor: pointer;
 }
 
 /* ========================================

@@ -102,6 +102,18 @@ function sendFriendRequestFromUsersPage(userId, userName = "") {
         if (typeof window.refreshCounts === "function") {
           window.refreshCounts();
         }
+
+        // Refresh the page after successful friend request to update all friend statuses
+        setTimeout(() => {
+          console.log("Refreshing page after sending friend request...");
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error("Error refreshing page:", error);
+            // Fallback: try to refresh using location.href
+            window.location.href = window.location.href;
+          }
+        }, 1500);
       } else {
         console.warn(
           `[FRIENDS] Failed to send request for user ${userId}:`,
@@ -211,6 +223,8 @@ function acceptRequest(requestId) {
 }
 
 function declineRequest(requestId) {
+  console.log("declineRequest function called with requestId:", requestId);
+
   // Show loading state
   const acceptBtn = document.querySelector(
     `[data-request-id="${requestId}"].accept-request-btn`
@@ -235,41 +249,29 @@ function declineRequest(requestId) {
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log("API response received:", data);
       if (data.success) {
-        showNotification("Friend request declined", "info");
-
-        // Update friend request counters
-        updateFriendRequestCounters(-1);
-
-        // Remove the request from the UI
-        const requestElement = document
-          .querySelector(`[data-request-id="${requestId}"]`)
-          ?.closest(".card, .dropdown-item");
-        if (requestElement) {
-          requestElement.remove();
-        }
-
-        // Check if there are any requests left
-        const remainingRequests = document.querySelectorAll(
-          "#requestsList .card, #headerRequestsList .dropdown-item"
+        console.log(
+          "Friend request declined successfully, refreshing page in 1.5 seconds..."
         );
-        if (remainingRequests.length === 0) {
-          const requestsList = document.getElementById("requestsList");
-          const noRequests = document.getElementById("noRequests");
-          if (requestsList) requestsList.classList.add("d-none");
-          if (noRequests) noRequests.classList.remove("d-none");
+
+        try {
+          showNotification("Friend request declined", "info");
+        } catch (error) {
+          console.error("Error showing notification:", error);
         }
 
-        // Update request count
-        updateRequestCount();
-
-        // Refresh counts dynamically if the function is available
-        if (typeof window.refreshCounts === "function") {
-          window.refreshCounts();
-        }
-
-        // Refresh the page after a short delay to update all friend statuses
-        setTimeout(() => window.location.reload(), 1500);
+        // Refresh the page after successful decline
+        setTimeout(() => {
+          console.log("Refreshing page now...");
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error("Error refreshing page:", error);
+            // Fallback: try to refresh using location.href
+            window.location.href = window.location.href;
+          }
+        }, 1500);
       } else {
         showNotification(data.error || "Could not decline request", "error");
         // Reset buttons
@@ -329,6 +331,23 @@ function cancelRequest(requestId) {
 
         // Update All Users tab if we're on the requests tab
         updateAllUsersTabAfterCancel(requestId);
+
+        // Refresh counts dynamically if the function is available
+        if (typeof window.refreshCounts === "function") {
+          window.refreshCounts();
+        }
+
+        // Refresh the page after successful cancellation to update all friend statuses
+        setTimeout(() => {
+          console.log("Refreshing page after cancel request...");
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error("Error refreshing page:", error);
+            // Fallback: try to refresh using location.href
+            window.location.href = window.location.href;
+          }
+        }, 1500);
       } else {
         // Reset cancel button to original state
         cancelBtn.disabled = false;
@@ -336,12 +355,12 @@ function cancelRequest(requestId) {
         showNotification(data.error || "Could not cancel request", "error");
       }
     })
-    .catch(() => {
-      // Reset cancel button to original state
-      cancelBtn.disabled = false;
-      cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-      showNotification("Could not cancel request. Please try again.", "error");
-    });
+          .catch(() => {
+        // Reset cancel button to original state
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        showNotification("Could not cancel request. Please try again.", "error");
+      });
 }
 
 function cancelRequestFromAllUsersPage(userId, userName, requestId) {
@@ -403,6 +422,18 @@ function cancelRequestFromAllUsersPage(userId, userName, requestId) {
         if (typeof window.refreshCounts === "function") {
           window.refreshCounts();
         }
+
+        // Refresh the page after successful cancellation to update all friend statuses
+        setTimeout(() => {
+          console.log("Refreshing page after cancel request...");
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error("Error refreshing page:", error);
+            // Fallback: try to refresh using location.href
+            window.location.href = window.location.href;
+          }
+        }, 1500);
       } else {
         // Reset cancel button to original state
         cancelBtn.disabled = false;
@@ -449,41 +480,10 @@ function removeFriend(friendId, friendName = "") {
         if (data.success) {
           showNotification("Friend removed", "info");
 
-          // Remove the friend card from the UI
-          const friendCard = document.querySelector(
-            `[data-user-id="${friendId}"]`
-          );
-          if (friendCard) {
-            friendCard.remove();
-          }
-
-          // Refresh the posts feed to remove posts from the removed friend
-          if (typeof loadPosts === "function") {
-            loadPosts(true); // Reset and reload posts
-          } else if (typeof window.loadPosts === "function") {
-            window.loadPosts(true); // Try global function
-          }
-
-          // Update friend count if it exists
-          const friendCountElement = document.querySelector(".friend-count");
-          if (friendCountElement) {
-            const currentCount = parseInt(friendCountElement.textContent) || 0;
-            friendCountElement.textContent = Math.max(0, currentCount - 1);
-          }
-
-          // If we're on the dashboard, refresh posts there too
-          if (window.location.pathname === "/dashboard") {
-            setTimeout(() => {
-              if (typeof loadPosts === "function") {
-                loadPosts(true);
-              }
-            }, 500);
-          }
-
-          // Refresh counts dynamically if the function is available
-          if (typeof window.refreshCounts === "function") {
-            window.refreshCounts();
-          }
+          // Refresh the page after successful unfriending
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000); // Wait 1 second to show the notification, then refresh
         } else {
           showNotification(data.error || "Could not remove friend", "error");
           // Reset button
@@ -677,11 +677,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Event delegation for dynamically created buttons
   document.addEventListener("click", function (e) {
+    console.log("Click event detected on:", e.target);
+
     // Add friend button event listeners
     if (e.target.closest(".add-friend-btn")) {
+      console.log("Add friend button clicked!");
       const button = e.target.closest(".add-friend-btn");
       const userId = button.getAttribute("data-user-id");
       const userName = button.getAttribute("data-user-name");
+      console.log("Button data:", { userId, userName });
       sendFriendRequestFromUsersPage(userId, userName);
     }
 
@@ -704,6 +708,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const userName = button.getAttribute("data-user-name");
       console.log("Button data:", { userId, userName });
       removeFriend(userId, userName);
+    }
+
+    // Accept request button event listeners
+    if (e.target.closest(".accept-request-btn")) {
+      console.log("Accept request button clicked");
+      const button = e.target.closest(".accept-request-btn");
+      const requestId = button.getAttribute("data-request-id");
+      console.log("Accept request data:", { requestId });
+      acceptRequestSimple(requestId);
+    }
+
+    // Decline request button event listeners
+    if (e.target.closest(".decline-request-btn")) {
+      console.log("Decline request button clicked");
+      const button = e.target.closest(".decline-request-btn");
+      const requestId = button.getAttribute("data-request-id");
+      console.log("Decline request data:", { requestId });
+      console.log("Calling declineRequest function...");
+      declineRequest(requestId);
     }
   });
 
@@ -848,7 +871,7 @@ function displayRequests(requests) {
     .join("");
 }
 
-function acceptRequest(requestId) {
+function acceptRequestSimple(requestId) {
   fetch("/friends/accept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -857,31 +880,31 @@ function acceptRequest(requestId) {
     .then((res) => res.json())
     .then((data) => {
       if (data.success) {
-        // Remove the request from the UI
-        const requestElement = document
-          .querySelector(`[onclick="acceptRequest('${requestId}')"]`)
-          .closest(".card");
-        requestElement.remove();
-
-        // Check if there are any requests left
-        const remainingRequests = document.querySelectorAll(
-          "#requestsList .card"
+        console.log(
+          "Friend request accepted successfully, refreshing page in 1.5 seconds..."
         );
-        if (remainingRequests.length === 0) {
-          document.getElementById("requestsList").classList.add("d-none");
-          document.getElementById("noRequests").classList.remove("d-none");
-        }
 
-        // Update request count
-        updateRequestCount();
+        // Show success notification
+        showNotification("Friend request accepted!", "success");
 
-        alert("Friend request accepted!");
+        // Refresh the page after successful acceptance
+        setTimeout(() => {
+          console.log("Refreshing page now...");
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error("Error refreshing page:", error);
+            // Fallback: try to refresh using location.href
+            window.location.href = window.location.href;
+          }
+        }, 1500); // Wait 1.5 seconds to show the notification, then refresh
       } else {
-        alert(data.error || "Could not accept request");
+        showNotification(data.error || "Could not accept request", "error");
       }
     })
-    .catch(() => {
-      alert("Could not accept request. Please try again.");
+    .catch((error) => {
+      console.error("Error accepting friend request:", error);
+      showNotification("Could not accept request. Please try again.", "error");
     });
 }
 

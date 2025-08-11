@@ -795,38 +795,11 @@ function removeFriend(friendId, friendName) {
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
               `;
           document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 3000);
 
-          // Remove the friend card from the UI
-          const friendCard = document.querySelector(
-            `[data-user-id="${friendId}"]`
-          );
-          if (friendCard) {
-            friendCard.remove();
-          }
-
-          // Refresh the posts feed to remove posts from the removed friend
-          if (typeof loadPosts === "function") {
-            loadPosts(true); // Reset and reload posts
-          } else if (typeof window.loadPosts === "function") {
-            window.loadPosts(true); // Try global function
-          }
-
-          // Update friend count if it exists
-          const friendCountElement = document.querySelector(".friend-count");
-          if (friendCountElement) {
-            const currentCount = parseInt(friendCountElement.textContent) || 0;
-            friendCountElement.textContent = Math.max(0, currentCount - 1);
-          }
-
-          // If we're on the dashboard, refresh posts there too
-          if (window.location.pathname === "/dashboard") {
-            setTimeout(() => {
-              if (typeof loadPosts === "function") {
-                loadPosts(true);
-              }
-            }, 500);
-          }
+          // Refresh the page after successful unfriending
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000); // Wait 2 seconds to show the notification, then refresh
         } else {
           const alertDiv = document.createElement("div");
           alertDiv.className =

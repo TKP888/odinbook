@@ -50,7 +50,7 @@
             type="button"
             role="tab"
           >
-            Friend Requests
+            Sent Requests
             <span class="badge bg-warning ms-1" id="requestCount">0</span>
           </button>
         </li>
@@ -72,16 +72,17 @@
           </div>
         </div>
 
-        <!-- Requests Tab -->
+        <!-- Sent Requests Tab -->
         <div class="tab-pane fade" id="requests" role="tabpanel">
           <div id="requestsList" class="row">
-            <!-- Requests will be loaded here -->
+            <!-- Sent requests will be loaded here -->
           </div>
           <div id="noRequests" class="text-center text-muted d-none">
             <div class="py-5">
-              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-              <h5 class="text-muted">No pending friend requests</h5>
-              <p class="text-muted">You're all caught up!</p>
+              <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">
+                You haven't sent any friend requests yet
+              </h5>
             </div>
           </div>
         </div>
@@ -122,9 +123,7 @@
 
         // Categorize users
         friends = allUsers.filter((user) => user.status === "friend");
-        requests = allUsers.filter(
-          (user) => user.status === "request_received"
-        );
+        requests = allUsers.filter((user) => user.status === "request_sent");
 
         // Render all tabs
         renderUsers("allUsersList", allUsers);
@@ -164,7 +163,11 @@
         .map(
           (user) => `
       <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
-        <div class="card user-card">
+        <div class="card user-card ${
+          user.status === "friend" ? "clickable-friend-card" : ""
+        }" data-username="${user.username}" data-is-friend="${
+            user.status === "friend"
+          }">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="user-avatar-large me-3">
@@ -191,6 +194,38 @@
 
       // Add event listeners for buttons
       // addButtonEventListeners(); // This line is removed as per the edit hint
+
+      // Add click event listeners for friend cards (in all tabs)
+      const friendCards = container.querySelectorAll(".clickable-friend-card");
+      friendCards.forEach((card) => {
+        card.addEventListener("click", function (e) {
+          // Don't navigate if clicking on a button
+          if (e.target.closest("button")) {
+            return;
+          }
+
+          const username = this.getAttribute("data-username");
+          if (username) {
+            navigateToProfile(username);
+          }
+        });
+      });
+
+      // Debug: Log button elements to see if they're being rendered correctly
+      if (containerId === "allUsersList") {
+        const addFriendButtons = container.querySelectorAll(".add-friend-btn");
+        console.log(
+          `Found ${addFriendButtons.length} add-friend buttons in ${containerId}:`,
+          addFriendButtons
+        );
+        addFriendButtons.forEach((btn) => {
+          console.log("Button data:", {
+            id: btn.id,
+            userId: btn.getAttribute("data-user-id"),
+            userName: btn.getAttribute("data-user-name"),
+          });
+        });
+      }
     }
 
     function getUserAvatar(user) {
@@ -238,20 +273,15 @@
                     : user.username
                 }</h6>
                 <p class="text-muted mb-0 small username">@${user.username}</p>
-                <small class="text-muted">Wants to be your friend</small>
               </div>
             </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${
-                user.requestId
-              }">
-                <i class="fas fa-check"></i> Accept
-              </button>
-              <button class="btn btn-danger btn-sm decline-request-btn" data-request-id="${
-                user.requestId
-              }">
-                <i class="fas fa-times"></i> Decline
-              </button>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">Request sent ${formatRequestDate(
+                user.requestSentAt || user.createdAt
+              )}</small>
+              <div id="friend-actions-${user.id}">
+                ${getActionButton(user)}
+              </div>
             </div>
           </div>
         </div>
@@ -273,16 +303,11 @@
             <i class="fas fa-user-minus"></i> Remove Friend
           </button>`;
         case "request_sent":
-          return `<div class="d-flex gap-2">
-            <button class="btn btn-success btn-sm" disabled>
-              <i class="fas fa-check"></i> Request Sent
-            </button>
-            <button class="btn btn-outline-secondary btn-sm cancel-request-btn" id="cancel-request-btn-${
-              user.id
-            }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}" data-request-id="${user.requestId}">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-          </div>`;
+          return `<button class="btn btn-outline-secondary btn-sm cancel-request-btn" id="cancel-request-btn-${
+            user.id
+          }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}" data-request-id="${user.requestId}">
+            <i class="fas fa-times"></i> Cancel Request
+          </button>`;
         case "request_received":
           return `<div class="d-flex gap-2">
             <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${user.requestId}">
@@ -339,7 +364,7 @@
     function refreshCounts() {
       // Re-categorize users based on current status
       friends = allUsers.filter((user) => user.status === "friend");
-      requests = allUsers.filter((user) => user.status === "request_received");
+      requests = allUsers.filter((user) => user.status === "request_sent");
 
       // Update the display
       updateAllCounts();
@@ -347,6 +372,41 @@
 
     // Make refreshCounts available globally so friends.js can call it
     window.refreshCounts = refreshCounts;
+
+    // Function to navigate to user profile
+    function navigateToProfile(username) {
+      // Find the user object to get the ID
+      const user = allUsers.find((u) => u.username === username);
+      if (user) {
+        window.location.href = `/profile/${user.id}`;
+      }
+    }
+
+    // Make navigateToProfile available globally so onclick handlers can call it
+    window.navigateToProfile = navigateToProfile;
+
+    // Function to format request date
+    function formatRequestDate(dateString) {
+      if (!dateString) return "recently";
+
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "recently";
+
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) return "yesterday";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+      if (diffDays < 365) return `${Math.ceil(diffDays / 30)} months ago`;
+
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    }
 
     function showError(message) {
       // Create error alert

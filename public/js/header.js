@@ -430,6 +430,7 @@ function declineRequest(requestId) {
       if (data.success) {
         console.log("[HEADER] Friend request declined successfully");
         updateHeaderRequestCount();
+        
         // Show success message
         const alertDiv = document.createElement("div");
         alertDiv.className =
@@ -441,26 +442,11 @@ function declineRequest(requestId) {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Remove the request from the header dropdown
-        if (requestElement) {
-          requestElement.remove();
-        }
-
-        // Check if there are any requests left
-        const remainingRequests = document.querySelectorAll(
-          "#headerRequestsList .dropdown-item"
-        );
-        if (remainingRequests.length === 0) {
-          const requestsList = document.getElementById("headerRequestsList");
-          if (requestsList) {
-            requestsList.innerHTML = `
-                <div class="dropdown-item text-center text-muted p-3">
-                  <i class="fas fa-inbox fa-2x mb-2"></i>
-                  <p class="mb-0 small">No pending requests</p>
-                </div>
-              `;
-          }
-        }
+        // Refresh the page after successful decline
+        setTimeout(() => {
+          console.log("[HEADER] Refreshing page now...");
+          window.location.reload();
+        }, 1500);
       } else {
         console.error("[HEADER] Failed to decline friend request:", data.error);
         const alertDiv = document.createElement("div");
