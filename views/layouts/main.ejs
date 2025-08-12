@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="user-id" content="<%= user ? user.id : '' %>" />
     <title><%= title %> - OdinBook</title>
     <link
@@ -114,7 +117,16 @@
             </ul>
           </div>
 
-          <div class="user-menu dropdown">
+          <!-- Mobile Menu Toggle -->
+          <button
+            class="mobile-menu-toggle d-md-none"
+            type="button"
+            aria-label="Toggle mobile menu"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="user-menu dropdown d-none d-md-block">
             <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown">
               <% if (user && user.profilePicture &&
               (user.profilePicture.startsWith('http') ||
@@ -155,6 +167,93 @@
         </div>
       </div>
     </header>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay">
+      <div class="mobile-nav-menu">
+        <div class="mobile-nav-header">
+          <button
+            class="mobile-nav-close"
+            onclick="closeMobileNav()"
+            aria-label="Close mobile menu"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="mobile-nav-user">
+            <div class="user-avatar">
+              <% if (user && user.profilePicture &&
+              (user.profilePicture.startsWith('http') ||
+              user.profilePicture.startsWith('/uploads/') ||
+              user.profilePicture.includes('cloudinary.com'))) { %>
+              <img
+                src="<%= user.profilePicture %>"
+                alt="Profile Picture"
+                class="profile-image"
+              />
+              <% } else { %> <%= user && user.firstName ?
+              user.firstName.charAt(0) : '' %><%= user && user.lastName ?
+              user.lastName.charAt(0) : '' %> <% } %>
+            </div>
+            <div class="mobile-nav-user-info">
+              <h6><%= user ? user.firstName + ' ' + user.lastName : '' %></h6>
+              <p>@<%= user ? user.username : '' %></p>
+            </div>
+          </div>
+        </div>
+        <ul class="mobile-nav-list">
+          <li class="mobile-nav-item">
+            <a
+              href="/dashboard"
+              class="mobile-nav-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>"
+              onclick="closeMobileNav()"
+            >
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="/profile"
+              class="mobile-nav-link <%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>"
+              onclick="closeMobileNav()"
+            >
+              <i class="fas fa-user"></i>
+              <span>Profile</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="/friends/users"
+              class="mobile-nav-link <%= typeof activePage !== 'undefined' && activePage === 'users' ? 'active' : '' %>"
+              onclick="closeMobileNav()"
+            >
+              <i class="fas fa-users"></i>
+              <span>Users</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="/friends/users?tab=friends"
+              class="mobile-nav-link"
+              onclick="closeMobileNav()"
+            >
+              <i class="fas fa-user-friends"></i>
+              <span>My Friends</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a
+              href="/auth/logout"
+              class="mobile-nav-link"
+              onclick="closeMobileNav()"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <main class="main-content">

@@ -1,5 +1,40 @@
 // Extracted from views/layouts/main.ejs (header search and friend request logic)
 
+// Mobile Navigation Functions
+function openMobileNav() {
+  const overlay = document.getElementById("mobileNavOverlay");
+  if (overlay) {
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  }
+}
+
+function closeMobileNav() {
+  const overlay = document.getElementById("mobileNavOverlay");
+  if (overlay) {
+    overlay.classList.remove("active");
+    document.body.style.overflow = ""; // Restore scrolling
+  }
+}
+
+// Close mobile nav when clicking outside the menu
+document.addEventListener("DOMContentLoaded", function () {
+  const overlay = document.getElementById("mobileNavOverlay");
+  if (overlay) {
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) {
+        closeMobileNav();
+      }
+    });
+  }
+
+  // Add click event to mobile menu toggle
+  const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
+  if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener("click", openMobileNav);
+  }
+});
+
 // Header Search Script
 let headerSearchTimeout;
 
@@ -430,7 +465,7 @@ function declineRequest(requestId) {
       if (data.success) {
         console.log("[HEADER] Friend request declined successfully");
         updateHeaderRequestCount();
-        
+
         // Show success message
         const alertDiv = document.createElement("div");
         alertDiv.className =

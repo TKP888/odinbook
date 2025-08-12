@@ -8,10 +8,10 @@
           <div class="card">
             <div class="card-body">
               <div
-                class="d-flex align-items-center justify-content-center gap-3"
+                class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-center gap-3"
               >
                 <!-- Welcome Message -->
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center mb-3 mb-md-0">
                   <div class="welcome-avatar me-2">
                     <div class="user-avatar-large">
                       <% if (user.useGravatar && user.email) { %>
@@ -39,10 +39,10 @@
                 </div>
 
                 <!-- Create Post Form -->
-                <div class="flex-grow-1">
+                <div class="flex-grow-1 w-100">
                   <form id="inlineCreatePostForm" enctype="multipart/form-data">
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="flex-grow-1">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                      <div class="flex-grow-1 w-100">
                         <textarea
                           id="inlinePostContent"
                           class="form-control"
@@ -52,7 +52,7 @@
                         ></textarea>
 
                         <!-- Photo upload section -->
-                        <div class="mt-2">
+                        <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
                           <input
                             type="file"
                             id="postPhoto"
@@ -63,19 +63,19 @@
                           />
                           <button
                             type="button"
-                            class="btn btn-outline-secondary btn-sm me-2"
+                            class="btn btn-outline-secondary btn-sm"
                             onclick="document.getElementById('postPhoto').click()"
                           >
-                            <i class="fas fa-camera"></i> Add Photo
+                            <i class="fas fa-camera"></i> <span class="d-none d-sm-inline">Add Photo</span>
                           </button>
                           <span
                             id="photoFileName"
-                            class="text-muted small"
+                            class="text-muted small flex-grow-1"
                           ></span>
                           <button
                             type="button"
                             id="removePhotoBtn"
-                            class="btn btn-outline-danger btn-sm ms-2"
+                            class="btn btn-outline-danger btn-sm"
                             style="display: none"
                             onclick="removePhoto()"
                           >
@@ -83,17 +83,17 @@
                           </button>
                         </div>
 
-                        <div class="form-text text-end">
+                        <div class="form-text text-end mt-2">
                           <span id="inlineCharCount">0</span>/250
                         </div>
                       </div>
                       <button
                         type="button"
-                        class="btn btn-primary"
+                        class="btn btn-primary w-100 w-md-auto"
                         onclick="createInlinePost()"
                         id="inlineCreatePostBtn"
                       >
-                        <i class="fas fa-paper-plane"></i> Post
+                        <i class="fas fa-paper-plane"></i> <span class="d-none d-sm-inline">Post</span>
                       </button>
                     </div>
                   </form>
