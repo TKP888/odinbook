@@ -14,6 +14,182 @@ function closeMobileNav() {
   if (overlay) {
     overlay.classList.remove("active");
     document.body.style.overflow = ""; // Restore scrolling
+    // Clear mobile search results when closing
+    hideMobileSearchResults();
+  }
+}
+
+// Mobile Search Functions - Using exact same logic as header search
+let mobileSearchTimeout;
+
+function mobileSearchUsers() {
+  const searchTerm = document.getElementById("mobileSearchInput").value.trim();
+
+  console.log("Mobile searching for:", searchTerm);
+
+  if (searchTerm.length === 0) {
+    hideMobileSearchResults();
+    return;
+  }
+
+  showMobileSearchLoading();
+
+  const searchUrl = `/friends/search?q=${encodeURIComponent(searchTerm)}`;
+  console.log("Mobile search URL:", searchUrl);
+
+  fetch(searchUrl)
+    .then((response) => {
+      console.log("Mobile search response status:", response.status);
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Mobile search results:", data);
+      hideMobileSearchLoading();
+      displayMobileSearchResults(data.users);
+    })
+    .catch((error) => {
+      console.error("Mobile search error:", error);
+      hideMobileSearchLoading();
+      hideMobileSearchResults();
+    });
+}
+
+function displayMobileSearchResults(users) {
+  console.log("Displaying mobile search results for users:", users);
+
+  const resultsDiv = document.getElementById("mobileSearchResults");
+  const usersListDiv = document.getElementById("mobileUsersList");
+  const noResultsDiv = document.getElementById("mobileNoResults");
+
+  if (users.length === 0) {
+    console.log("No users found, showing no results message");
+    resultsDiv.classList.remove("d-none");
+    usersListDiv.innerHTML = "";
+    noResultsDiv.classList.remove("d-none");
+    return;
+  }
+
+  console.log(`Found ${users.length} users, displaying results`);
+  noResultsDiv.classList.add("d-none");
+  resultsDiv.classList.remove("d-none");
+
+  usersListDiv.innerHTML = users
+    .map(
+      (user) => `
+        <div class="search-result-item">
+          <div class="d-flex align-items-center p-2">
+            <div class="user-avatar-small me-3">
+              ${getUserAvatar(user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">
+                <a href="/profile/${user.id}" class="text-decoration-none text-dark user-profile-link">
+                  ${user.firstName || ""} ${user.lastName || ""}
+                </a>
+              </div>
+              <div class="text-muted small">@${user.username}</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromMobile('${user.id}', '${user.firstName || ""} ${user.lastName || ""}')">
+              <i class="fas fa-user-plus"></i>
+            </button>
+          </div>
+        </div>
+      `
+    )
+    .join("");
+}
+
+function sendFriendRequestFromMobile(userId, userName = "") {
+  fetch("/friends/request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ receiverId: userId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+          <div><i class="fas fa-user-plus"></i> Friend request sent to ${
+            userName || "user"
+          }!</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Hide search results
+        hideMobileSearchResults();
+        // Clear search input
+        document.getElementById("mobileSearchInput").value = "";
+      } else {
+        if (
+          data.error === "You already have a pending request from this user"
+        ) {
+          // Show a more helpful message
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-info alert-dismissible fade show position-fixed";
+          alertDiv.innerHTML = `
+            <div><i class="fas fa-info-circle"></i> ${data.error}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+          document.body.appendChild(alertDiv);
+          setTimeout(() => alertDiv.remove(), 5000);
+        } else {
+          const alertDiv = document.createElement("div");
+          alertDiv.className =
+            "alert alert-danger alert-dismissible fade show position-fixed";
+          alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> ${
+              data.error || "Could not send request"
+            }</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+          document.body.appendChild(alertDiv);
+          setTimeout(() => alertDiv.remove(), 5000);
+        }
+      }
+    })
+    .catch(() => {
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+        <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    });
+}
+
+function showMobileSearchLoading() {
+  document.getElementById("mobileSearchLoading").classList.remove("d-none");
+  document.getElementById("mobileSearchResults").classList.remove("d-none");
+  document.getElementById("mobileUsersList").innerHTML = "";
+  document.getElementById("mobileNoResults").classList.add("d-none");
+}
+
+function hideMobileSearchLoading() {
+  document.getElementById("mobileSearchLoading").classList.add("d-none");
+}
+
+function hideMobileSearchResults() {
+  document.getElementById("mobileSearchResults").classList.add("d-none");
+}
+
+// Helper function to get user avatar (image or initials) - used by both searches
+function getUserAvatar(user) {
+  if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) {
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+  } else if (user.useGravatar && user.email && user.gravatarUrl) {
+    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+  } else {
+    return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}`;
   }
 }
 
@@ -32,6 +208,50 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
   if (mobileMenuToggle) {
     mobileMenuToggle.addEventListener("click", openMobileNav);
+  }
+
+  // Add mobile search functionality
+  const mobileSearchInput = document.getElementById("mobileSearchInput");
+  console.log("Mobile search input element found:", !!mobileSearchInput);
+  
+  if (mobileSearchInput) {
+    console.log("Setting up mobile search event listeners...");
+    
+    // Real-time search with debouncing - EXACTLY like header search
+    mobileSearchInput.addEventListener("input", function () {
+      clearTimeout(mobileSearchTimeout);
+      const searchTerm = this.value.trim();
+
+      if (searchTerm.length === 0) {
+        hideMobileSearchResults();
+        return;
+      }
+
+      mobileSearchTimeout = setTimeout(() => {
+        mobileSearchUsers();
+      }, 300); // Same 300ms debounce as header search
+    });
+
+    // Search on Enter key - EXACTLY like header search
+    mobileSearchInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        mobileSearchUsers();
+      }
+    });
+
+    // Hide search results when clicking outside - EXACTLY like header search
+    document.addEventListener("click", function (e) {
+      const mobileSearchContainer = document.querySelector(".mobile-search-container");
+      const mobileSearchResults = document.getElementById("mobileSearchResults");
+
+      if (mobileSearchContainer && mobileSearchResults && !mobileSearchContainer.contains(e.target)) {
+        hideMobileSearchResults();
+      }
+    });
+    
+    console.log("Mobile search event listeners set up successfully - using EXACT same logic as header search");
+  } else {
+    console.error("Mobile search input element not found!");
   }
 });
 
@@ -95,9 +315,7 @@ function displayHeaderSearchResults(users) {
         <div class="search-result-item">
           <div class="d-flex align-items-center p-2">
             <div class="user-avatar-small me-3">
-              ${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
-        0
-      )}
+              ${getUserAvatar(user)}
             </div>
             <div class="flex-grow-1">
               <div class="fw-bold">

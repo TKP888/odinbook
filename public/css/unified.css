@@ -1227,6 +1227,92 @@ body.error-page {
   padding: var(--spacing-lg);
 }
 
+/* Reduce spacing between cards to eliminate dead space */
+.card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.card-body {
+  padding: var(--spacing-md);
+}
+
+.card-header {
+  padding: var(--spacing-md);
+}
+
+/* Dashboard specific card spacing */
+.main-content .card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.main-content .mb-4 {
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.main-content .mb-3 {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+/* Welcome section spacing reduction */
+.welcome-section {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+/* Posts feed spacing reduction */
+.posts-feed {
+  margin-top: var(--spacing-sm) !important;
+}
+
+/* Profile page card spacing */
+.profile-header-card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.profile-about-card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.profile-friends-card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+/* Users page card spacing */
+.users-page .card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.users-page .mb-4 {
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.users-page .mb-3 {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+/* General spacing reductions */
+.mb-4 {
+  margin-bottom: var(--spacing-md) !important;
+}
+
+.mb-3 {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+.py-5 {
+  padding-top: var(--spacing-lg) !important;
+  padding-bottom: var(--spacing-lg) !important;
+}
+
+.py-4 {
+  padding-top: var(--spacing-md) !important;
+  padding-bottom: var(--spacing-md) !important;
+}
+
+.py-3 {
+  padding-top: var(--spacing-md) !important;
+  padding-bottom: var(--spacing-md) !important;
+}
+
 .col-lg-3 .card {
   position: sticky;
   top: 80px;
@@ -2995,11 +3081,12 @@ button.like-btn:focus {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--white);
   z-index: var(--z-modal);
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-normal);
+  overflow-y: auto;
 }
 
 .mobile-nav-overlay.active {
@@ -3010,36 +3097,42 @@ button.like-btn:focus {
 .mobile-nav-menu {
   position: fixed;
   top: 0;
-  left: -100%;
-  width: 280px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
   height: 100vh;
   background: var(--white);
   z-index: calc(var(--z-modal) + 1);
-  transition: left var(--transition-normal);
+  transition: all var(--transition-normal);
   overflow-y: auto;
   padding: var(--spacing-xl) 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-nav-overlay.active .mobile-nav-menu {
-  left: 0;
+  transform: none;
 }
 
 .mobile-nav-header {
-  padding: 0 var(--spacing-lg) var(--spacing-lg);
+  padding: 0 var(--spacing-xl) var(--spacing-xl);
   border-bottom: 1px solid var(--light-gray);
   margin-bottom: var(--spacing-lg);
+  flex-shrink: 0;
 }
 
 .mobile-nav-close {
   position: absolute;
-  top: var(--spacing-lg);
-  right: var(--spacing-lg);
+  top: var(--spacing-xl);
+  right: var(--spacing-xl);
   background: none;
   border: none;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
   color: var(--dark-gray);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  z-index: calc(var(--z-modal) + 2);
 }
 
 .mobile-nav-close:hover {
@@ -3049,46 +3142,55 @@ button.like-btn:focus {
 .mobile-nav-user {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  margin-top: var(--spacing-lg);
 }
 
 .mobile-nav-user .user-avatar {
-  width: 50px;
-  height: 50px;
-  font-size: var(--font-size-lg);
+  width: 80px;
+  height: 80px;
+  font-size: var(--font-size-2xl);
 }
 
 .mobile-nav-user-info h6 {
   margin: 0;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-xl);
   color: var(--dark-gray);
 }
 
 .mobile-nav-user-info p {
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--medium-gray);
 }
 
 .mobile-nav-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--spacing-xl);
+  flex-grow: 1;
 }
 
 .mobile-nav-item {
   border-bottom: 1px solid var(--light-gray);
+  margin-bottom: var(--spacing-sm);
+}
+
+.mobile-nav-item:last-child {
+  border-bottom: none;
 }
 
 .mobile-nav-link {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
   padding: var(--spacing-lg);
   color: var(--dark-gray);
   text-decoration: none;
   transition: background-color var(--transition-fast);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-lg);
 }
 
 .mobile-nav-link:hover {
@@ -3103,62 +3205,189 @@ button.like-btn:focus {
 }
 
 .mobile-nav-link i {
-  width: 20px;
+  width: 24px;
   text-align: center;
+  font-size: var(--font-size-lg);
 }
 
-.col-lg-3 .mt-4 .text-center {
-  padding: var(--spacing-lg) 0;
+/* Mobile search bar styling - using exact same styles as desktop */
+.mobile-search-container {
+  padding: 0 var(--spacing-lg);
 }
 
-/* Reduce spacing between cards to eliminate dead space */
-.card {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .search-container {
+  position: relative;
 }
 
-.card-body {
-  padding: var(--spacing-md);
+.mobile-search-container .input-group-rounded {
+  border-radius: var(--border-radius-pill);
+  overflow: hidden;
 }
 
-.card-header {
-  padding: var(--spacing-md);
+.mobile-search-container .search-input {
+  border-radius: var(--border-radius-pill);
+  border: 1px solid var(--medium-gray);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
-/* Dashboard specific card spacing */
-.main-content .card {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .search-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
-.main-content .mb-4 {
-  margin-bottom: var(--spacing-md) !important;
+.mobile-search-container .search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-md);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: calc(var(--z-modal) + 2);
+  margin-top: var(--spacing-xs);
 }
 
-.main-content .mb-3 {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .search-result-item {
+  border-bottom: 1px solid var(--light-gray);
+  transition: background-color var(--transition-fast);
 }
 
-/* Welcome section spacing reduction */
-.welcome-section {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .search-result-item:hover {
+  background-color: var(--light-gray);
 }
 
-/* Posts feed spacing reduction */
-.posts-feed {
-  margin-top: var(--spacing-sm) !important;
+.mobile-search-container .search-result-item:last-child {
+  border-bottom: none;
 }
 
-/* Profile page card spacing */
-.profile-header-card {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .search-result-item .d-flex {
+  padding: var(--spacing-sm);
 }
 
-.profile-about-card {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .user-avatar-small {
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-sm);
 }
 
-.profile-friends-card {
-  margin-bottom: var(--spacing-sm) !important;
+.mobile-search-container .btn-sm {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  height: 28px;
 }
+
+/* Mobile search results specific mobile fixes */
+@media (max-width: 768px) {
+  .mobile-search-container {
+    padding: 0 var(--spacing-md);
+  }
+
+  .mobile-search-container .search-results-dropdown {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    width: calc(100% - var(--spacing-md) * 2);
+  }
+
+  .mobile-search-container .search-result-item .d-flex {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+    align-items: center;
+  }
+
+  .mobile-search-container .user-avatar-small {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-xs);
+    flex-shrink: 0;
+  }
+
+  .mobile-search-container .search-result-item .flex-grow-1 {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mobile-search-container .search-result-item .flex-grow-1 h6 {
+    font-size: var(--font-size-sm);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-search-container .search-result-item .flex-grow-1 p {
+    font-size: var(--font-size-xs);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-search-container .btn-sm {
+    padding: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    height: 24px;
+    min-width: 24px;
+    flex-shrink: 0;
+  }
+
+  /* Force mobile search results to fit viewport */
+  .mobile-search-container .search-result-item {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .mobile-search-container .search-result-item .d-flex {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-search-container {
+    padding: 0 var(--spacing-sm);
+  }
+
+  .mobile-search-container .search-results-dropdown {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: calc(100% - var(--spacing-sm) * 2);
+  }
+
+  .mobile-search-container .search-result-item .d-flex {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+  }
+
+  .mobile-search-container .user-avatar-small {
+    width: 24px;
+    height: 24px;
+    font-size: var(--font-size-xs);
+  }
+
+  .mobile-search-container .btn-sm {
+    padding: 4px;
+    height: 20px;
+    min-width: 20px;
+  }
+
+  /* Extra aggressive mobile fixes for very small screens */
+  .mobile-search-container .search-result-item .flex-grow-1 h6 {
+    font-size: var(--font-size-xs);
+  }
+
+  .mobile-search-container .search-result-item .flex-grow-1 p {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* ========================================
+   DASHBOARD LAYOUT
+   ======================================== */
 
 /* Users page card spacing */
 .users-page .card {
@@ -3173,55 +3402,64 @@ button.like-btn:focus {
   margin-bottom: var(--spacing-sm) !important;
 }
 
-/* General spacing reductions */
-.mb-4 {
-  margin-bottom: var(--spacing-md) !important;
+/* Mobile user card adjustments */
+@media (max-width: 768px) {
+  .users-page .card {
+    margin: 0 var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) !important;
+    width: calc(100% - var(--spacing-sm) * 2) !important;
+    max-width: 100% !important;
+  }
+
+  .users-page .card-body {
+    padding: var(--spacing-sm) !important;
+  }
+
+  .users-page .user-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--spacing-sm) !important;
+  }
+
+  .users-page .user-info {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .users-page .user-avatar {
+    align-self: center !important;
+    margin-bottom: var(--spacing-xs) !important;
+  }
+
+  .users-page .btn {
+    width: 100% !important;
+    margin-top: var(--spacing-xs) !important;
+  }
+
+  /* Ensure tabs don't cause horizontal scroll */
+  .users-page .nav-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .users-page .nav-tabs .nav-link {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: auto !important;
+  }
 }
 
-.mb-3 {
-  margin-bottom: var(--spacing-sm) !important;
-}
+@media (max-width: 480px) {
+  .users-page .card {
+    margin: 0 var(--spacing-xs) var(--spacing-sm) var(--spacing-xs) !important;
+    width: calc(100% - var(--spacing-xs) * 2) !important;
+  }
 
-.py-5 {
-  padding-top: var(--spacing-lg) !important;
-  padding-bottom: var(--spacing-lg) !important;
-}
+  .users-page .card-body {
+    padding: var(--spacing-xs) !important;
+  }
 
-.py-4 {
-  padding-top: var(--spacing-md) !important;
-  padding-bottom: var(--spacing-md) !important;
+  .users-page .user-item {
+    gap: var(--spacing-xs) !important;
+  }
 }
-
-.py-3 {
-  padding-top: var(--spacing-md) !important;
-  padding-bottom: var(--spacing-md) !important;
-}
-
-/* Posts feed spacing reduction */
-.posts-feed {
-  margin-top: var(--spacing-sm) !important;
-}
-
-/* Dashboard specific spacing overrides */
-.main-content .col-12.mb-4 {
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-.main-content .card.mb-4 {
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-.main-content .card.mb-3 {
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-/* Welcome section and create post form spacing */
-.welcome-avatar + div {
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-.flex-grow-1 {
-  margin-top: var(--spacing-sm) !important;
-}
-
-/* Profile page card spacing */

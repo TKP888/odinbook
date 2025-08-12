@@ -199,6 +199,44 @@
               <p>@<%= user ? user.username : '' %></p>
             </div>
           </div>
+
+          <!-- Mobile Search Bar -->
+          <div class="mobile-search-container mt-3">
+            <div class="search-container">
+              <div class="input-group input-group-rounded">
+                <input
+                  type="text"
+                  class="form-control search-input"
+                  id="mobileSearchInput"
+                  placeholder="Search users..."
+                  autocomplete="off"
+                />
+              </div>
+              <!-- Search Results Dropdown -->
+              <div
+                id="mobileSearchResults"
+                class="search-results-dropdown d-none"
+              >
+                <div id="mobileUsersList"></div>
+                <div
+                  id="mobileNoResults"
+                  class="text-center text-muted p-3 d-none"
+                >
+                  <i class="fas fa-search fa-lg mb-2"></i>
+                  <p class="mb-0">No users found</p>
+                </div>
+                <div id="mobileSearchLoading" class="text-center p-3 d-none">
+                  <div
+                    class="spinner-border spinner-border-sm text-primary"
+                    role="status"
+                  >
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <span class="ms-2">Searching...</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <ul class="mobile-nav-list">
           <li class="mobile-nav-item">
