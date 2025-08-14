@@ -59,10 +59,17 @@ router.get("/posts", ensureAuthenticated, async (req, res) => {
       where: {
         OR: [{ userId: req.user.id }, { userId: { in: mutualFriendIds } }],
       },
-      include: {
+      select: {
+        id: true,
+        content: true,
+        photoUrl: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,
+            firstName: true,
+            lastName: true,
             username: true,
             profilePicture: true,
             useGravatar: true,
@@ -99,7 +106,7 @@ router.get("/posts", ensureAuthenticated, async (req, res) => {
             },
           },
           orderBy: {
-            createdAt: "desc",
+            createdAt: "asc",
           },
         },
       },

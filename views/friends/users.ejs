@@ -7,9 +7,10 @@
       <div class="mb-3">
         <input
           type="text"
-          id="searchInput"
+          id="usersSearchInput"
           class="form-control"
           placeholder="Search users..."
+          autocomplete="off"
         />
       </div>
 
@@ -132,13 +133,37 @@
       }
     }
 
-    // Search functionality
-    document
-      .getElementById("searchInput")
-      .addEventListener("input", function (e) {
-        const searchTerm = e.target.value.toLowerCase();
-        filterUsers(searchTerm);
+    // Simple search functionality - filter existing users
+    const searchInput = document.getElementById("usersSearchInput");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", function (e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+
+        if (searchTerm.length === 0) {
+          // Show all users when search is empty
+          renderUsers("allUsersList", allUsers);
+          document.getElementById("allUsersCount").textContent =
+            allUsers.length;
+          return;
+        }
+
+        // Filter users based on search term
+        const filteredUsers = allUsers.filter(
+          (user) =>
+            user.username.toLowerCase().includes(searchTerm) ||
+            (user.firstName &&
+              user.firstName.toLowerCase().includes(searchTerm)) ||
+            (user.lastName && user.lastName.toLowerCase().includes(searchTerm))
+        );
+
+        // Render filtered results
+        renderUsers("allUsersList", filteredUsers);
+        document.getElementById(
+          "allUsersCount"
+        ).textContent = `${filteredUsers.length} results`;
       });
+    }
 
     async function loadUsers() {
       try {
@@ -169,17 +194,6 @@
       }
     }
 
-    function filterUsers(searchTerm) {
-      const filtered = allUsers.filter(
-        (user) =>
-          user.username.toLowerCase().includes(searchTerm) ||
-          (user.firstName &&
-            user.firstName.toLowerCase().includes(searchTerm)) ||
-          (user.lastName && user.lastName.toLowerCase().includes(searchTerm))
-      );
-      renderUsers("allUsersList", filtered);
-    }
-
     function renderUsers(containerId, users) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -194,11 +208,9 @@
         .map(
           (user) => `
       <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
-        <div class="card user-card ${
-          user.status === "friend" ? "clickable-friend-card" : ""
-        }" data-username="${user.username}" data-is-friend="${
-            user.status === "friend"
-          }">
+        <div class="card user-card clickable-user-card" data-username="${
+          user.username
+        }" data-is-friend="${user.status === "friend"}">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="user-avatar-large me-3">
@@ -226,9 +238,9 @@
       // Add event listeners for buttons
       // addButtonEventListeners(); // This line is removed as per the edit hint
 
-      // Add click event listeners for friend cards (in all tabs)
-      const friendCards = container.querySelectorAll(".clickable-friend-card");
-      friendCards.forEach((card) => {
+      // Add click event listeners for all user cards (in all tabs)
+      const userCards = container.querySelectorAll(".clickable-user-card");
+      userCards.forEach((card) => {
         card.addEventListener("click", function (e) {
           // Don't navigate if clicking on a button
           if (e.target.closest("button")) {
@@ -291,7 +303,7 @@
         .map(
           (user) => `
       <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
-        <div class="card user-card">
+        <div class="card user-card clickable-user-card">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
               <div class="user-avatar-large me-3">

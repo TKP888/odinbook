@@ -5,6 +5,7 @@ let createPostModal;
 let editPostModal;
 let likesModal;
 let editProfileModal;
+let viewAllFriendsModal;
 
 // Get current user ID from the page
 const currentUserId = document
@@ -47,9 +48,22 @@ document.addEventListener("DOMContentLoaded", function () {
   editProfileModal = new bootstrap.Modal(
     document.getElementById("editProfileModal")
   );
+  viewAllFriendsModal = new bootstrap.Modal(
+    document.getElementById("viewAllFriendsModal")
+  );
 
   // Initialize photo handling
   initializePhotoHandling();
+
+  // Add event listeners for remove friend buttons in the modal
+  document.addEventListener("click", function (e) {
+    if (e.target.classList.contains("remove-friend-btn")) {
+      e.preventDefault();
+      const friendId = e.target.dataset.friendId;
+      const friendName = e.target.dataset.friendName;
+      removeFriend(friendId, friendName);
+    }
+  });
 
   // Character count for create post modal
   const postContent = document.getElementById("postContent");
@@ -1628,3 +1642,13 @@ function removePhoto() {
   document.getElementById("photoFileName").textContent = "";
   document.getElementById("removePhotoBtn").style.display = "none";
 }
+
+// Function to open the view all friends modal
+function openViewAllFriendsModal() {
+  if (viewAllFriendsModal) {
+    viewAllFriendsModal.show();
+  }
+}
+
+// Make the function globally available
+window.openViewAllFriendsModal = openViewAllFriendsModal;

@@ -220,7 +220,38 @@
               </h5>
             </div>
             <div class="card-body">
-              <% if (friends.length === 0) { %>
+              <% if (typeof profileUser !== 'undefined' && !isFriend) { %>
+              <!-- Not Friends - Show Restricted Message -->
+              <div class="text-center text-muted py-4">
+                <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
+                <h6>Friends are Private</h6>
+                <p class="small">Become friends with <%= profileUser.firstName %> to see their friends!</p>
+                <div class="mt-3">
+                  <small class="text-muted">
+                    <i class="fas fa-users me-1"></i>
+                    <%= profileUser.firstName %> has friends, but you need to connect first to see them.
+                  </small>
+                </div>
+                <% if (!pendingRequest) { %>
+                  <button class="btn btn-primary btn-sm mt-3" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                    <i class="fas fa-user-plus me-1"></i> Send Friend Request
+                  </button>
+                <% } else if (pendingRequest.senderId === user.id) { %>
+                  <button class="btn btn-secondary btn-sm mt-3" disabled>
+                    <i class="fas fa-clock me-1"></i> Request Sent
+                  </button>
+                <% } else { %>
+                  <div class="btn-group btn-group-sm mt-3" role="group">
+                    <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
+                      <i class="fas fa-check me-1"></i> Accept
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
+                      <i class="fas fa-times me-1"></i> Decline
+                    </button>
+                  </div>
+                <% } %>
+              </div>
+              <% } else if (friends.length === 0) { %>
               <div class="text-center text-muted py-4">
                 <i class="fas fa-users fa-3x mb-3 text-muted"></i>
                 <h6>No friends yet</h6>
@@ -274,7 +305,7 @@
                 </div>
                 <% }); %> <% if (friends.length > 5) { %>
                 <div class="text-center mt-3">
-                  <button class="btn btn-outline-primary btn-sm">
+                  <button class="btn btn-outline-primary btn-sm" onclick="openViewAllFriendsModal()">
                     <i class="fas fa-eye me-1"></i> View All <%= friends.length %> Friends
                   </button>
                 </div>
@@ -293,9 +324,14 @@
   <!-- Create Post Form - only show for current user -->
   <div class="col-12 mb-4">
     <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">
+          <i class="fas fa-edit me-2"></i>Create New Post
+        </h6>
+      </div>
       <div class="card-body">
         <div class="d-flex align-items-start">
-          <div class="user-avatar-small me-3">
+          <div class="user-avatar-small me-3 flex-shrink-0">
             <% if (user.useGravatar && user.email) { %>
               <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
             <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) { %>
@@ -305,9 +341,7 @@
             <% } %>
           </div>
           <div class="flex-grow-1">
-            <div class="mb-2">
-              <h6 class="mb-0 text-muted">Welcome back, <%= user.firstName %>!</h6>
-            </div>
+            
             <form id="inlineCreatePostForm" enctype="multipart/form-data">
               <div class="mb-3">
                 <textarea
@@ -317,9 +351,11 @@
                   placeholder="What's on your mind, <%= user.firstName %>?"
                   maxlength="250"
                 ></textarea>
-                
-                <!-- Photo upload section -->
-                <div class="mt-2">
+              </div>
+              
+              <!-- Photo upload section -->
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center">
                   <input
                     type="file"
                     id="inlinePostPhoto"
@@ -333,36 +369,36 @@
                     class="btn btn-outline-secondary btn-sm me-2"
                     onclick="document.getElementById('inlinePostPhoto').click()"
                   >
-                    <i class="fas fa-camera"></i> Add Photo
+                    <i class="fas fa-camera me-1"></i> Add Photo
                   </button>
                   <span
                     id="inlinePhotoFileName"
-                    class="text-muted small"
+                    class="text-muted small me-2"
                   ></span>
                   <button
                     type="button"
                     id="inlineRemovePhotoBtn"
-                    class="btn btn-outline-danger btn-sm ms-2"
+                    class="btn btn-outline-danger btn-sm"
                     style="display: none"
                     onclick="removeInlinePhoto()"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times me-1"></i> Remove
                   </button>
                 </div>
                 
-                <div class="form-text text-end">
-                  <span id="inlineCharCount">0</span>/250
+                <div class="d-flex align-items-center">
+                  <small class="text-muted me-3">
+                    <span id="inlineCharCount">0</span>/250
+                  </small>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="createInlinePost()"
+                    id="inlineCreatePostBtn"
+                  >
+                    <i class="fas fa-paper-plane me-1"></i> Post
+                  </button>
                 </div>
-              </div>
-              <div class="d-flex justify-content-end">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  onclick="createInlinePost()"
-                  id="inlineCreatePostBtn"
-                >
-                  <i class="fas fa-paper-plane me-1"></i> Post
-                </button>
               </div>
             </form>
           </div>
@@ -375,18 +411,49 @@
 <!-- Posts Feed -->
 <div class="col-12">
   <div class="card">
-    <div class="card-header">
-      <h5 class="mb-0">
-        <i class="fas fa-newspaper me-2"></i>
-        <% if (typeof profileUser !== 'undefined') { %>
-          <%= profileUser.firstName %>'s Posts
-        <% } else { %>
-          My Posts
-        <% } %>
-      </h5>
-    </div>
+                <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-newspaper me-2"></i>
+                <% if (typeof profileUser !== 'undefined') { %>
+                  <%= profileUser.firstName %>'s Posts
+                <% } else { %>
+                  My Posts
+                <% } %>
+              </h5>
+            </div>
     <div class="card-body">
-      <% if (posts.length === 0) { %>
+      <% if (typeof profileUser !== 'undefined' && !isFriend) { %>
+      <!-- Not Friends - Show Restricted Message -->
+      <div class="text-center text-muted py-5">
+        <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
+        <h5>Posts are Private</h5>
+        <p class="text-muted">Become friends with <%= profileUser.firstName %> to see their posts!</p>
+        <div class="mt-3">
+          <small class="text-muted">
+            <i class="fas fa-newspaper me-1"></i>
+            <%= profileUser.firstName %> has shared posts, but you need to connect first to see them.
+          </small>
+        </div>
+        <% if (!pendingRequest) { %>
+          <button class="btn btn-primary mt-3" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+            <i class="fas fa-user-plus me-1"></i> Send Friend Request
+          </button>
+        <% } else if (pendingRequest.senderId === user.id) { %>
+          <button class="btn btn-secondary mt-3" disabled>
+            <i class="fas fa-clock me-1"></i> Friend Request Sent
+          </button>
+        <% } else { %>
+          <div class="btn-group mt-3" role="group">
+            <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
+              <i class="fas fa-check me-1"></i> Accept Request
+            </button>
+            <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
+              <i class="fas fa-times me-1"></i> Decline
+            </button>
+          </div>
+        <% } %>
+      </div>
+      <% } else if (posts.length === 0) { %>
       <!-- No Posts -->
       <div class="text-center text-muted py-5">
         <i class="fas fa-newspaper fa-3x mb-3"></i>
@@ -418,12 +485,14 @@
                 <div class="d-flex justify-content-between align-items-start">
                   <div>
                     <h6 class="mb-1">
-                      <a href="/profile/<%= post.user.id %>" class="text-decoration-none fw-bold">
+                      <a href="/profile/<%= post.user.id %>" class="text-decoration-none fw-bold text-primary">
                         <%= post.user.firstName || '' %> <%= post.user.lastName || '' %>
                       </a>
                     </h6>
                     <div class="d-flex align-items-center gap-2">
-                      <small class="text-muted">@<%= post.user.username %></small>
+                      <small class="text-muted">
+                        <a href="/profile/<%= post.user.id %>" class="text-decoration-none text-muted">@<%= post.user.username %></a>
+                      </small>
                       <small class="text-muted">•</small>
                       <small class="text-muted">
                         <%= new Date(post.createdAt).toLocaleDateString() %> at <%= new Date(post.createdAt).toLocaleTimeString() %>
@@ -450,13 +519,13 @@
             </div>
 
             <!-- Post Content -->
-            <div class="post-content mb-3">
-              <p class="mb-0" style="line-height: 1.5;"><%= post.content.replace(/\n/g, "<br>") %></p>
+            <div class="post-content">
+              <p><%= post.content.replace(/\n/g, "<br>") %></p>
               
               <!-- Post Image -->
               <% if (post.photoUrl) { %>
-                <div class="post-image-container mt-3">
-                  <img src="<%= post.photoUrl %>" alt="Post image" class="post-image img-fluid rounded" style="max-width: 100%; max-height: 500px; object-fit: contain;">
+                <div class="post-photo">
+                  <img src="<%= post.photoUrl %>" alt="Post image" class="img-fluid rounded" style="max-width: 100%; max-height: 600px; height: auto; object-fit: contain;">
                 </div>
               <% } %>
             </div>
@@ -882,19 +951,7 @@
             />
           </div>
           
-          <!-- Gravatar Settings -->
-          <div class="mb-3">
-            <label class="form-label">Profile Picture</label>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="useGravatar" <%= user.useGravatar ? 'checked' : '' %>>
-              <label class="form-check-label" for="useGravatar">
-                Use Gravatar (uses your email address to display your Gravatar profile picture)
-              </label>
-            </div>
-            <div class="form-text">
-              When enabled, your profile picture will be automatically pulled from Gravatar based on your email address.
-            </div>
-          </div>
+
         </form>
       </div>
       <div class="modal-footer">
@@ -912,6 +969,97 @@
           id="saveProfileBtn"
         >
           Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View All Friends Modal -->
+<div
+  class="modal fade"
+  id="viewAllFriendsModal"
+  tabindex="-1"
+  aria-labelledby="viewAllFriendsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewAllFriendsModalLabel">
+          <i class="fas fa-users me-2"></i>All Friends (<%= friends.length %>)
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <% if (friends.length === 0) { %>
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+            <h6>No friends yet</h6>
+            <p class="text-muted">Start connecting with people to build your network!</p>
+            <button class="btn btn-primary btn-sm" onclick="window.location.href='/friends/users'">
+              <i class="fas fa-search me-1"></i> Find Friends
+            </button>
+          </div>
+        <% } else { %>
+          <div class="row">
+            <% friends.forEach(friend => { %>
+              <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="user-avatar-small me-3">
+                        <% if (friend.useGravatar && friend.email) { %>
+                          <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
+                        <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
+                          <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
+                        <% } else { %>
+                          <%= (friend.firstName || '').charAt(0) %><%= (friend.lastName || '').charAt(0) %>
+                        <% } %>
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-1">
+                          <a href="/profile/<%= friend.id %>" class="text-decoration-none">
+                            <%= friend.firstName || '' %> <%= friend.lastName || '' %>
+                          </a>
+                        </h6>
+                        <p class="text-muted mb-0 small">@<%= friend.username %></p>
+                      </div>
+                      <button
+                        class="btn btn-outline-danger btn-sm remove-friend-btn"
+                        data-friend-id="<%= friend.id %>"
+                        data-friend-name="<%= friend.firstName || 'No First Name' %> <%= friend.lastName || 'No Last Name' %>"
+                        title="Unfriend"
+                      >
+                        <i class="fas fa-user-minus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="window.location.href='/friends/users'"
+        >
+          <i class="fas fa-search me-1"></i> Find More Friends
         </button>
       </div>
     </div>

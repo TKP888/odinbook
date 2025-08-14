@@ -64,6 +64,16 @@
   --z-modal: 1050;
   --z-tooltip: 1060;
   --z-popover: 1070;
+
+  /* ========================================
+     ENHANCED SEARCH BAR STYLES
+     ======================================== */
+  --search-height: 48px;
+  --search-height-mobile: 56px;
+  --search-font-size: 16px;
+  --search-font-size-mobile: 18px;
+  --search-padding: 12px 16px;
+  --search-padding-mobile: 16px 20px;
 }
 
 /* ========================================
@@ -233,17 +243,51 @@ p {
 }
 
 .search-input {
-  border: 1px solid var(--medium-gray);
-  max-height: 20px;
-  margin: 10px;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  font-size: var(--font-size-sm);
+  border: 2px solid var(--medium-gray) !important;
+  height: var(--search-height) !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: var(--search-padding) !important;
+  font-size: var(--search-font-size) !important;
+  border-radius: var(--border-radius-pill) !important;
   transition: all var(--transition-normal);
+  line-height: 1.5 !important;
 }
 
 .search-input:focus {
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+  outline: none !important;
+}
+
+/* Mobile Search Bar - Even Larger */
+#mobileSearchInput {
+  height: var(--search-height-mobile) !important;
+  font-size: var(--search-font-size-mobile) !important;
+  padding: var(--search-padding-mobile) !important;
+}
+
+#mobileSearchInput::placeholder {
+  font-size: var(--search-font-size-mobile) !important;
+}
+
+/* Header Search Bar */
+#headerSearchInput {
+  height: var(--search-height) !important;
+  font-size: var(--search-font-size) !important;
+  padding: var(--search-padding) !important;
+}
+
+#headerSearchInput::placeholder {
+  font-size: var(--search-font-size) !important;
+}
+
+/* Override Bootstrap form-control defaults */
+.input-group .form-control.search-input {
+  height: var(--search-height) !important;
+  font-size: var(--search-font-size) !important;
+  padding: var(--search-padding) !important;
+  border-radius: var(--border-radius-pill) !important;
 }
 
 .search-btn {
@@ -355,7 +399,8 @@ p {
   width: 80px;
   height: 80px;
   font-size: var(--font-size-2xl);
-  margin: 0 auto;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 /* ========================================
@@ -908,13 +953,18 @@ body.error-page {
 }
 
 .post-content {
-  line-height: 1.4;
+  line-height: 1.2 !important;
   white-space: pre-line;
   word-wrap: break-word;
-  margin-top: 0;
-  padding-top: 0;
-  margin-bottom: 0;
-  padding-bottom: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 1rem;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  /* Force remove any browser default spacing */
+  display: block !important;
+  box-sizing: border-box !important;
 }
 
 /* Reduce gap between text and image in posts */
@@ -923,7 +973,7 @@ body.error-page {
 }
 
 .post-content .post-photo {
-  margin-top: 0.75rem !important; /* Add top margin for spacing */
+  margin-top: 0 !important; /* Remove top margin */
 }
 
 /* Reduce margin-bottom on post photos */
@@ -970,10 +1020,7 @@ body.error-page {
 }
 
 /* Ensure the post content container itself has no extra spacing */
-.post-content {
-  padding: 0 !important;
-  margin: 0 !important;
-}
+/* .post-content rules consolidated above */
 
 /* Control line-height to minimize visual spacing */
 .post-content p {
@@ -984,7 +1031,7 @@ body.error-page {
 
 .post-content .post-photo {
   line-height: 1 !important; /* Ensure no line-height spacing on images */
-  margin-top: 0.75rem !important;
+  margin-top: 0 !important;
   margin-bottom: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -1002,10 +1049,20 @@ body.error-page {
   padding: 0 !important;
 }
 
-/* Exception: Add spacing above images */
+/* Override any Bootstrap default spacing */
+.post-content,
+.post-content div,
+.post-content p,
+.post-content span {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Remove spacing above images */
 .post-content .post-photo,
 .post-content img {
-  margin-top: 0.75rem !important;
+  margin-top: 0 !important;
 }
 
 .post-content p + .post-photo,
@@ -1015,9 +1072,9 @@ body.error-page {
   padding-top: 0 !important;
 }
 
-/* Add top spacing to images and ensure proper scaling */
+/* Remove top spacing from images and ensure proper scaling */
 .post-content img {
-  margin-top: 0.75rem !important;
+  margin-top: 0 !important;
   padding-top: 0 !important;
   display: block; /* Remove any inline spacing */
   max-width: 100%;
@@ -1044,6 +1101,9 @@ body.error-page {
   line-height: 0 !important;
   font-size: 0 !important;
   display: block;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 /* Ensure all post images fit properly without cropping */
@@ -1065,10 +1125,84 @@ body.error-page {
   display: none;
 }
 
-/* Add spacing between text and image containers */
+/* Remove spacing between text and image containers */
 .post-content p + .post-photo,
 .post-content p + div:has(img) {
-  margin-top: 0.75rem !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Add small spacing between text and images */
+.post-content p + img,
+.post-content p + .post-photo,
+.post-content p + div:has(img),
+.post-content p + div:has(.post-photo) {
+  margin-top: 0.5rem !important; /* Small spacing */
+  padding-top: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Simple spacing for paragraphs - direct approach */
+.post-content > p {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Nuclear option: Target every possible spacing scenario with maximum specificity */
+.post-content p:has(+ img),
+.post-content p:has(+ .post-photo),
+.post-content p:has(+ div:has(img)),
+.post-content p:has(+ div:has(.post-photo)) {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Ultra-specific targeting for any remaining gaps */
+.post-content > p:first-child + .post-photo,
+.post-content > p:first-child + div:has(img),
+.post-content > p:first-child + img {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Target the exact structure from JavaScript-generated HTML */
+.post-content p + .post-photo,
+.post-content p + div.post-photo {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  line-height: 0 !important;
+  /* Force remove any remaining spacing */
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* Handle any potential flexbox spacing */
+.post-content .post-photo {
+  flex-shrink: 0 !important;
+  align-self: flex-start !important;
+}
+
+/* Debug: Add a border to see the actual spacing */
+.post-content {
+  border: 1px solid transparent !important;
+}
+
+.post-content p {
+  border: 1px solid transparent !important;
+}
+
+.post-content .post-photo {
+  border: 1px solid transparent !important;
+}
+
+/* Add small spacing between text and images */
+.post-content > p + .post-photo,
+.post-content > p + div:has(.post-photo),
+.post-content > p + div:has(img) {
+  margin-top: 0.5rem !important; /* Small spacing */
   padding-top: 0 !important;
   line-height: 0 !important;
 }
@@ -1082,12 +1216,12 @@ body.error-page {
   line-height: 1 !important;
 }
 
-/* Add spacing between text and images */
+/* Add small spacing between text and images */
 .post-content p + .post-photo,
 .post-content p + div:has(img),
 .post-content p + img,
 .post-content p + div:has(.post-photo) {
-  margin-top: 0.75rem !important;
+  margin-top: 0.5rem !important; /* Small spacing */
   padding-top: 0 !important;
   line-height: 0 !important;
 }
@@ -1133,14 +1267,213 @@ body.error-page {
 }
 
 /* Remove any potential spacing from the post content wrapper */
-.post-content {
-  /* Remove font-size: 0 as it can cause display issues */
-  line-height: 1.2;
-}
+/* .post-content rules consolidated above */
 
 .post-content p {
-  font-size: 1rem;
-  line-height: 1.2;
+  font-size: 1rem !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  padding: 0.75rem 0 !important; /* Simple padding above and below */
+  /* Force remove any browser default spacing */
+  display: block !important;
+  box-sizing: border-box !important;
+  /* Ensure no vertical spacing */
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* Nuclear option: Override any Bootstrap or custom spacing on post content */
+.post-content,
+.post-content *,
+.post-content p,
+.post-content div,
+.post-content span {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Specific override for any remaining spacing */
+.post-content > *:not(.post-photo) {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Target the post content div itself to remove any default spacing */
+div.post-content,
+.post-content {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Ensure no spacing between post content and actions */
+.post-content + .post-actions {
+  margin-top: var(--spacing-xs) !important;
+  padding-top: var(--spacing-xs) !important;
+}
+
+/* Final nuclear option: Override ALL possible spacing sources */
+.post-content,
+.post-content *,
+.post-content p,
+.post-content div,
+.post-content span,
+.post-content br,
+.post-content .post-photo,
+.post-content img {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 1rem !important;
+}
+
+/* Target any Bootstrap utility classes that might be applied */
+.post-content .mb-0,
+.post-content .mb-1,
+.post-content .mb-2,
+.post-content .mb-3,
+.post-content .mb-4,
+.post-content .mb-5,
+.post-content .mt-0,
+.post-content .mt-1,
+.post-content .mt-2,
+.post-content .mt-3,
+.post-content .mt-4,
+.post-content .mt-5 {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* NUCLEAR OVERRIDE: Force all post actions spacing to be minimal */
+.post-actions,
+.post-actions.mt-1,
+.post-actions.mt-2,
+.post-actions.mt-3,
+.post-actions.mt-4,
+.post-actions.mt-5,
+.post-actions.pt-1,
+.post-actions.pt-2,
+.post-actions.pt-3,
+.post-actions.pt-4,
+.post-actions.pt-5,
+.post-actions[class*="mt-"],
+.post-actions[class*="pt-"] {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+}
+
+/* Also override any paragraph margins in post content */
+.post-content p,
+.post-content p.mb-0,
+.post-content p.mb-1,
+.post-content p.mb-2,
+.post-content p.mb-3,
+.post-content p.mb-4,
+.post-content p.mb-5 {
+  margin-bottom: 4px !important;
+}
+
+/* MAXIMUM SPECIFICITY OVERRIDE: Target every possible Bootstrap spacing scenario */
+.post-item .post-actions,
+.post-item .post-actions.mt-1,
+.post-item .post-actions.mt-2,
+.post-item .post-item .post-actions.mt-3,
+.post-item .post-item .post-actions.mt-4,
+.post-item .post-item .post-actions.mt-5,
+.post-item .post-actions.pt-1,
+.post-item .post-actions.pt-2,
+.post-item .post-item .post-actions.pt-3,
+.post-item .post-item .post-actions.pt-4,
+.post-item .post-item .post-actions.pt-5 {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+}
+
+/* Force override any remaining spacing with inline-style level specificity */
+.post-actions[style*="margin"],
+.post-actions[style*="padding"] {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+}
+
+/* FINAL NUCLEAR OPTION: Override Bootstrap's spacing system entirely */
+.post-actions {
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Override any Bootstrap spacing variables that might be applied */
+.post-actions,
+.post-actions * {
+  --bs-spacer: 4px !important;
+  --bs-spacer-1: 4px !important;
+  --bs-spacer-2: 4px !important;
+  --bs-spacer-3: 4px !important;
+  --bs-spacer-4: 4px !important;
+  --bs-spacer-5: 4px !important;
+}
+
+/* Ultra-specific targeting to override any remaining spacing */
+div.post-content,
+div.post-content *,
+div.post-content p,
+div.post-content div,
+div.post-content span,
+div.post-content br,
+div.post-content .post-photo,
+div.post-content img {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 1rem !important;
+}
+
+/* Target the specific post content structure */
+.post-item .post-content,
+.post-item .post-content *,
+.post-item .post-content p,
+.post-item .post-content div,
+.post-item .post-content span,
+.post-item .post-content br,
+.post-item .post-content .post-photo,
+.post-item .post-content img {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 1rem !important;
+}
+
+/* Last resort: Target every possible selector combination */
+[class*="post-content"],
+[class*="post-content"] *,
+[class*="post-content"] p,
+[class*="post-content"] div,
+[class*="post-content"] span,
+[class*="post-content"] br,
+[class*="post-content"] .post-photo,
+[class*="post-content"] img {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 1rem !important;
+}
+
+/* Target parent containers that might be adding spacing */
+.post-item,
+.post-item .card-body,
+.post-item .card {
+  margin-bottom: var(--spacing-sm) !important;
+}
+
+/* Ensure post content has no inherited spacing */
+.post-item .card-body .post-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
 }
 
 .post-item h6 {
@@ -1459,9 +1792,10 @@ body.error-page {
   }
 
   .user-avatar-large {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     font-size: var(--font-size-lg);
+    margin: 0;
   }
 
   .welcome-avatar + div h5 {
@@ -1471,7 +1805,7 @@ body.error-page {
 
   /* Create post form mobile layout */
   .flex-grow-1 {
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
   }
 
   #inlinePostContent {
@@ -1482,7 +1816,7 @@ body.error-page {
 
   /* Photo upload mobile layout */
   .mt-2 {
-    margin-top: var(--spacing-sm) !important;
+    margin-top: v5ar(--spacing-sm) !important;
   }
 
   .btn-sm {
@@ -1559,35 +1893,37 @@ body.error-page {
 
   /* Post items mobile */
   .post-item {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
   }
 
   .post-item .card-body {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .post-header {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
   }
 
   .post-header h6 {
     font-size: var(--font-size-base);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 0;
   }
 
   .post-content {
     font-size: var(--font-size-base);
-    line-height: 1.4;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .post-content p {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 0 !important;
   }
 
   /* Post actions mobile */
   .post-actions {
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-xs);
   }
 
   .post-actions .btn {
@@ -1599,8 +1935,8 @@ body.error-page {
 
   /* Post stats mobile */
   .post-stats {
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-sm);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
   }
 
   .post-stats span {
@@ -1636,8 +1972,8 @@ body.error-page {
 
   /* Mobile post content spacing */
   .post-content .post-photo {
-    margin-top: var(--spacing-sm) !important;
-    margin-bottom: var(--spacing-sm) !important;
+    margin-top: var(--spacing-xs) !important;
+    margin-bottom: 0 !important;
   }
 
   .post-content img {
@@ -1962,9 +2298,10 @@ body.error-page {
   }
 
   .user-avatar-large {
-    width: 36px;
-    height: 36px;
+    width: 45px;
+    height: 45px;
     font-size: var(--font-size-base);
+    margin: 0;
   }
 
   .profile-picture {

@@ -83,15 +83,15 @@ function displayMobileSearchResults(users) {
             </div>
             <div class="flex-grow-1">
               <div class="fw-bold">
-                <a href="/profile/${user.id}" class="text-decoration-none text-dark user-profile-link">
+                <a href="/profile/${
+                  user.id
+                }" class="text-decoration-none text-dark user-profile-link">
                   ${user.firstName || ""} ${user.lastName || ""}
                 </a>
               </div>
               <div class="text-muted small">@${user.username}</div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromMobile('${user.id}', '${user.firstName || ""} ${user.lastName || ""}')">
-              <i class="fas fa-user-plus"></i>
-            </button>
+            ${getMobileActionButton(user)}
           </div>
         </div>
       `
@@ -184,12 +184,92 @@ function hideMobileSearchResults() {
 
 // Helper function to get user avatar (image or initials) - used by both searches
 function getUserAvatar(user) {
-  if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) {
+  console.log("getUserAvatar called with user:", user);
+
+  if (
+    user.profilePicture &&
+    (user.profilePicture.startsWith("http") ||
+      user.profilePicture.startsWith("/uploads/") ||
+      user.profilePicture.includes("cloudinary.com"))
+  ) {
+    console.log("Using profile picture:", user.profilePicture);
     return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
   } else if (user.useGravatar && user.email && user.gravatarUrl) {
+    console.log("Using Gravatar:", user.gravatarUrl);
     return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
   } else {
-    return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}`;
+    console.log("Using initials fallback");
+    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; font-size: 0.9rem; font-weight: bold;">${(
+      user.firstName || ""
+    ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
+  }
+}
+
+// Helper function to get the appropriate action button based on friendship status
+function getActionButton(user) {
+  console.log("getActionButton called with user:", user);
+
+  switch (user.status) {
+    case "friend":
+      return `<button class="btn btn-success btn-sm" disabled>
+        <i class="fas fa-user-check"></i> Friends
+      </button>`;
+
+    case "request_sent":
+      return `<button class="btn btn-secondary btn-sm" disabled>
+        <i class="fas fa-clock"></i> Request Sent
+      </button>`;
+
+    case "request_received":
+      return `<div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-success btn-sm" onclick="acceptRequest('${user.requestId}')">
+          <i class="fas fa-check"></i> Accept
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${user.requestId}')">
+          <i class="fas fa-times"></i> Decline
+        </button>
+      </div>`;
+
+    default:
+      return `<button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
+        user.id
+      }', '${user.firstName || ""} ${user.lastName || ""}')">
+        <i class="fas fa-user-plus"></i>
+      </button>`;
+  }
+}
+
+// Helper function to get the appropriate action button for mobile search
+function getMobileActionButton(user) {
+  console.log("getMobileActionButton called with user:", user);
+
+  switch (user.status) {
+    case "friend":
+      return `<button class="btn btn-success btn-sm" disabled>
+        <i class="fas fa-user-check"></i> Friends
+      </button>`;
+
+    case "request_sent":
+      return `<button class="btn btn-secondary btn-sm" disabled>
+        <i class="fas fa-clock"></i> Request Sent
+      </button>`;
+
+    case "request_received":
+      return `<div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-success btn-sm" onclick="acceptRequest('${user.requestId}')">
+          <i class="fas fa-check"></i> Accept
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${user.requestId}')">
+          <i class="fas fa-times"></i> Decline
+        </button>
+      </div>`;
+
+    default:
+      return `<button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromMobile('${
+        user.id
+      }', '${user.firstName || ""} ${user.lastName || ""}')">
+        <i class="fas fa-user-plus"></i>
+      </button>`;
   }
 }
 
@@ -213,10 +293,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Add mobile search functionality
   const mobileSearchInput = document.getElementById("mobileSearchInput");
   console.log("Mobile search input element found:", !!mobileSearchInput);
-  
+
   if (mobileSearchInput) {
     console.log("Setting up mobile search event listeners...");
-    
+
     // Real-time search with debouncing - EXACTLY like header search
     mobileSearchInput.addEventListener("input", function () {
       clearTimeout(mobileSearchTimeout);
@@ -241,15 +321,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Hide search results when clicking outside - EXACTLY like header search
     document.addEventListener("click", function (e) {
-      const mobileSearchContainer = document.querySelector(".mobile-search-container");
-      const mobileSearchResults = document.getElementById("mobileSearchResults");
+      const mobileSearchContainer = document.querySelector(
+        ".mobile-search-container"
+      );
+      const mobileSearchResults = document.getElementById(
+        "mobileSearchResults"
+      );
 
-      if (mobileSearchContainer && mobileSearchResults && !mobileSearchContainer.contains(e.target)) {
+      if (
+        mobileSearchContainer &&
+        mobileSearchResults &&
+        !mobileSearchContainer.contains(e.target)
+      ) {
         hideMobileSearchResults();
       }
     });
-    
-    console.log("Mobile search event listeners set up successfully - using EXACT same logic as header search");
+
+    console.log(
+      "Mobile search event listeners set up successfully - using EXACT same logic as header search"
+    );
   } else {
     console.error("Mobile search input element not found!");
   }
@@ -327,11 +417,7 @@ function displayHeaderSearchResults(users) {
               </div>
               <div class="text-muted small">@${user.username}</div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
-              user.id
-            }', '${user.firstName || ""} ${user.lastName || ""}')">
-              <i class="fas fa-user-plus"></i>
-            </button>
+            ${getActionButton(user)}
           </div>
         </div>
       `
@@ -844,3 +930,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Update every 30 seconds for live updates
   setInterval(updateHeaderRequestCount, 30000);
 });
+
+// Make the functions globally available
+window.getActionButton = getActionButton;
+window.getMobileActionButton = getMobileActionButton;

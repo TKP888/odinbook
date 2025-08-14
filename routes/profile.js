@@ -351,89 +351,95 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
       }
     }
 
-    // Get profile user's posts
-    const posts = await prisma.post.findMany({
-      where: { userId: profileUserId },
-      select: {
-        id: true,
-        content: true,
-        photoUrl: true,
-        createdAt: true,
-        updatedAt: true,
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true,
-            profilePicture: true,
-            useGravatar: true,
-            email: true,
+    // Get profile user's posts - only show if friends
+    let posts = [];
+    if (isFriend) {
+      posts = await prisma.post.findMany({
+        where: { userId: profileUserId },
+        select: {
+          id: true,
+          content: true,
+          photoUrl: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              username: true,
+              profilePicture: true,
+              useGravatar: true,
+              email: true,
+            },
           },
-        },
-        likes: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-                profilePicture: true,
-                useGravatar: true,
-                email: true,
+          likes: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true,
+                  profilePicture: true,
+                  useGravatar: true,
+                  email: true,
+                },
               },
             },
           },
-        },
-        comments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                username: true,
-                profilePicture: true,
-                useGravatar: true,
-                email: true,
+          comments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true,
+                  profilePicture: true,
+                  useGravatar: true,
+                  email: true,
+                },
               },
             },
-          },
-          orderBy: {
-            createdAt: "asc",
+            orderBy: {
+              createdAt: "asc",
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
 
-    // Get profile user's friends
-    const friends = await prisma.user.findMany({
-      where: {
-        friends: {
-          some: {
-            id: profileUserId,
+    // Get profile user's friends - only show if friends
+    let friends = [];
+    if (isFriend) {
+      friends = await prisma.user.findMany({
+        where: {
+          friends: {
+            some: {
+              id: profileUserId,
+            },
           },
         },
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        email: true,
-        bio: true,
-        profilePicture: true,
-        useGravatar: true,
-        birthday: true,
-        gender: true,
-        location: true,
-        createdAt: true,
-      },
-    });
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          email: true,
+          bio: true,
+          profilePicture: true,
+          useGravatar: true,
+          birthday: true,
+          gender: true,
+          location: true,
+          createdAt: true,
+        },
+      });
+    }
 
     res.render("profile/index", {
       title: `${profileUser.firstName} ${profileUser.lastName}`,

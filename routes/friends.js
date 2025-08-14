@@ -190,6 +190,34 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
     const searchTerm = q.trim();
     console.log("Searching for term:", searchTerm);
 
+    // Get current user's friend relationships and requests
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        friends: {
+          select: { id: true },
+        },
+        friendOf: {
+          select: { id: true },
+        },
+        sentRequests: {
+          where: { status: "pending" },
+          select: { id: true, receiverId: true },
+        },
+        receivedRequests: {
+          where: { status: "pending" },
+          select: { id: true, senderId: true },
+        },
+      },
+    });
+
+    // Find mutual friends (users who are in both lists)
+    const outgoingFriends = currentUser?.friends?.map((friend) => friend.id) || [];
+    const incomingFriends = currentUser?.friendOf?.map((friend) => friend.id) || [];
+    const mutualFriendIds = outgoingFriends.filter((id) =>
+      incomingFriends.includes(id)
+    );
+
     // Search for users by firstName, lastName, username, or email
     // Exclude the current user from results
     const users = await prisma.user.findMany({
@@ -224,8 +252,8 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
 
     console.log(`Found ${users.length} users matching "${searchTerm}"`);
     
-    // Add gravatar URLs to search results
-    const usersWithGravatar = users.map(user => {
+    // Add friendship status and gravatar URLs to search results
+    const usersWithStatus = users.map(user => {
       let gravatarUrl = null;
       if (user.useGravatar && user.email) {
         const crypto = require('crypto');
@@ -235,14 +263,36 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
           .digest("hex");
         gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=50&d=identicon&r=pg`;
       }
+
+      // Check friendship status
+      const isFriend = mutualFriendIds.includes(user.id);
+      
+      // Check for pending requests
+      const sentRequest = currentUser.sentRequests.find(req => req.receiverId === user.id);
+      const receivedRequest = currentUser.receivedRequests.find(req => req.senderId === user.id);
+      
+      let status = "none";
+      let requestId = null;
+      
+      if (isFriend) {
+        status = "friend";
+      } else if (sentRequest) {
+        status = "request_sent";
+        requestId = sentRequest.id;
+      } else if (receivedRequest) {
+        status = "request_received";
+        requestId = receivedRequest.id;
+      }
       
       return {
         ...user,
         gravatarUrl,
+        status,
+        requestId,
       };
     });
     
-    res.json({ users: usersWithGravatar });
+    res.json({ users: usersWithStatus });
   } catch (error) {
     console.error("Search error:", error);
     res.status(500).json({ error: "Search failed" });

@@ -394,6 +394,7 @@ function displayPosts(posts) {
   }
 
   console.log(`[DASHBOARD] Displaying posts, hiding no posts message`);
+  console.log(`[DASHBOARD] Posts data:`, posts);
   noPosts.classList.add("d-none");
   postsList.classList.remove("d-none");
 
@@ -409,16 +410,30 @@ function displayPosts(posts) {
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <h6 class="mb-1">
-            <a href="/profile/${post.user.id}" class="text-decoration-none">
-              ${post.user.firstName || ""} ${post.user.lastName || ""}
+            <a href="/profile/${
+              post.user.id
+            }" class="text-decoration-none fw-bold text-primary">
+              ${
+                post.user.firstName && post.user.lastName
+                  ? `${post.user.firstName} ${post.user.lastName}`
+                  : post.user.firstName || post.user.lastName || "User"
+              }
             </a>
-            <span class="text-muted small">@${post.user.username}</span>
+            <!-- Debug: firstName="${post.user.firstName}", lastName="${
+        post.user.lastName
+      }" -->
           </h6>
-          <small class="text-muted">
-
-
-            ${formatDateTime(post.createdAt)}
-          </small>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <small class="text-muted">
+              <a href="/profile/${
+                post.user.id
+              }" class="text-decoration-none text-muted">@${
+        post.user.username
+      }</a>
+            </small>
+            <small class="text-muted">•</small>
+            <small class="text-muted">${formatDateTime(post.createdAt)}</small>
+          </div>
         </div>
         ${
           post.user.id === currentUserId
@@ -444,41 +459,24 @@ function displayPosts(posts) {
   </div>
   ${
     post.content || post.photoUrl
-      ? `
-  <div class="post-content">
-    ${
-      post.content
-        ? `<p class="${post.photoUrl ? "" : "mb-0"}">${post.content.replace(
-            /\n/g,
-            post.photoUrl ? "" : "<br>"
-          )}</p>`
-        : ""
-    }
-    
-    <!-- Display photo if present -->
-    ${
-      post.photoUrl
-        ? `
-      <div class="post-photo">
-        <img 
-          src="${post.photoUrl}" 
-          alt="Post photo" 
-          class="img-fluid rounded"
-          style="width: 100%; height: 400px; max-height: 400px; object-fit: cover; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;"
-          onclick="openPhotoModal('${post.photoUrl}')"
-        />
-      </div>
-    `
-        : ""
-    }
-  </div>
-  `
+      ? `<div class="post-content">${
+          post.content
+            ? `<p>${post.content.replace(
+                /\n/g,
+                post.photoUrl ? "" : "<br>"
+              )}</p>`
+            : ""
+        }${
+          post.photoUrl
+            ? `<div class="post-photo"><img src="${post.photoUrl}" alt="Post photo" class="img-fluid rounded" style="width: 100%; max-height: 600px; height: auto; object-fit: contain; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;" onclick="openPhotoModal('${post.photoUrl}')" /></div>`
+            : ""
+        }</div>`
       : ""
   }
 
   <!-- Post Actions -->
   <div class="post-actions ${
-    post.content || post.photoUrl ? "mt-3 pt-3" : "mt-2 pt-2"
+    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
   } border-top">
     <div class="d-flex justify-content-between align-items-center">
       <!-- Action Buttons -->
@@ -595,6 +593,7 @@ function displayPosts(posts) {
 }
 
 function appendPosts(posts) {
+  console.log(`[DASHBOARD] appendPosts called with:`, posts);
   const postsList = document.getElementById("postsList");
   const postsHTML = posts
     .map(
@@ -608,14 +607,27 @@ function appendPosts(posts) {
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <h6 class="mb-1">
-            <a href="/profile/${post.user.id}" class="text-decoration-none">
-              ${post.user.firstName || ""} ${post.user.lastName || ""}
+            <a href="/profile/${
+              post.user.id
+            }" class="text-decoration-none fw-bold text-primary">
+              ${
+                post.user.firstName && post.user.lastName
+                  ? `${post.user.firstName} ${post.user.lastName}`
+                  : post.user.firstName || post.user.lastName || "User"
+              }
             </a>
-            <span class="text-muted small">@${post.user.username}</span>
           </h6>
-          <small class="text-muted">
-            ${formatDateTime(post.createdAt)}
-          </small>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <small class="text-muted">
+              <a href="/profile/${
+                post.user.id
+              }" class="text-decoration-none text-muted">@${
+        post.user.username
+      }</a>
+            </small>
+            <small class="text-muted">•</small>
+            <small class="text-muted">${formatDateTime(post.createdAt)}</small>
+          </div>
         </div>
         ${
           post.user.id === currentUserId
@@ -641,41 +653,24 @@ function appendPosts(posts) {
   </div>
   ${
     post.content || post.photoUrl
-      ? `
-  <div class="post-content">
-    ${
-      post.content
-        ? `<p class="${post.photoUrl ? "" : "mb-0"}">${post.content.replace(
-            /\n/g,
-            post.photoUrl ? "" : "<br>"
-          )}</p>`
-        : ""
-    }
-    
-    <!-- Display photo if present -->
-    ${
-      post.photoUrl
-        ? `
-      <div class="post-photo">
-        <img 
-          src="${post.photoUrl}" 
-          alt="Post photo" 
-          class="img-fluid rounded"
-          style="width: 100%; height: 400px; max-height: 400px; object-fit: cover; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;"
-          onclick="openPhotoModal('${post.photoUrl}')"
-        />
-      </div>
-    `
-        : ""
-    }
-  </div>
-  `
+      ? `<div class="post-content">${
+          post.content
+            ? `<p>${post.content.replace(
+                /\n/g,
+                post.photoUrl ? "" : "<br>"
+              )}</p>`
+            : ""
+        }${
+          post.photoUrl
+            ? `<div class="post-photo"><img src="${post.photoUrl}" alt="Post photo" class="img-fluid rounded" style="width: 100%; max-height: 600px; height: auto; object-fit: contain; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;" onclick="openPhotoModal('${post.photoUrl}')" /></div>`
+            : ""
+        }</div>`
       : ""
   }
 
   <!-- Post Actions -->
   <div class="post-actions ${
-    post.content || post.photoUrl ? "mt-3 pt-3" : "mt-2 pt-2"
+    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
   } border-top">
     <div class="d-flex justify-content-between align-items-center">
       <!-- Action Buttons -->
@@ -1285,7 +1280,11 @@ function showLikesModal(postId) {
             ${like.user.firstName || ""} ${like.user.lastName || ""}
           </a>
         </div>
-        <div class="text-muted small">@${like.user.username}</div>
+        <div class="text-muted small">
+          <a href="/profile/${
+            like.user.id
+          }" class="text-decoration-none text-muted">@${like.user.username}</a>
+        </div>
       </div>
     </div>
   `
