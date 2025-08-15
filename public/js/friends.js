@@ -355,12 +355,12 @@ function cancelRequest(requestId) {
         showNotification(data.error || "Could not cancel request", "error");
       }
     })
-          .catch(() => {
-        // Reset cancel button to original state
-        cancelBtn.disabled = false;
-        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-        showNotification("Could not cancel request. Please try again.", "error");
-      });
+    .catch(() => {
+      // Reset cancel button to original state
+      cancelBtn.disabled = false;
+      cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+      showNotification("Could not cancel request. Please try again.", "error");
+    });
 }
 
 function cancelRequestFromAllUsersPage(userId, userName, requestId) {
@@ -654,26 +654,29 @@ function showNotification(message, type = "info") {
 document.addEventListener("DOMContentLoaded", function () {
   const searchInput = document.getElementById("searchInput");
 
-  // Real-time search with debouncing
-  searchInput.addEventListener("input", function () {
-    clearTimeout(searchTimeout);
-    const searchTerm = this.value.trim();
+  // Only add event listeners if searchInput exists
+  if (searchInput) {
+    // Real-time search with debouncing
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimeout);
+      const searchTerm = this.value.trim();
 
-    if (searchTerm.length === 0) {
-      return;
-    }
+      if (searchTerm.length === 0) {
+        return;
+      }
 
-    searchTimeout = setTimeout(() => {
-      searchUsers();
-    }, 500);
-  });
+      searchTimeout = setTimeout(() => {
+        searchUsers();
+      }, 500);
+    });
 
-  // Search on Enter key
-  searchInput.addEventListener("keypress", function (e) {
-    if (e.key === "Enter") {
-      searchUsers();
-    }
-  });
+    // Search on Enter key
+    searchInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        searchUsers();
+      }
+    });
+  }
 
   // Event delegation for dynamically created buttons
   document.addEventListener("click", function (e) {
@@ -739,7 +742,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const searchTerm = this.value.trim();
 
       if (searchTerm.length === 0) {
-        clearSearchResults();
+        if (typeof clearSearchResults === "function") {
+          clearSearchResults();
+        }
         return;
       }
 
