@@ -1,0 +1,112 @@
+<%# Post Modal Component - Usage: include('layouts/components/post-modal', { 
+  modalId: 'createPostModal',
+  modalTitle: 'Create New Post',
+  formId: 'createPostForm',
+  textareaId: 'postContent',
+  photoId: 'postPhoto',
+  buttonId: 'createPostBtn',
+  buttonText: 'Post',
+  onSubmit: 'createPost()',
+  isEdit: false,
+  post: null
+}) %>
+
+<!-- Post Modal -->
+<div class="modal fade" id="<%= modalId %>" tabindex="-1" aria-labelledby="<%= modalId %>Label" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="<%= modalId %>Label">
+          <%= modalTitle %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="<%= formId %>" enctype="multipart/form-data">
+          <% if (isEdit && post) { %>
+          <input type="hidden" id="editPostId" value="<%= post.id %>" />
+          <% } %>
+          
+          <div class="mb-3">
+            <label for="<%= textareaId %>" class="form-label">
+              <%= isEdit ? 'Edit your post' : 'What\'s on your mind?' %>
+            </label>
+            <textarea
+              id="<%= textareaId %>"
+              class="form-control"
+              rows="6"
+              placeholder="<%= isEdit ? 'Edit your post...' : 'Share your thoughts...' %>"
+              maxlength="1000"
+              required
+            ><%= isEdit && post ? post.content : '' %></textarea>
+            <div class="form-text">
+              <span id="<%= textareaId %>CharCount">0</span>/1000 characters
+            </div>
+          </div>
+          
+          <!-- Photo upload section -->
+          <div class="mb-3">
+            <label for="<%= photoId %>" class="form-label">Add Photo (Optional)</label>
+            <div class="d-flex align-items-center">
+              <input
+                type="file"
+                id="<%= photoId %>"
+                name="photo"
+                accept="image/*"
+                class="form-control"
+                style="display: none"
+              />
+              <button
+                type="button"
+                class="btn btn-outline-secondary me-2"
+                onclick="document.getElementById('<%= photoId %>').click()"
+              >
+                <i class="fas fa-camera me-1"></i> Choose Photo
+              </button>
+              <span
+                id="<%= photoId %>FileName"
+                class="text-muted small me-2"
+              ></span>
+              <button
+                type="button"
+                id="<%= photoId %>RemoveBtn"
+                class="btn btn-outline-danger"
+                style="display: none"
+                onclick="removePhoto('<%= photoId %>')"
+              >
+                <i class="fas fa-times me-1"></i> Remove
+              </button>
+            </div>
+            
+            <% if (isEdit && post && post.photoUrl) { %>
+            <div class="mt-2">
+              <small class="text-muted">Current photo:</small>
+              <img 
+                src="<%= post.photoUrl %>" 
+                alt="Current post photo" 
+                class="img-thumbnail mt-1" 
+                style="max-height: 100px;"
+              />
+            </div>
+            <% } %>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="<%= onSubmit %>"
+          id="<%= buttonId %>"
+        >
+          <i class="fas fa-paper-plane me-1"></i> <%= buttonText %>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

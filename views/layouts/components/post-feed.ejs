@@ -1,0 +1,62 @@
+<%# Post Feed Component - Usage: include('layouts/components/post-feed', {
+posts: posts, currentUser: user, showActions: true, showComments: true,
+showUserActions: true, showLikes: true, showShare: true, showEditDelete: true,
+showRefresh: true, showLoadMore: true, showNoPosts: true, noPostsMessage: 'No
+posts to show', noPostsSubMessage: 'Add some friends to see their posts in your
+feed!', postsPerPage: 10, currentPage: 1 }) %>
+
+<div class="post-feed-component">
+  <!-- Feed Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Recent Posts</h5>
+    <% if (typeof showRefresh !== 'undefined' && showRefresh) { %>
+    <button
+      class="btn btn-outline-secondary btn-sm"
+      onclick="refreshPosts()"
+      title="Refresh posts feed"
+    >
+      <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+    <% } %>
+  </div>
+
+  <!-- Loading State -->
+  <div id="postsLoading" class="text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading posts...</p>
+  </div>
+
+  <!-- Posts List -->
+  <div id="postsList" class="d-none">
+    <% if (typeof posts !== 'undefined' && posts && posts.length > 0) { %> <%
+    posts.forEach(function(post) { %> <%- include('post-display', { post: post,
+    currentUser: currentUser, showActions: showActions, showComments:
+    showComments, showUserActions: showUserActions, showLikes: showLikes,
+    showShare: showShare, showEditDelete: showEditDelete }) %> <% }); %> <% } %>
+  </div>
+
+  <!-- Load More Button -->
+  <% if (typeof showLoadMore !== 'undefined' && showLoadMore) { %>
+  <div class="text-center mt-3">
+    <button
+      class="btn btn-outline-primary"
+      onclick="loadMorePosts()"
+      id="loadMoreBtn"
+      style="display: none"
+    >
+      <i class="fas fa-plus me-1"></i> Load More Posts
+    </button>
+  </div>
+  <% } %>
+
+  <!-- No Posts State -->
+  <% if (typeof showNoPosts !== 'undefined' && showNoPosts) { %>
+  <div id="noPosts" class="text-center text-muted d-none">
+    <i class="fas fa-comments fa-3x mb-3"></i>
+    <h5 class="text-muted"><%= noPostsMessage %></h5>
+    <p class="text-muted"><%= noPostsSubMessage %></p>
+  </div>
+  <% } %>
+</div>

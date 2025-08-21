@@ -1,0 +1,44 @@
+<%# User Avatar Component - Usage: include('user-avatar', { user: user, size: 'large'|'medium'|'small', showOverlay: false, clickable: false }) %>
+
+<%# Default values %>
+
+<div class="<%= (typeof size !== 'undefined' && size === 'small') ? 'user-avatar-small' : (typeof size !== 'undefined' && size === 'large') ? 'user-avatar-large' : 'user-avatar' %> <%= (typeof clickable !== 'undefined' && clickable) ? 'clickable' : '' %>" 
+     <% if (typeof id !== 'undefined') { %>id="<%= id %>"<% } %>>
+  
+  <%# Profile Picture Logic %>
+  <% if (user && user.useGravatar && user.email) { %>
+    <img src="<%= getGravatarUrl(user.email, (typeof size !== 'undefined' && size === 'small') ? 40 : (typeof size !== 'undefined' && size === 'large') ? 200 : 60) %>" 
+         alt="Profile Picture" 
+         class="profile-image">
+  
+  <% } else if (user && user.profilePicture && 
+       (user.profilePicture.startsWith('http') || 
+        user.profilePicture.startsWith('/uploads/') || 
+        user.profilePicture.includes('cloudinary.com') ||
+        user.profilePicture.includes('gravatar.com'))) { %>
+    <img src="<%= user.profilePicture %>" 
+         alt="Profile Picture" 
+         class="profile-image">
+  
+  <% } else if (user) { %>
+    <%# Fallback to initials %>
+    <span class="avatar-initials">
+      <%= user.firstName ? user.firstName.charAt(0) : '' %><%= user.lastName ? user.lastName.charAt(0) : '' %>
+    </span>
+  <% } else { %>
+    <%# No user data available %>
+    <span class="avatar-initials">
+      ?
+    </span>
+  <% } %>
+  
+  <%# Optional overlay for profile picture upload %>
+  <% if (typeof showOverlay !== 'undefined' && showOverlay) { %>
+    <div class="profile-picture-overlay">
+      <label for="profilePictureInput" class="profile-picture-upload-btn">
+        <i class="fas fa-camera"></i>
+        <span>Change Photo</span>
+      </label>
+    </div>
+  <% } %>
+</div>

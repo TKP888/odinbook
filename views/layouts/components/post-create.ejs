@@ -1,0 +1,94 @@
+<%# Post Create Component - Usage: include('layouts/components/post-create', {
+user: user, formId: 'inlineCreatePostForm', textareaId: 'inlinePostContent',
+photoId: 'postPhoto', buttonId: 'inlineCreatePostBtn', charCountId:
+'inlineCharCount', placeholder: 'What\'s on your mind, ' + (user && user.firstName ? user.firstName : 'Guest') + '?',
+maxLength: 250, showPhotoUpload: true, showCharCount: true, onSubmit:
+'createInlinePost()' }) %>
+
+<div class="post-create-component">
+  <div class="d-flex align-items-start">
+    <div class="me-3 flex-shrink-0">
+      <%- include('../../partials/user-avatar', { user: user, size: 'large' })
+      %>
+    </div>
+    <div class="flex-grow-1">
+      <form id="<%= formId %>" enctype="multipart/form-data">
+        <div class="mb-3">
+          <textarea
+            id="<%= textareaId %>"
+            class="form-control"
+            rows="3"
+            placeholder="<%= placeholder %>"
+            maxlength="<%= maxLength %>"
+          ></textarea>
+        </div>
+
+        <% if (typeof showPhotoUpload !== 'undefined' && showPhotoUpload) { %>
+        <!-- Photo upload section -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center">
+            <input
+              type="file"
+              id="<%= photoId %>"
+              name="photo"
+              accept="image/*"
+              class="form-control form-control-sm"
+              style="display: none"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm me-2"
+              onclick="document.getElementById('<%= photoId %>').click()"
+            >
+              <i class="fas fa-camera me-1"></i> Add Photo
+            </button>
+            <span id="photoFileName" class="text-muted small me-2"></span>
+            <button
+              type="button"
+              id="removePhotoBtn"
+              class="btn btn-outline-danger btn-sm"
+              style="display: none"
+              onclick="removePhoto()"
+            >
+              <i class="fas fa-times me-1"></i> Remove
+            </button>
+          </div>
+
+          <div class="d-flex align-items-center">
+            <% if (typeof showCharCount !== 'undefined' && showCharCount) { %>
+            <small class="text-muted me-3">
+              <span id="<%= charCountId %>">0</span>/<%= maxLength %>
+            </small>
+            <% } %>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="<%= onSubmit %>"
+              id="<%= buttonId %>"
+            >
+              <i class="fas fa-paper-plane me-1"></i> Post
+            </button>
+          </div>
+        </div>
+        <% } else { %>
+        <!-- No photo upload, just char count and post button -->
+        <div class="d-flex align-items-center justify-content-end mb-3">
+          <% if (typeof showCharCount !== 'undefined' && showCharCount) { %>
+          <small class="text-muted me-3">
+            <span id="<%= charCountId %>">0</span>/<%= maxLength %>
+          </small>
+          <% } %>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="<%= onSubmit %>"
+            id="<%= buttonId %>"
+          >
+            <i class="fas fa-paper-plane me-1"></i> Post
+          </button>
+        </div>
+        <% } %>
+      </form>
+    </div>
+  </div>
+</div>

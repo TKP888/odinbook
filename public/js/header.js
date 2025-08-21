@@ -1,351 +1,6 @@
 // Extracted from views/layouts/main.ejs (header search and friend request logic)
 
-// Mobile Navigation Functions
-function openMobileNav() {
-  const overlay = document.getElementById("mobileNavOverlay");
-  if (overlay) {
-    overlay.classList.add("active");
-    document.body.style.overflow = "hidden"; // Prevent background scrolling
-  }
-}
-
-function closeMobileNav() {
-  const overlay = document.getElementById("mobileNavOverlay");
-  if (overlay) {
-    overlay.classList.remove("active");
-    document.body.style.overflow = ""; // Restore scrolling
-    // Clear mobile search results when closing
-    hideMobileSearchResults();
-  }
-}
-
-// Mobile Search Functions - Using exact same logic as header search
-let mobileSearchTimeout;
-
-function mobileSearchUsers() {
-  const searchTerm = document.getElementById("mobileSearchInput").value.trim();
-
-  console.log("Mobile searching for:", searchTerm);
-
-  if (searchTerm.length === 0) {
-    hideMobileSearchResults();
-    return;
-  }
-
-  showMobileSearchLoading();
-
-  const searchUrl = `/friends/search?q=${encodeURIComponent(searchTerm)}`;
-  console.log("Mobile search URL:", searchUrl);
-
-  fetch(searchUrl)
-    .then((response) => {
-      console.log("Mobile search response status:", response.status);
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Mobile search results:", data);
-      hideMobileSearchLoading();
-      displayMobileSearchResults(data.users);
-    })
-    .catch((error) => {
-      console.error("Mobile search error:", error);
-      hideMobileSearchLoading();
-      hideMobileSearchResults();
-    });
-}
-
-function displayMobileSearchResults(users) {
-  console.log("Displaying mobile search results for users:", users);
-
-  const resultsDiv = document.getElementById("mobileSearchResults");
-  const usersListDiv = document.getElementById("mobileUsersList");
-  const noResultsDiv = document.getElementById("mobileNoResults");
-
-  if (users.length === 0) {
-    console.log("No users found, showing no results message");
-    resultsDiv.classList.remove("d-none");
-    usersListDiv.innerHTML = "";
-    noResultsDiv.classList.remove("d-none");
-    return;
-  }
-
-  console.log(`Found ${users.length} users, displaying results`);
-  noResultsDiv.classList.add("d-none");
-  resultsDiv.classList.remove("d-none");
-
-  usersListDiv.innerHTML = users
-    .map(
-      (user) => `
-        <div class="search-result-item">
-          <div class="d-flex align-items-center p-2">
-            <div class="user-avatar-small me-3">
-              ${getUserAvatar(user)}
-            </div>
-            <div class="flex-grow-1">
-              <div class="fw-bold">
-                <a href="/profile/${
-                  user.id
-                }" class="text-decoration-none text-dark user-profile-link">
-                  ${user.firstName || ""} ${user.lastName || ""}
-                </a>
-              </div>
-              <div class="text-muted small">@${user.username}</div>
-            </div>
-            ${getMobileActionButton(user)}
-          </div>
-        </div>
-      `
-    )
-    .join("");
-}
-
-function sendFriendRequestFromMobile(userId, userName = "") {
-  fetch("/friends/request", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ receiverId: userId }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-          <div><i class="fas fa-user-plus"></i> Friend request sent to ${
-            userName || "user"
-          }!</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
-
-        // Hide search results
-        hideMobileSearchResults();
-        // Clear search input
-        document.getElementById("mobileSearchInput").value = "";
-      } else {
-        if (
-          data.error === "You already have a pending request from this user"
-        ) {
-          // Show a more helpful message
-          const alertDiv = document.createElement("div");
-          alertDiv.className =
-            "alert alert-info alert-dismissible fade show position-fixed";
-          alertDiv.innerHTML = `
-            <div><i class="fas fa-info-circle"></i> ${data.error}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-          document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 5000);
-        } else {
-          const alertDiv = document.createElement("div");
-          alertDiv.className =
-            "alert alert-danger alert-dismissible fade show position-fixed";
-          alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> ${
-              data.error || "Could not send request"
-            }</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-          document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 5000);
-        }
-      }
-    })
-    .catch(() => {
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-        <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
-    });
-}
-
-function showMobileSearchLoading() {
-  document.getElementById("mobileSearchLoading").classList.remove("d-none");
-  document.getElementById("mobileSearchResults").classList.remove("d-none");
-  document.getElementById("mobileUsersList").innerHTML = "";
-  document.getElementById("mobileNoResults").classList.add("d-none");
-}
-
-function hideMobileSearchLoading() {
-  document.getElementById("mobileSearchLoading").classList.add("d-none");
-}
-
-function hideMobileSearchResults() {
-  document.getElementById("mobileSearchResults").classList.add("d-none");
-}
-
-// Helper function to get user avatar (image or initials) - used by both searches
-function getUserAvatar(user) {
-  console.log("getUserAvatar called with user:", user);
-
-  if (
-    user.profilePicture &&
-    (user.profilePicture.startsWith("http") ||
-      user.profilePicture.startsWith("/uploads/") ||
-      user.profilePicture.includes("cloudinary.com"))
-  ) {
-    console.log("Using profile picture:", user.profilePicture);
-    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
-  } else if (user.useGravatar && user.email && user.gravatarUrl) {
-    console.log("Using Gravatar:", user.gravatarUrl);
-    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
-  } else {
-    console.log("Using initials fallback");
-    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; font-size: 0.9rem; font-weight: bold;">${(
-      user.firstName || ""
-    ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
-  }
-}
-
-// Helper function to get the appropriate action button based on friendship status
-function getActionButton(user) {
-  console.log("getActionButton called with user:", user);
-
-  switch (user.status) {
-    case "friend":
-      return `<button class="btn btn-success btn-sm" disabled>
-        <i class="fas fa-user-check"></i> Friends
-      </button>`;
-
-    case "request_sent":
-      return `<button class="btn btn-secondary btn-sm" disabled>
-        <i class="fas fa-clock"></i> Request Sent
-      </button>`;
-
-    case "request_received":
-      return `<div class="btn-group btn-group-sm" role="group">
-        <button class="btn btn-success btn-sm" onclick="acceptRequest('${user.requestId}')">
-          <i class="fas fa-check"></i> Accept
-        </button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${user.requestId}')">
-          <i class="fas fa-times"></i> Decline
-        </button>
-      </div>`;
-
-    default:
-      return `<button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
-        user.id
-      }', '${user.firstName || ""} ${user.lastName || ""}')">
-        <i class="fas fa-user-plus"></i>
-      </button>`;
-  }
-}
-
-// Helper function to get the appropriate action button for mobile search
-function getMobileActionButton(user) {
-  console.log("getMobileActionButton called with user:", user);
-
-  switch (user.status) {
-    case "friend":
-      return `<button class="btn btn-success btn-sm" disabled>
-        <i class="fas fa-user-check"></i> Friends
-      </button>`;
-
-    case "request_sent":
-      return `<button class="btn btn-secondary btn-sm" disabled>
-        <i class="fas fa-clock"></i> Request Sent
-      </button>`;
-
-    case "request_received":
-      return `<div class="btn-group btn-group-sm" role="group">
-        <button class="btn btn-success btn-sm" onclick="acceptRequest('${user.requestId}')">
-          <i class="fas fa-check"></i> Accept
-        </button>
-        <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${user.requestId}')">
-          <i class="fas fa-times"></i> Decline
-        </button>
-      </div>`;
-
-    default:
-      return `<button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromMobile('${
-        user.id
-      }', '${user.firstName || ""} ${user.lastName || ""}')">
-        <i class="fas fa-user-plus"></i>
-      </button>`;
-  }
-}
-
-// Close mobile nav when clicking outside the menu
-document.addEventListener("DOMContentLoaded", function () {
-  const overlay = document.getElementById("mobileNavOverlay");
-  if (overlay) {
-    overlay.addEventListener("click", function (e) {
-      if (e.target === overlay) {
-        closeMobileNav();
-      }
-    });
-  }
-
-  // Add click event to mobile menu toggle
-  const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
-  if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener("click", openMobileNav);
-  }
-
-  // Add mobile search functionality
-  const mobileSearchInput = document.getElementById("mobileSearchInput");
-  console.log("Mobile search input element found:", !!mobileSearchInput);
-
-  if (mobileSearchInput) {
-    console.log("Setting up mobile search event listeners...");
-
-    // Real-time search with debouncing - EXACTLY like header search
-    mobileSearchInput.addEventListener("input", function () {
-      clearTimeout(mobileSearchTimeout);
-      const searchTerm = this.value.trim();
-
-      if (searchTerm.length === 0) {
-        hideMobileSearchResults();
-        return;
-      }
-
-      mobileSearchTimeout = setTimeout(() => {
-        mobileSearchUsers();
-      }, 300); // Same 300ms debounce as header search
-    });
-
-    // Search on Enter key - EXACTLY like header search
-    mobileSearchInput.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        mobileSearchUsers();
-      }
-    });
-
-    // Hide search results when clicking outside - EXACTLY like header search
-    document.addEventListener("click", function (e) {
-      const mobileSearchContainer = document.querySelector(
-        ".mobile-search-container"
-      );
-      const mobileSearchResults = document.getElementById(
-        "mobileSearchResults"
-      );
-
-      if (
-        mobileSearchContainer &&
-        mobileSearchResults &&
-        !mobileSearchContainer.contains(e.target)
-      ) {
-        hideMobileSearchResults();
-      }
-    });
-
-    console.log(
-      "Mobile search event listeners set up successfully - using EXACT same logic as header search"
-    );
-  } else {
-    console.error("Mobile search input element not found!");
-  }
-});
-
-// Header Search Script
+// Header Search Functions
 let headerSearchTimeout;
 
 function headerSearchUsers() {
@@ -402,7 +57,7 @@ function displayHeaderSearchResults(users) {
   usersListDiv.innerHTML = users
     .map(
       (user) => `
-        <div class="search-result-item">
+        <div class="search-result-item" data-user-id="${user.id}">
           <div class="d-flex align-items-center p-2">
             <div class="user-avatar-small me-3">
               ${getUserAvatar(user)}
@@ -447,10 +102,32 @@ function sendFriendRequestFromHeader(userId, userName = "") {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Hide search results
-        hideHeaderSearchResults();
-        // Clear search input
-        document.getElementById("headerSearchInput").value = "";
+        // Find the button that was clicked and update it immediately
+        const searchResults = document.getElementById("headerUsersList");
+        const userItem = searchResults.querySelector(
+          `[data-user-id="${userId}"]`
+        );
+
+        if (userItem) {
+          const actionButton = userItem.querySelector(".btn");
+          if (actionButton) {
+            // Replace the single button with a container showing both "Request Sent" and "Cancel Request"
+            const buttonContainer = document.createElement("div");
+            buttonContainer.className = "d-flex gap-1";
+            buttonContainer.innerHTML = `
+              <button class="btn btn-secondary btn-sm" disabled>
+                <i class="fas fa-clock"></i> Request Sent
+              </button>
+              <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${data.requestId}', '${userName || "user"}', event)">
+                <i class="fas fa-times"></i>
+              </button>
+            `;
+            actionButton.replaceWith(buttonContainer);
+          }
+        }
+
+        // Keep search results open - don't hide them
+        // Don't clear search input - keep the search term
       } else {
         if (
           data.error === "You already have a pending request from this user"
@@ -488,6 +165,97 @@ function sendFriendRequestFromHeader(userId, userName = "") {
               <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    });
+}
+
+// Function to cancel a sent friend request from header search
+function cancelFriendRequestFromHeader(requestId, userName, event) {
+  console.log(`[HEADER] cancelFriendRequestFromHeader called for request ${requestId} (${userName})`);
+  
+  // Show loading state on the cancel button
+  const cancelBtn = event.target;
+  if (cancelBtn) {
+    cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    cancelBtn.disabled = true;
+  }
+  
+  fetch("/friends/cancel-request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requestId }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-times"></i> Friend request to ${userName} cancelled</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Find the user item and update it to show "Add Friend" button again
+        // Use event.target to find the button that was clicked, then traverse up to find the user item
+        const cancelBtn = event.target;
+        if (cancelBtn) {
+          const userItem = cancelBtn.closest('.search-result-item');
+          if (userItem) {
+            const userId = userItem.getAttribute('data-user-id');
+            const buttonContainerDiv = userItem.querySelector(".d-flex.gap-1");
+            if (buttonContainerDiv) {
+              // Replace with "Add Friend" button
+              const addFriendBtn = document.createElement("button");
+              addFriendBtn.className = "btn btn-primary btn-sm";
+              addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i>';
+              addFriendBtn.onclick = () => sendFriendRequestFromHeader(userId, userName);
+              buttonContainerDiv.replaceWith(addFriendBtn);
+            }
+          }
+        }
+      } else {
+        // Reset button state on error
+        if (cancelBtn) {
+          cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+          cancelBtn.disabled = false;
+        }
+        
+        // Show error notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> ${
+                data.error || "Failed to cancel request"
+              }</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      }
+    })
+    .catch((error) => {
+      console.error("Error cancelling friend request:", error);
+      
+      // Reset button state on error
+      if (cancelBtn) {
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+        cancelBtn.disabled = false;
+      }
+      
+      // Show error notification
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> Failed to cancel request. Please try again.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
       document.body.appendChild(alertDiv);
       setTimeout(() => alertDiv.remove(), 5000);
     });
@@ -911,6 +679,46 @@ function sendFriendRequest(userId, userName = "") {
 
 // Add event listeners for friend request actions
 document.addEventListener("DOMContentLoaded", function () {
+  // Header search functionality
+  const searchInput = document.getElementById("headerSearchInput");
+  if (searchInput) {
+    // Real-time search with debouncing
+    searchInput.addEventListener("input", function () {
+      clearTimeout(headerSearchTimeout);
+      const searchTerm = this.value.trim();
+
+      if (searchTerm.length === 0) {
+        hideHeaderSearchResults();
+        return;
+      }
+
+      headerSearchTimeout = setTimeout(() => {
+        headerSearchUsers();
+      }, 300);
+    });
+
+    // Search on Enter key
+    searchInput.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        headerSearchUsers();
+      }
+    });
+
+    // Hide search results when clicking outside
+    document.addEventListener("click", function (e) {
+      const searchContainer = document.querySelector(".header-search");
+      const searchResults = document.getElementById("headerSearchResults");
+
+      if (
+        searchContainer &&
+        searchResults &&
+        !searchContainer.contains(e.target)
+      ) {
+        hideHeaderSearchResults();
+      }
+    });
+  }
+
   // Event delegation for accept/decline friend request buttons
   document.addEventListener("click", function (e) {
     if (e.target.closest(".accept-request-btn")) {
@@ -931,6 +739,68 @@ document.addEventListener("DOMContentLoaded", function () {
   setInterval(updateHeaderRequestCount, 30000);
 });
 
+// Helper function to get user avatar (image or initials) - used by both searches
+function getUserAvatar(user) {
+  console.log("getUserAvatar called with user:", user);
+
+  if (
+    user.profilePicture &&
+    (user.profilePicture.startsWith("http") ||
+      user.profilePicture.startsWith("/uploads/") ||
+      user.profilePicture.includes("cloudinary.com"))
+  ) {
+    console.log("Using profile picture:", user.profilePicture);
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+  } else if (user.useGravatar && user.email && user.gravatarUrl) {
+    console.log("Using Gravatar:", user.gravatarUrl);
+    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+  } else {
+    console.log("Using initials fallback");
+    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; font-size: 0.9rem; font-weight: bold;">${(
+      user.firstName || ""
+    ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
+  }
+}
+
+// Helper function to get the appropriate action button based on friendship status
+function getActionButton(user) {
+  console.log("getActionButton called with user:", user);
+
+  switch (user.status) {
+    case "friend":
+      return `<button class="btn btn-success btn-sm" disabled>
+        <i class="fas fa-user-check"></i> Friends
+      </button>`;
+
+    case "request_sent":
+      return `<div class="d-flex gap-1">
+        <button class="btn btn-secondary btn-sm" disabled>
+          <i class="fas fa-clock"></i> Request Sent
+        </button>
+        <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${user.requestId}', '${user.firstName || ""} ${user.lastName || ""}', event)">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>`;
+
+    case "request_received":
+      return `<div class="btn-group btn-group-sm" role="group">
+        <button class="btn btn-success btn-sm" onclick="acceptRequest('${user.requestId}')">
+          <i class="fas fa-check"></i> Accept
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="declineRequest('${user.requestId}')">
+          <i class="fas fa-times"></i> Decline
+        </button>
+      </div>`;
+
+    default:
+      return `<button class="btn btn-primary btn-sm" onclick="sendFriendRequestFromHeader('${
+        user.id
+      }', '${user.firstName || ""} ${user.lastName || ""}')">
+        <i class="fas fa-user-plus"></i>
+      </button>`;
+  }
+}
+
 // Make the functions globally available
 window.getActionButton = getActionButton;
-window.getMobileActionButton = getMobileActionButton;
+window.cancelFriendRequestFromHeader = cancelFriendRequestFromHeader;

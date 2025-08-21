@@ -1,15 +1,28 @@
 {
   "name": "odinbook",
-  "version": "1.0.0",
-  "description": "A social media clone built with Node.js, Express, EJS, and PostgreSQL",
-  "main": "app.js",
+  "version": "2.0.0",
+  "description": "A social media clone built with Node.js, Express, EJS, and PostgreSQL - Reorganized for better maintainability",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node --no-deprecation app.js",
-    "dev": "nodemon --no-deprecation app.js",
+    "start": "node --no-deprecation src/app.js",
+    "dev": "nodemon --no-deprecation src/app.js",
+    "build": "npm run lint && npm run test",
+    "lint": "eslint src/",
+    "test": "jest",
+    "test:all": "node tests/run-all-tests.js",
+    "test:user": "node tests/test-user.js",
+    "test:friends": "node tests/test-friendships.js",
+    "test:posts": "node tests/test-post-visibility.js",
+    "test:db": "node tests/test-db.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "reorganize": "node scripts/reorganize.js",
+    "clean": "node scripts/cleanup.js",
+    "status": "node scripts/check-status.js",
+    "start:script": "./scripts/start.sh"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -19,7 +32,10 @@
     "express",
     "ejs",
     "passport",
-    "prisma"
+    "prisma",
+    "modular",
+    "organized",
+    "enterprise"
   ],
   "author": "",
   "license": "MIT",
@@ -41,6 +57,11 @@
     "prisma": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

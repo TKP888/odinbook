@@ -1,0 +1,63 @@
+<%# Friend Request Item Component - Usage: include('friend-request-item', { request: request, currentUser: user, showActions: true }) %>
+
+<%# Default values %>
+
+    <div class="friend-request-item d-flex align-items-center p-2">
+    <div class="user-avatar me-3">
+      <%- include('user-avatar', { 
+        user: (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id) ? request.receiver : request.sender, 
+        size: 'small' 
+      }) %>
+    </div>
+    
+    <div class="friend-request-info flex-grow-1">
+      <h6 class="mb-1">
+        <a href="/profile/<%= (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id) ? request.receiver.username : request.sender.username %>" class="text-decoration-none">
+          <%= (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id) ? request.receiver.firstName + ' ' + request.receiver.lastName : request.sender.firstName + ' ' + request.sender.lastName %>
+        </a>
+      </h6>
+      <small class="text-muted">@<%= (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id) ? request.receiver.username : request.sender.username %></small>
+      
+      <%# Request Status %>
+      <% if (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id) { %>
+        <div class="request-status mt-1">
+          <small class="text-muted">
+            <i class="fas fa-clock me-1"></i>Request sent
+          </small>
+        </div>
+      <% } else { %>
+        <div class="request-status mt-1">
+          <small class="text-muted">
+            <i class="fas fa-user-plus me-1"></i>Wants to be friends
+          </small>
+        </div>
+      <% } %>
+    </div>
+    
+    <%# Action Buttons %>
+    <% if ((typeof showActions !== 'undefined' && showActions) && !(typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id)) { %>
+      <div class="friend-request-actions">
+        <button class="btn btn-success btn-sm me-2" 
+                onclick="acceptRequest('<%= request.id %>')"
+                title="Accept friend request">
+          <i class="fas fa-check"></i>
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" 
+                onclick="declineRequest('<%= request.id %>')"
+                title="Decline friend request">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    <% } %>
+    
+    <%# Cancel Button for Sent Requests %>
+    <% if ((typeof showActions !== 'undefined' && showActions) && (typeof currentUser !== 'undefined' && currentUser && request.senderId === currentUser.id)) { %>
+      <div class="friend-request-actions">
+        <button class="btn btn-outline-danger btn-sm" 
+                onclick="cancelRequest('<%= request.id %>')"
+                title="Cancel friend request">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    <% } %>
+  </div>

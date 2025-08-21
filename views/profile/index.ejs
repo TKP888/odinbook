@@ -1,4 +1,9 @@
-<div class="container-fluid">
+<div class="container-fluid profile-page" 
+     <% if (typeof profileUser !== 'undefined') { %>
+       data-profile-user-id="<%= profileUser.id %>"
+     <% } else { %>
+       data-profile-user-id="<%= user.id %>"
+     <% } %>>
   <div class="row">
     <!-- Profile Header -->
     <div class="col-12 mb-4">
@@ -6,33 +11,14 @@
         <div class="card-body text-center py-5">
           <div class="profile-avatar mb-4">
             <div class="profile-picture-container">
-              <div class="user-avatar-large profile-picture" id="profilePicture">
-                <% if (typeof profileUser !== 'undefined') { %>
-                  <% if (profileUser.useGravatar && profileUser.email) { %>
-                    <img src="<%= getGravatarUrl(profileUser.email, 200) %>" alt="Profile Picture" class="profile-image">
-                  <% } else if (profileUser.profilePicture && (profileUser.profilePicture.startsWith('http') || profileUser.profilePicture.startsWith('/uploads/') || profileUser.profilePicture.includes('cloudinary.com') || profileUser.profilePicture.includes('gravatar.com'))) { %>
-                    <img src="<%= profileUser.profilePicture %>" alt="Profile Picture" class="profile-image">
-                  <% } else { %>
-                    <%= profileUser.firstName.charAt(0) %><%= profileUser.lastName.charAt(0) %>
-                  <% } %>
-                <% } else { %>
-                  <% if (user.useGravatar && user.email) { %>
-                    <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
-                  <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com') || user.profilePicture.includes('gravatar.com'))) { %>
-                    <img src="<%= user.profilePicture %>" alt="Profile Picture" class="profile-image">
-                  <% } else { %>
-                    <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
-                  <% } %>
-                <% } %>
-              </div>
+              <%- include('../partials/user-avatar', { 
+                user: (typeof profileUser !== 'undefined') ? profileUser : user, 
+                size: 'large',
+                id: 'profilePicture',
+                showOverlay: (typeof profileUser === 'undefined')
+              }) %>
               <% if (typeof profileUser === 'undefined') { %>
-                <div class="profile-picture-overlay">
-                  <label for="profilePictureInput" class="profile-picture-upload-btn">
-                    <i class="fas fa-camera"></i>
-                    <span>Change Photo</span>
-                  </label>
-                  <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
-                </div>
+                <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
               <% } %>
             </div>
           </div>
@@ -66,9 +52,14 @@
               </button>
             <% } else if (pendingRequest) { %>
               <% if (pendingRequest.senderId === user.id) { %>
-                <button class="btn btn-secondary btn-lg" disabled>
-                  <i class="fas fa-clock me-2"></i> Request Sent
-                </button>
+                <div class="d-flex gap-3 justify-content-center">
+                  <button class="btn btn-secondary btn-lg" disabled>
+                    <i class="fas fa-clock me-2"></i> Request Sent
+                  </button>
+                  <button class="btn btn-outline-danger btn-lg" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                    <i class="fas fa-times me-2"></i> Cancel Request
+                  </button>
+                </div>
               <% } else { %>
                 <div class="btn-group btn-group-lg" role="group">
                   <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
@@ -90,11 +81,10 @@
     </div>
 
     <!-- Main Content Row -->
-    <div class="col-12">
-      <div class="row">
+    <div class="col-split" style="display: flex; flex-direction: row; gap: 16px; margin-bottom: 16px;" 
+         data-is-friend="<%= typeof profileUser !== 'undefined' ? isFriend : 'true' %>">
         <!-- About Section -->
-        <div class="col-lg-8 mb-4">
-          <div class="card h-100">
+        <div class="card" style="flex: 1; margin-right: 0px;">
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="fas fa-info-circle me-2"></i>About
@@ -204,11 +194,8 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Friends Section -->
-        <div class="col-lg-4 mb-4">
-          <div class="card h-100">
+                  <!-- Friends Section -->
+        <div class="card" style="flex: 1; margin-left: 0px;">
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="fas fa-users me-2"></i>
@@ -237,9 +224,14 @@
                     <i class="fas fa-user-plus me-1"></i> Send Friend Request
                   </button>
                 <% } else if (pendingRequest.senderId === user.id) { %>
-                  <button class="btn btn-secondary btn-sm mt-3" disabled>
-                    <i class="fas fa-clock me-1"></i> Request Sent
-                  </button>
+                  <div class="d-flex gap-2 mt-3 justify-content-center">
+                    <button class="btn btn-secondary btn-sm" disabled>
+                      <i class="fas fa-clock me-1"></i> Request Sent
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                      <i class="fas fa-times me-1"></i> Cancel Request
+                    </button>
+                  </div>
                 <% } else { %>
                   <div class="btn-group btn-group-sm mt-3" role="group">
                     <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
@@ -315,10 +307,12 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+ 
+
+    <div class="container-fluid profile-page">
 
 <% if (typeof profileUser === 'undefined') { %>
   <!-- Create Post Form - only show for current user -->
@@ -329,8 +323,8 @@
                 <i class="fas fa-edit me-2"></i>
                   Create New Post
               </h5>
-            </div>
-      <div class="card-body">
+              </div>
+              <div class="card-body">
         <div class="d-flex align-items-start">
           <div class="user-avatar-small me-3 flex-shrink-0">
             <% if (user.useGravatar && user.email) { %>
@@ -412,215 +406,151 @@
 <!-- Posts Feed -->
 <div class="col-12">
   <div class="card">
-                <div class="card-header">
-              <h5 class="mb-0">
-                <i class="fas fa-newspaper me-2"></i>
-                <% if (typeof profileUser !== 'undefined') { %>
-                  <%= profileUser.firstName %>'s Posts
-                <% } else { %>
-                  My Posts
-                <% } %>
-              </h5>
-            </div>
-    <div class="card-body">
-      <% if (typeof profileUser !== 'undefined' && !isFriend) { %>
-      <!-- Not Friends - Show Restricted Message -->
-      <div class="text-center text-muted py-5">
-        <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
-        <h5>Posts are Private</h5>
-        <p class="text-muted">Become friends with <%= profileUser.firstName %> to see their posts!</p>
-        <div class="mt-3">
-          <small class="text-muted">
-            <i class="fas fa-newspaper me-1"></i>
-            <%= profileUser.firstName %> has shared posts, but you need to connect first to see them.
-          </small>
-        </div>
-        <% if (!pendingRequest) { %>
-          <button class="btn btn-primary mt-3" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
-            <i class="fas fa-user-plus me-1"></i> Send Friend Request
-          </button>
-        <% } else if (pendingRequest.senderId === user.id) { %>
-          <button class="btn btn-secondary mt-3" disabled>
-            <i class="fas fa-clock me-1"></i> Friend Request Sent
-          </button>
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="fas fa-newspaper me-2"></i>
+        <% if (typeof profileUser !== 'undefined') { %>
+          <%= profileUser.firstName %>'s Posts
         <% } else { %>
-          <div class="btn-group mt-3" role="group">
-            <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
-              <i class="fas fa-check me-1"></i> Accept Request
-            </button>
-            <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
-              <i class="fas fa-times me-1"></i> Decline
-            </button>
-          </div>
+          My Posts
         <% } %>
+      </h5>
+      <button 
+        class="btn btn-outline-secondary btn-sm" 
+        onclick="refreshPosts()" 
+        title="Refresh posts feed"
+      >
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+    </div>
+    <div class="card-body">
+      <!-- Loading State -->
+      <div id="postsLoading" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading posts...</p>
       </div>
-      <% } else if (posts.length === 0) { %>
-      <!-- No Posts -->
-      <div class="text-center text-muted py-5">
-        <i class="fas fa-newspaper fa-3x mb-3"></i>
-        <h5>No posts yet</h5>
-        <p class="text-muted">Share your thoughts with the world!</p>
-        <% if (typeof profileUser === 'undefined') { %>
-          <button class="btn btn-primary" onclick="openCreatePostModal()">
-            <i class="fas fa-plus me-1"></i> Create Post
-          </button>
-        <% } %>
-      </div>
-      <% } else { %>
+
       <!-- Posts List -->
-      <div class="posts-list">
-        <% posts.forEach(post => { %>
-        <div class="post-item mb-4 p-4 border rounded shadow-sm" data-post-id="<%= post.id %>">
-            <!-- Post Header -->
-            <div class="d-flex align-items-start mb-3">
-              <div class="user-avatar-small me-3">
-                <% if (post.user.useGravatar && post.user.email) { %>
-                  <img src="<%= getGravatarUrl(post.user.email, 200) %>" alt="Profile Picture" class="profile-image">
-                <% } else if (post.user.profilePicture && (post.user.profilePicture.startsWith('http') || post.user.profilePicture.startsWith('/uploads/') || post.user.profilePicture.includes('cloudinary.com'))) { %>
-                  <img src="<%= post.user.profilePicture %>" alt="Profile Picture" class="profile-image">
-                <% } else { %>
-                  <%= (post.user.firstName || '').charAt(0) %><%= (post.user.lastName || '').charAt(0) %>
-                <% } %>
-              </div>
-              <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-start">
-                  <div>
-                    <h6 class="mb-1">
-                      <a href="/profile/<%= post.user.id %>" class="text-decoration-none fw-bold text-primary">
-                        <%= post.user.firstName || '' %> <%= post.user.lastName || '' %>
-                      </a>
-                    </h6>
-                    <div class="d-flex align-items-center gap-2">
-                      <small class="text-muted">
-                        <a href="/profile/<%= post.user.id %>" class="text-decoration-none text-muted">@<%= post.user.username %></a>
-                      </small>
-                      <small class="text-muted">•</small>
-                      <small class="text-muted">
-                        <%= new Date(post.createdAt).toLocaleDateString() %> at <%= new Date(post.createdAt).toLocaleTimeString() %>
-                      </small>
-                    </div>
-                  </div>
-                  <% if (typeof profileUser === 'undefined' && post.userId === user.id) { %>
-                    <div class="dropdown">
-                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-h"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item edit-post-btn" href="#" data-post-id="<%= post.id %>" data-post-content="<%= post.content.replace(/'/g, "\\'") %>">
-                          <i class="fas fa-edit me-2"></i> Edit
-                        </a></li>
-                        <li><a class="dropdown-item text-danger delete-post-btn" href="#" data-post-id="<%= post.id %>">
-                          <i class="fas fa-trash me-2"></i> Delete
-                        </a></li>
-                      </ul>
-                    </div>
-                  <% } %>
-                </div>
-              </div>
-            </div>
+      <div id="postsList" class="d-none"></div>
 
-            <!-- Post Content -->
-            <div class="post-content">
-              <p><%= post.content.replace(/\n/g, "<br>") %></p>
-              
-              <!-- Post Image -->
-              <% if (post.photoUrl) { %>
-                <div class="post-photo">
-                  <img src="<%= post.photoUrl %>" alt="Post image" class="img-fluid rounded" style="max-width: 100%; max-height: 600px; height: auto; object-fit: contain;">
-                </div>
-              <% } %>
-            </div>
-
-            <!-- Post Actions -->
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-              <!-- Action Buttons -->
-              <div class="d-flex gap-2">
-                <!-- Like Button -->
-                <button class="btn btn-sm like-btn <%= post.likes.some(like => like.userId === user.id) ? 'liked' : 'btn-outline-primary' %>" 
-                        id="like-btn-<%= post.id %>"
-                        onclick="toggleLike('<%= post.id %>')" 
-                        data-post-id="<%= post.id %>">
-                  <i class="fas fa-heart"></i> 
-                  Like
-                </button>
-                
-                <!-- Comment Button -->
-                <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('<%= post.id %>')">
-                  <i class="fas fa-comment"></i> 
-                  Comment
-                </button>
-              </div>
-              
-              <!-- Counters -->
-              <div class="text-muted small">
-                <span class="likes-count" onclick="showLikes('<%= post.id %>')">
-                  <%= post.likes.length %> like<%= post.likes.length !== 1 ? 's' : '' %>
-                </span>
-                <span class="comments-count ms-2" onclick="toggleComments('<%= post.id %>')">
-                  <%= post.comments.length %> comment<%= post.comments.length !== 1 ? 's' : '' %>
-                </span>
-              </div>
-            </div>
-
-            <!-- Comments Section -->
-            <div class="comments-section mt-3 d-none" id="comments-<%= post.id %>">
-              <div class="comments-list mb-3" id="comments-list-<%= post.id %>">
-                <% if (post.comments && post.comments.length > 0) { %>
-                  <% post.comments.forEach(comment => { %>
-                  <div class="comment-item p-3 border-bottom" data-comment-id="<%= comment.id %>">
-                    <div class="d-flex align-items-start">
-                      <div class="user-avatar-tiny me-2">
-                        <% if (comment.user.useGravatar && comment.user.email) { %>
-                          <img src="<%= getGravatarUrl(comment.user.email, 200) %>" alt="Profile Picture" class="profile-image">
-                        <% } else if (comment.user.profilePicture && (comment.user.profilePicture.startsWith('http') || comment.user.profilePicture.startsWith('/uploads/') || comment.user.profilePicture.includes('cloudinary.com'))) { %>
-                          <img src="<%= comment.user.profilePicture %>" alt="Profile Picture" class="profile-image">
-                        <% } else { %>
-                          <%= (comment.user.firstName || '').charAt(0) %><%= (comment.user.lastName || '').charAt(0) %>
-                        <% } %>
-                      </div>
-                      <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between align-items-start">
-                          <div>
-                            <small class="fw-bold">
-                              <a href="/profile/<%= comment.user.id %>" class="text-decoration-none">
-                                <%= comment.user.firstName || '' %> <%= comment.user.lastName || '' %>
-                              </a>
-                            </small>
-                            <div class="comment-content mt-1"><%= comment.content %></div>
-                            <small class="text-muted"><%= new Date(comment.createdAt).toLocaleDateString() %></small>
-                          </div>
-                          <% if (comment.userId === user.id) { %>
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-sm btn-outline-primary" onclick="editComment('<%= comment.id %>', '<%= post.id %>', '<%= comment.content %>')" title="Edit comment">
-                              <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('<%= comment.id %>')" title="Delete comment">
-                              <i class="fas fa-trash"></i>
-                            </button>
-                          </div>
-                          <% } %>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <% }); %>
-                <% } else { %>
-                  <p class="text-muted text-center">No comments yet</p>
-                <% } %>
-              </div>
-              <div class="comment-form">
-                <div class="input-group">
-                  <input type="text" class="form-control form-control-sm" placeholder="Write a comment..." id="comment-input-<%= post.id %>" onkeypress="handleCommentKeyPress(event, '<%= post.id %>')">
-                  <button class="btn btn-primary btn-sm" onclick="submitComment('<%= post.id %>')">
-                    <i class="fas fa-paper-plane"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        <% }); %>
+      <!-- Load More Button -->
+      <div id="loadMoreContainer" class="text-center mt-3 d-none">
+        <button
+          id="loadMoreBtn"
+          class="btn btn-outline-primary"
+          onclick="loadMorePosts()"
+        >
+          <i
+            class="fas fa-spinner fa-spin d-none"
+            id="loadMoreSpinner"
+          ></i>
+          Load More Posts
+        </button>
       </div>
-      <% } %>
+
+      <!-- No Posts -->
+      <div id="noPosts" class="text-center text-muted d-none">
+        <div class="py-5">
+          <% if (typeof profileUser !== 'undefined' && !isFriend) { %>
+            <!-- Not Friends - Show Privacy Message -->
+            <i class="fas fa-lock fa-3x mb-3 text-warning"></i>
+            <h5 class="text-muted">Posts are Private</h5>
+            <p class="text-muted">Become friends with <%= profileUser.firstName %> to see their posts!</p>
+            <div class="mt-3">
+              <small class="text-muted">
+                <i class="fas fa-newspaper me-1"></i>
+                <%= profileUser.firstName %> has posts, but you need to connect first to see them.
+              </small>
+            </div>
+            <% if (!pendingRequest) { %>
+              <button class="btn btn-primary btn-sm mt-3" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                <i class="fas fa-user-plus me-1"></i> Send Friend Request
+              </button>
+            <% } else if (pendingRequest.senderId === user.id) { %>
+              <div class="d-flex gap-2 mt-3 justify-content-center">
+                <button class="btn btn-secondary btn-sm" disabled>
+                  <i class="fas fa-clock me-1"></i> Request Sent
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                  <i class="fas fa-times me-1"></i> Cancel Request
+                </button>
+              </div>
+            <% } else { %>
+              <div class="btn-group btn-group-sm mt-3" role="group">
+                <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
+                  <i class="fas fa-check me-1"></i> Accept
+                </button>
+                <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
+                  <i class="fas fa-times me-1"></i> Decline
+                </button>
+              </div>
+            <% } %>
+          <% } else { %>
+            <!-- Friends or Own Profile - Show No Posts Message -->
+            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No posts to show</h5>
+            <p class="text-muted">
+              <% if (typeof profileUser !== 'undefined') { %>
+                <%= profileUser.firstName %> hasn't shared any posts yet.
+              <% } else { %>
+                You haven't shared any posts yet. Share your thoughts with the world!
+              <% } %>
+            </p>
+            <% if (typeof profileUser === 'undefined') { %>
+              <div class="mt-3">
+                <button class="btn btn-primary me-2" onclick="openCreatePostModal()">
+                  <i class="fas fa-plus"></i> Create Post
+                </button>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<!-- Unfriend Confirmation Modal -->
+<div
+  class="modal fade"
+  id="unfriendModal"
+  tabindex="-1"
+  aria-labelledby="unfriendModalLabel"
+  aria-hidden="true"
+  style="z-index: 9999;"
+>
+  <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="unfriendModalLabel">
+          <i class="fas fa-user-minus text-danger me-2"></i>Remove Friend
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to remove <strong id="unfriendUserName"></strong> from your friends?</p>
+        <p class="text-muted small mb-0">
+          <i class="fas fa-info-circle me-1"></i>
+          This action cannot be undone. You'll need to send a new friend request to reconnect.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" id="confirmUnfriendBtn">
+          <i class="fas fa-user-minus me-1"></i>Remove Friend
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -682,7 +612,50 @@
   </div>
 </div>
 
+<!-- Likes Modal -->
+<div
+  class="modal fade"
+  id="likesModal"
+  tabindex="-1"
+  aria-labelledby="likesModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="likesModalLabel">People who liked this post</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div id="likesList">
+          <!-- Likes will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="/js/profile.js"></script>
+
+<script>
+// Initialize posts using dashboard logic
+document.addEventListener('DOMContentLoaded', function() {
+  // Call the loadPosts function to load posts from backend
+  if (typeof loadPosts === 'function') {
+    console.log('Profile page loaded with dashboard logic');
+    // Load posts from backend
+    loadPosts(true);
+  } else {
+    console.error('loadPosts function not found');
+  }
+});
+</script>
 
 <!-- Create Post Modal -->
 <div
@@ -949,6 +922,7 @@
               value="<%= user.location || '' %>"
               placeholder="City, Country (e.g., London, UK)"
               maxlength="100"
+              autocomplete="off"
             />
           </div>
           

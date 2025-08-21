@@ -12,6 +12,117 @@ const currentUserId = document
   .querySelector('meta[name="user-id"]')
   ?.getAttribute("content");
 
+// Debug: Log the current user ID
+console.log("[PROFILE] Current user ID:", currentUserId);
+
+// Safety check: If currentUserId is not available, try to get it from the profile page data
+if (!currentUserId) {
+  const profileUserElement = document.querySelector("[data-profile-user-id]");
+  if (profileUserElement) {
+    const profileUserId = profileUserElement.getAttribute(
+      "data-profile-user-id"
+    );
+    console.log("[PROFILE] Using profile user ID as fallback:", profileUserId);
+  }
+}
+
+// Global variables for pagination
+let currentPage = 1;
+let hasNextPage = true;
+let isLoading = false;
+
+// Function to send friend request from profile page
+function sendFriendRequest(userId, userName = "") {
+  console.log(
+    `[PROFILE] sendFriendRequest called for user ${userId} (${userName})`
+  );
+
+  // Find the button that was clicked and update it immediately
+  const addFriendBtn = document.querySelector(
+    `button[onclick*="sendFriendRequest('${userId}")`
+  );
+  if (addFriendBtn) {
+    // Update button to show "Request Sent" state
+    addFriendBtn.className = "btn btn-secondary btn-lg";
+    addFriendBtn.disabled = true;
+    addFriendBtn.innerHTML = '<i class="fas fa-clock me-2"></i> Request Sent';
+    addFriendBtn.onclick = null; // Remove onclick handler
+  }
+
+  fetch("/friends/request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ receiverId: userId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+                <div><i class="fas fa-user-plus"></i> Friend request sent to ${
+                  userName || "user"
+                }!</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Reload the page to update the UI
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        // Reset button to original state on error
+        if (addFriendBtn) {
+          addFriendBtn.className = "btn btn-primary btn-lg";
+          addFriendBtn.disabled = false;
+          addFriendBtn.innerHTML =
+            '<i class="fas fa-user-plus me-2"></i> Add Friend';
+          addFriendBtn.onclick = `sendFriendRequest('${userId}', '${userName}')`;
+        }
+
+        // Show error notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+                <div><i class="fas fa-exclamation-triangle"></i> ${
+                  data.error || "Could not send request"
+                }</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      }
+    })
+    .catch((error) => {
+      console.error("Error sending friend request:", error);
+
+      // Reset button to original state on error
+      if (addFriendBtn) {
+        addFriendBtn.className = "btn btn-primary btn-lg";
+        addFriendBtn.disabled = false;
+        addFriendBtn.innerHTML =
+          '<i class="fas fa-user-plus me-2"></i> Add Friend';
+        addFriendBtn.onclick = `sendFriendRequest('${userId}', '${userName}')`;
+      }
+
+      // Show error notification
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> Could not send request. Please try again.</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    });
+}
+
 // Function to get user avatar (Gravatar or initials)
 function getUserAvatar(user) {
   // Check if user uses Gravatar and has email
@@ -52,8 +163,33 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("viewAllFriendsModal")
   );
 
+  // Prevent scrollbar from disappearing when edit profile modal opens
+  document
+    .getElementById("editProfileModal")
+    .addEventListener("show.bs.modal", function () {
+      // Store current scrollbar width to prevent layout shift
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.paddingRight = scrollbarWidth + "px";
+      document.body.style.overflow = "scroll";
+    });
+
+  document
+    .getElementById("editProfileModal")
+    .addEventListener("hidden.bs.modal", function () {
+      // Restore original body styles
+      document.body.style.paddingRight = "";
+      document.body.style.overflow = "";
+    });
+
   // Initialize photo handling
   initializePhotoHandling();
+
+  // Make sendFriendRequest function globally available
+  window.sendFriendRequest = sendFriendRequest;
+
+  // Make cancelFriendRequest function globally available
+  window.cancelFriendRequest = cancelFriendRequest;
 
   // Add event listeners for remove friend buttons in the modal
   document.addEventListener("click", function (e) {
@@ -83,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const charCount = this.value.length;
       document.getElementById("editCharCount").textContent = charCount;
       document.getElementById("editCharCount").style.color =
-        charCount > 200 ? "#dc3545" : charCount > 150 ? "#ffc107" : "#6c757d";
+        charCount > 250 ? "#dc3545" : charCount > 200 ? "#ffc107" : "#6c757d";
     });
   }
 
@@ -120,25 +256,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Add edit post handlers
-  document.querySelectorAll(".edit-post-btn").forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      const postId = this.dataset.postId;
-      const content = this.dataset.postContent;
-      editPost(postId, content);
-    });
-  });
-
-  // Add delete post handlers
-  document.querySelectorAll(".delete-post-btn").forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      const postId = this.dataset.postId;
-      deletePost(postId);
-    });
-  });
-
   // Add event listeners for remove friend buttons
   document.querySelectorAll(".remove-friend-btn").forEach((btn) => {
     btn.addEventListener("click", function (e) {
@@ -167,28 +284,12 @@ function createPost() {
   const content = document.getElementById("postContent").value.trim();
 
   if (!content) {
-    const alertDiv = document.createElement("div");
-    alertDiv.className =
-      "alert alert-warning alert-dismissible fade show position-fixed";
-    alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content for your post.</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);
+    showNotification("Please enter some content for your post.", "warning");
     return;
   }
 
   if (content.length > 250) {
-    const alertDiv = document.createElement("div");
-    alertDiv.className =
-      "alert alert-warning alert-dismissible fade show position-fixed";
-    alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Post content cannot exceed 250 characters.</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);
+    showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
   }
 
@@ -197,56 +298,62 @@ function createPost() {
   createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
   createBtn.disabled = true;
 
+  console.log(`[PROFILE] Creating post with content:`, content);
+  console.log(`[PROFILE] Current user ID:`, currentUserId);
+  console.log(`[PROFILE] Profile user ID:`, profileUserId);
+
   fetch("/posts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "same-origin", // Include cookies/session
     body: JSON.stringify({ content }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log(`[PROFILE] Post creation response status:`, response.status);
+      console.log(
+        `[PROFILE] Post creation response headers:`,
+        response.headers
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Log the raw response text to see what we're actually getting
+      return response.text().then((text) => {
+        console.log(`[PROFILE] Raw response text:`, text);
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          console.error(`[PROFILE] JSON parse error:`, e);
+          console.error(`[PROFILE] Response was not valid JSON:`, text);
+          throw new Error(
+            `Server returned invalid JSON: ${text.substring(0, 100)}...`
+          );
+        }
+      });
+    })
     .then((data) => {
       if (data.success) {
         createPostModal.hide();
 
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-check"></i> Post created successfully!</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        // Clear the form
+        document.getElementById("postContent").value = "";
+        document.getElementById("charCount").textContent = "0";
+        document.getElementById("charCount").style.color = "#6c757d";
 
-        // Optionally reload after a short delay to show the new post
-        setTimeout(() => {
-          location.reload();
-        }, 1000);
+        // Show success notification
+        showNotification("Post created successfully!", "success");
+
+        // Soft refresh the posts feed to show the new post
+        loadPosts(true);
       } else {
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${
-                data.error || "Failed to create post"
-              }</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+        showNotification(data.error || "Failed to create post", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to create post. Please try again.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
+      showNotification("Failed to create post. Please try again.", "danger");
     })
     .finally(() => {
       createBtn.innerHTML = originalText;
@@ -254,26 +361,76 @@ function createPost() {
     });
 }
 
-function editPost(postId, content) {
-  document.getElementById("editPostId").value = postId;
-  document.getElementById("editPostContent").value = content;
-  document.getElementById("editCharCount").textContent = content.length;
-  editPostModal.show();
+function editPost(postId) {
+  // Check if currentUserId is available
+  if (!currentUserId) {
+    showNotification(
+      "User authentication error. Please refresh the page.",
+      "danger"
+    );
+    return;
+  }
+
+  // Fetch the post data and open edit modal
+  fetch(`/posts/${postId}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.post) {
+        // Check if the post belongs to the current user
+        if (data.post.user.id === currentUserId) {
+          // Populate the edit modal
+          document.getElementById("editPostId").value = postId;
+          document.getElementById("editPostContent").value = data.post.content;
+          document.getElementById("editCharCount").textContent =
+            data.post.content.length;
+
+          // Reset character count color
+          const charCountElement = document.getElementById("editCharCount");
+          if (data.post.content.length > 250) {
+            charCountElement.style.color = "#dc3545";
+          } else if (data.post.content.length > 200) {
+            charCountElement.style.color = "#ffc107";
+          } else {
+            charCountElement.style.color = "#6c757d";
+          }
+
+          // Show the edit modal
+          editPostModal.show();
+        } else {
+          showNotification("You can only edit your own posts.", "warning");
+        }
+      } else {
+        showNotification("Post not found.", "warning");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching post:", error);
+      showNotification(
+        "Failed to load post for editing. Please try again.",
+        "danger"
+      );
+    });
 }
 
 function saveEditedPost() {
   const content = document.getElementById("editPostContent").value.trim();
 
   if (!content) {
-    const alertDiv = document.createElement("div");
-    alertDiv.className =
-      "alert alert-warning alert-dismissible fade show position-fixed";
-    alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content for your post.</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);
+    showNotification("Please enter some content for your post.", "warning");
+    return;
+  }
+
+  if (content.length > 250) {
+    showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
   }
 
@@ -292,32 +449,28 @@ function saveEditedPost() {
     .then((data) => {
       if (data.success) {
         editPostModal.hide();
-        location.reload(); // Refresh to show the updated post
+
+        // Update the post content in the DOM instead of reloading
+        const postId = document.getElementById("editPostId").value;
+        const postElement = document.querySelector(
+          `[data-post-id="${postId}"]`
+        );
+        if (postElement) {
+          const postContentElement =
+            postElement.querySelector(".post-content p");
+          if (postContentElement) {
+            postContentElement.textContent = content;
+          }
+        }
+
+        showNotification("Post updated successfully", "success");
       } else {
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${
-                data.error || "Failed to update post"
-              }</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+        showNotification(data.error || "Failed to update post", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to update post. Please try again.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
+      showNotification("Failed to update post. Please try again.", "danger");
     })
     .finally(() => {
       saveBtn.innerHTML = originalText;
@@ -325,42 +478,92 @@ function saveEditedPost() {
     });
 }
 
-function deletePost(postId) {
-  if (confirm("Are you sure you want to delete this post?")) {
+async function deletePost(postId) {
+  // Use custom confirmation modal instead of browser confirm
+  const confirmed = await confirmDelete(
+    "Are you sure you want to delete this post?"
+  );
+
+  if (confirmed) {
     fetch(`/posts/${postId}`, {
       method: "DELETE",
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          location.reload(); // Refresh to remove the deleted post
+          // Remove the post from the DOM instead of reloading
+          const postElement = document.querySelector(
+            `[data-post-id="${postId}"]`
+          );
+          if (postElement) {
+            postElement.remove();
+          }
+          // Refresh posts to update pagination
+          loadPosts(true);
+          showNotification("Post deleted successfully", "success");
         } else {
-          const alertDiv = document.createElement("div");
-          alertDiv.className =
-            "alert alert-danger alert-dismissible fade show position-fixed";
-          alertDiv.innerHTML = `
-                <div><i class="fas fa-exclamation-triangle"></i> ${
-                  data.error || "Failed to delete post"
-                }</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              `;
-          document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 5000);
+          showNotification(data.error || "Failed to delete post", "danger");
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> Failed to delete post. Please try again.</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+        showNotification("Failed to delete post. Please try again.", "danger");
       });
   }
+}
+
+function confirmDelete(message) {
+  return new Promise((resolve) => {
+    const modalHTML = `
+      <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirm Delete</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Remove existing modal if any
+    const existingModal = document.getElementById("confirmDeleteModal");
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Add modal to page
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+    // Show modal
+    const confirmModal = new bootstrap.Modal(
+      document.getElementById("confirmDeleteModal")
+    );
+    confirmModal.show();
+
+    // Handle confirm button click
+    document
+      .getElementById("confirmDeleteBtn")
+      .addEventListener("click", () => {
+        confirmModal.hide();
+        resolve(true);
+      });
+
+    // Handle modal close
+    document
+      .getElementById("confirmDeleteModal")
+      .addEventListener("hidden.bs.modal", () => {
+        resolve(false);
+      });
+  });
 }
 
 function toggleLike(postId) {
@@ -379,13 +582,8 @@ function toggleLike(postId) {
           likeButton.classList.add("liked");
           icon.style.color = "white";
 
-          // Update likes count - find the post container and then the likes count
-          const postContainer = document.querySelector(
-            `[data-post-id="${postId}"]`
-          );
-          const likesElement = postContainer
-            ? postContainer.querySelector(".likes-count")
-            : null;
+          // Update likes count - find the likes count element directly
+          const likesElement = document.getElementById(`likes-${postId}`);
           if (likesElement) {
             const currentLikes = parseInt(likesElement.textContent) || 0;
             likesElement.textContent = `${currentLikes + 1} like${
@@ -398,13 +596,8 @@ function toggleLike(postId) {
           likeButton.classList.add("btn-outline-primary");
           icon.style.color = "";
 
-          // Update likes count - find the post container and then the likes count
-          const postContainer = document.querySelector(
-            `[data-post-id="${postId}"]`
-          );
-          const likesElement = postContainer
-            ? postContainer.querySelector(".likes-count")
-            : null;
+          // Update likes count - find the likes count element directly
+          const likesElement = document.getElementById(`likes-${postId}`);
           if (likesElement) {
             const currentLikes = parseInt(likesElement.textContent) || 1;
             likesElement.textContent = `${currentLikes - 1} like${
@@ -441,8 +634,12 @@ function toggleLike(postId) {
 }
 
 function toggleComments(postId) {
-  const commentsSection = document.getElementById(`comments-${postId}`);
+  console.log(`[PROFILE] toggleComments called for post ${postId}`);
+  const commentsSection = document.getElementById(`comments-section-${postId}`);
+  console.log(`[PROFILE] Comments section found:`, commentsSection);
+
   if (commentsSection.classList.contains("d-none")) {
+    console.log(`[PROFILE] Showing comments section`);
     commentsSection.classList.remove("d-none");
     // Focus on the comment input when opening
     const commentInput = document.getElementById(`comment-input-${postId}`);
@@ -450,8 +647,1058 @@ function toggleComments(postId) {
       commentInput.focus();
     }
   } else {
+    console.log(`[PROFILE] Hiding comments section`);
     commentsSection.classList.add("d-none");
   }
+}
+
+// Function to format date/time - copied from dashboard
+function formatDateTime(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "just now";
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+  } else if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  } else {
+    return date.toLocaleDateString();
+  }
+}
+
+// Function to load posts from backend - copied from dashboard
+function loadPosts(reset = true) {
+  console.log(`[PROFILE] loadPosts called with reset: ${reset}`);
+
+  if (isLoading) {
+    console.log("[PROFILE] Already loading posts, skipping...");
+    return Promise.resolve();
+  }
+
+  const postsLoading = document.getElementById("postsLoading");
+  const postsList = document.getElementById("postsList");
+  const noPosts = document.getElementById("noPosts");
+  const loadMoreContainer = document.getElementById("loadMoreContainer");
+
+  if (reset) {
+    // Reset pagination when loading fresh posts
+    currentPage = 1;
+    hasNextPage = true;
+    postsList.innerHTML = "";
+    loadMoreContainer.classList.add("d-none");
+  }
+
+  if (!hasNextPage && !reset) return Promise.resolve();
+
+  isLoading = true;
+  postsLoading.classList.remove("d-none");
+  postsList.classList.remove("d-none");
+  noPosts.classList.add("d-none");
+
+  // Get the profile user ID from the page
+  let profileUserId = currentUserId; // Default to current user
+  const profileUserElement = document.querySelector("[data-profile-user-id]");
+  if (profileUserElement) {
+    profileUserId = profileUserElement.getAttribute("data-profile-user-id");
+  }
+
+  // Check if we're viewing our own profile or if we're friends with the profile user
+  const isOwnProfile = profileUserId === currentUserId;
+  const isFriend =
+    document
+      .querySelector("[data-is-friend]")
+      ?.getAttribute("data-is-friend") === "true";
+
+  // If not our own profile and not friends, don't try to load posts
+  if (!isOwnProfile && !isFriend) {
+    console.log(
+      `[PROFILE] Not friends with user ${profileUserId}, skipping posts load`
+    );
+    postsLoading.classList.add("d-none");
+    isLoading = false;
+    showNoPostsMessage();
+    return Promise.resolve();
+  }
+
+  console.log(
+    `[PROFILE] Loading posts for user ${profileUserId}, page: ${currentPage}, reset: ${reset}, isOwnProfile: ${isOwnProfile}, isFriend: ${isFriend}`
+  );
+
+  return fetch(
+    `/profile/${profileUserId}/posts?page=${currentPage}&limit=10&_t=${Date.now()}`,
+    {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    }
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      postsLoading.classList.add("d-none");
+      isLoading = false;
+
+      console.log(`[PROFILE] Posts API response:`, data);
+
+      if (data.posts && data.posts.length > 0) {
+        console.log(`[PROFILE] Displaying ${data.posts.length} posts`);
+        if (reset) {
+          displayPosts(data.posts);
+        } else {
+          appendPosts(data.posts);
+        }
+
+        // Update pagination state
+        hasNextPage = data.pagination.hasNextPage;
+        currentPage = data.pagination.currentPage;
+
+        // Show/hide load more button
+        updateLoadMoreButton();
+      } else if (reset) {
+        console.log(`[PROFILE] No posts found, showing no posts message`);
+        // Show appropriate message based on whether user has friends
+        showNoPostsMessage();
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading posts:", error);
+      postsLoading.classList.add("d-none");
+      isLoading = false;
+      if (reset) {
+        showNoPostsMessage();
+      }
+      throw error;
+    });
+}
+
+// Function to refresh posts (force reload)
+function refreshPosts() {
+  console.log("[PROFILE] Refreshing posts...");
+
+  // Clear any cached data
+  currentPage = 1;
+  hasNextPage = true;
+
+  // Force reload posts
+  loadPosts(true);
+
+  // Show feedback to user
+  showNotification("Posts refreshed!", "success");
+}
+
+// Function to load more posts
+function loadMorePosts() {
+  if (isLoading || !hasNextPage) return;
+
+  const loadMoreBtn = document.getElementById("loadMoreBtn");
+  const loadMoreSpinner = document.getElementById("loadMoreSpinner");
+
+  loadMoreBtn.disabled = true;
+  loadMoreSpinner.classList.remove("d-none");
+
+  currentPage++;
+  loadPosts(false).finally(() => {
+    loadMoreBtn.disabled = false;
+    loadMoreSpinner.classList.add("d-none");
+  });
+}
+
+// Function to update load more button
+function updateLoadMoreButton() {
+  const loadMoreContainer = document.getElementById("loadMoreContainer");
+  if (hasNextPage) {
+    loadMoreContainer.classList.remove("d-none");
+  } else {
+    loadMoreContainer.classList.add("d-none");
+  }
+}
+
+// Function to show no posts message
+function showNoPostsMessage() {
+  const postsList = document.getElementById("postsList");
+  const noPosts = document.getElementById("noPosts");
+
+  postsList.classList.add("d-none");
+  noPosts.classList.remove("d-none");
+}
+
+// Function to show notification
+function showNotification(message, type = "info") {
+  // Simple notification - you can enhance this with a proper notification library
+  console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+// Function to display posts - copied from dashboard
+function displayPosts(posts) {
+  const postsList = document.getElementById("postsList");
+  const noPosts = document.getElementById("noPosts");
+
+  console.log(`[PROFILE] displayPosts called with ${posts.length} posts`);
+
+  if (posts.length === 0) {
+    console.log(`[PROFILE] No posts to display, showing no posts message`);
+    postsList.classList.add("d-none");
+    noPosts.classList.remove("d-none");
+    return;
+  }
+
+  console.log(`[PROFILE] Displaying posts, hiding no posts message`);
+  console.log(`[PROFILE] Posts data:`, posts);
+
+  // Debug: Log the first post's likes structure
+  if (posts.length > 0) {
+    console.log(`[PROFILE] First post likes:`, posts[0].likes);
+    console.log(`[PROFILE] First post likes type:`, typeof posts[0].likes);
+    console.log(
+      `[PROFILE] First post likes length:`,
+      posts[0].likes ? posts[0].likes.length : "undefined"
+    );
+  }
+
+  noPosts.classList.add("d-none");
+  postsList.classList.remove("d-none");
+
+  postsList.innerHTML = posts
+    .map(
+      (post) => `
+<div class="post-item mb-4 p-3 border rounded" data-post-id="${post.id}">
+  <div class="d-flex align-items-start mb-3">
+    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+      ${getUserAvatar(post.user)}
+    </div>
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">
+            <a href="/profile/${
+              post.user.id
+            }" class="text-decoration-none fw-bold text-primary">
+              ${
+                post.user.firstName && post.user.lastName
+                  ? `${post.user.firstName} ${post.user.lastName}`
+                  : post.user.firstName || post.user.lastName || "User"
+              }
+            </a>
+          </h6>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <small class="text-muted">
+              <a href="/profile/${
+                post.user.id
+              }" class="text-decoration-none text-muted">@${
+        post.user.username
+      }</a>
+            </small>
+            <small class="text-muted">•</small>
+            <small class="text-muted">${formatDateTime(post.createdAt)}</small>
+          </div>
+        </div>
+        ${
+          post.user.id === currentUserId
+            ? `
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
+              Edit
+              </a></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
+                Delete
+              </a></li>
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    </div>
+  </div>
+  ${
+    post.content || post.photoUrl
+      ? `<div class="post-content">${
+          post.content
+            ? `<p>${post.content.replace(
+                /\n/g,
+                post.photoUrl ? "" : "<br>"
+              )}</p>`
+            : ""
+        }${
+          post.photoUrl
+            ? `<div class="post-photo"><img src="${post.photoUrl}" alt="Post photo" class="img-fluid rounded" style="width: 100%; max-height: 600px; height: auto; object-fit: contain; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;" onclick="openPhotoModal('${post.photoUrl}')" /></div>`
+            : ""
+        }</div>`
+      : ""
+  }
+
+  <!-- Post Actions -->
+  <div class="post-actions ${
+    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
+  } border-top">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm ${
+          post.likes &&
+          post.likes.some((like) => like.user.id === currentUserId)
+            ? "liked"
+            : "btn-outline-primary"
+        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        post.id
+      }')" data-post-id="${post.id}">
+          <i class="fas fa-heart" style="color: ${
+            post.likes &&
+            post.likes.some((like) => like.user.id === currentUserId)
+              ? "red"
+              : "inherit"
+          };"></i> ${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Liked"
+          : "Like"
+      }
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          post.id
+        }')">
+          <i class="fas fa-comment"></i> Comment
+        </button>
+      </div>
+      <!-- Counters -->
+      <div class="text-muted small">
+        <span class="likes-count" id="likes-${
+          post.id
+        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+        (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+      } like${
+        ((post.likes && Array.isArray(post.likes) && post.likes.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+        <span class="comments-count ms-2" id="comments-${
+          post.id
+        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+        (post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+        0
+      } comment${
+        ((post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section mt-3 d-none" id="comments-section-${post.id}">
+    <div class="comments-list mb-3" id="comments-list-${post.id}">
+      ${
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (comment) => `
+        <div class="comment-item p-2 border-bottom" data-comment-id="${
+          comment.id
+        }">
+          <div class="d-flex align-items-start">
+            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+              ${getUserAvatar(comment.user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <small class="fw-bold">
+                    <a href="/profile/${
+                      comment.user.id
+                    }" class="text-decoration-none">
+                      ${comment.user.firstName || ""} ${
+                  comment.user.lastName || ""
+                }
+                    </a>
+                  </small>
+                  <div class="comment-content">${comment.content}</div>
+                  <small class="text-muted">${formatDateTime(
+                    comment.createdAt
+                  )}</small>
+                </div>
+                ${
+                  comment.user.id === currentUserId
+                    ? `
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                      comment.id
+                    }', '${post.id}', '${comment.content.replace(
+                        /'/g,
+                        "\\'"
+                      )}')" title="Edit comment">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                      comment.id
+                    }', '${post.id}')" title="Delete comment">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+              )
+              .join("")
+          : '<p class="text-muted text-center">No comments yet</p>'
+      }
+    </div>
+    <div class="comment-form">
+      <div class="input-group">
+        <input type="text" class="form-control form-control-sm" placeholder="Write a comment..." id="comment-input-${
+          post.id
+        }" onkeypress="handleCommentKeyPress(event, '${post.id}')">
+        <button class="btn btn-primary btn-sm" onclick="submitComment('${
+          post.id
+        }')">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`
+    )
+    .join("");
+}
+
+// Function to append posts - copied from dashboard
+function appendPosts(posts) {
+  console.log(`[PROFILE] appendPosts called with:`, posts);
+  const postsList = document.getElementById("postsList");
+  const postsHTML = posts
+    .map(
+      (post) => `
+<div class="post-item mb-4 p-3 border rounded">
+  <div class="d-flex align-items-start mb-3">
+    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+      ${getUserAvatar(post.user)}
+    </div>
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">
+            <a href="/profile/${
+              post.user.id
+            }" class="text-decoration-none fw-bold text-primary">
+              ${
+                post.user.firstName && post.user.lastName
+                  ? `${post.user.firstName} ${post.user.lastName}`
+                  : post.user.firstName || post.user.lastName || "User"
+              }
+            </a>
+          </h6>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <small class="text-muted">
+              <a href="/profile/${
+                post.user.id
+              }" class="text-decoration-none text-muted">@${
+        post.user.username
+      }</a>
+            </small>
+            <small class="text-muted">•</small>
+            <small class="text-muted">${formatDateTime(post.createdAt)}</small>
+          </div>
+        </div>
+        ${
+          post.user.id === currentUserId
+            ? `
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
+              Edit
+              </a></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
+                Delete
+              </a></li>
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    </div>
+  </div>
+  ${
+    post.content || post.photoUrl
+      ? `<div class="post-content">${
+          post.content
+            ? `<p>${post.content.replace(
+                /\n/g,
+                post.photoUrl ? "" : "<br>"
+              )}</p>`
+            : ""
+        }${
+          post.photoUrl
+            ? `<div class="post-photo"><img src="${post.photoUrl}" alt="Post photo" class="img-fluid rounded" style="width: 100%; max-height: 600px; height: auto; object-fit: contain; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;" onclick="openPhotoModal('${post.photoUrl}')" /></div>`
+            : ""
+        }</div>`
+      : ""
+  }
+
+  <!-- Post Actions -->
+  <div class="post-actions ${
+    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
+  } border-top">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm ${
+          post.likes.some((like) => like.user.id === currentUserId)
+            ? "liked"
+            : "btn-outline-primary"
+        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        post.id
+      }')" data-post-id="${post.id}">
+          <i class="fas fa-heart" style="color: ${
+            post.likes &&
+            post.likes.some((like) => like.user.id === currentUserId)
+              ? "red"
+              : "inherit"
+          };"></i> ${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Liked"
+          : "Like"
+      }
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          post.id
+        }')">
+          <i class="fas fa-comment"></i> Comment
+          </button>
+      </div>
+      <!-- Counters -->
+      <div class="text-muted small">
+        <span class="likes-count" id="likes-${
+          post.id
+        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+        (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+      } like${
+        ((post.likes && Array.isArray(post.likes) && post.likes.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+        <span class="comments-count ms-2" id="comments-${
+          post.id
+        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+        (post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+        0
+      } comment${
+        ((post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section mt-3 d-none" id="comments-section-${post.id}">
+    <div class="comments-list mb-3" id="comments-list-${post.id}">
+      ${
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (comment) => `
+        <div class="comment-item p-2 border-bottom" data-comment-id="${
+          comment.id
+        }">
+          <div class="d-flex align-items-start">
+            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+              ${getUserAvatar(comment.user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <small class="fw-bold">
+                    <a href="/profile/${
+                      comment.user.id
+                    }" class="text-decoration-none">
+                      ${comment.user.firstName || ""} ${
+                  comment.user.lastName || ""
+                }
+                    </a>
+                  </small>
+                  <div class="comment-content">${comment.content}</div>
+                  <small class="text-muted">${formatDateTime(
+                    comment.createdAt
+                  )}</small>
+                </div>
+                ${
+                  comment.user.id === currentUserId
+                    ? `
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                      comment.id
+                    }', '${post.id}', '${comment.content.replace(
+                        /'/g,
+                        "\\'"
+                      )}')" title="Edit comment">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                      comment.id
+                    }', '${post.id}')" title="Delete comment">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+              )
+              .join("")
+          : '<p class="text-muted text-center">No comments yet</p>'
+      }
+    </div>
+    <div class="comment-form">
+      <div class="input-group">
+        <input type="text" class="form-control form-control-sm" placeholder="Write a comment..." id="comment-input-${
+          post.id
+        }" onkeypress="handleCommentKeyPress(event, '${post.id}')">
+        <button class="btn btn-primary btn-sm" onclick="submitComment('${
+          post.id
+        }')">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`
+    )
+    .join("");
+
+  postsList.insertAdjacentHTML("beforeend", postsHTML);
+}
+
+// Function to append posts (for pagination) - copied from dashboard
+function appendPosts(posts) {
+  const postsList = document.getElementById("postsList");
+
+  const postsHTML = posts
+    .map(
+      (post) => `
+<div class="post-item mb-4 p-3 border rounded" data-post-id="${post.id}">
+  <div class="d-flex align-items-start mb-3">
+    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+      ${getUserAvatar(post.user)}
+    </div>
+    <div class="flex-grow-1">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="mb-1">
+            <a href="/profile/${
+              post.user.id
+            }" class="text-decoration-none fw-bold text-primary">
+              ${
+                post.user.firstName && post.user.lastName
+                  ? `${post.user.firstName} ${post.user.lastName}`
+                  : post.user.firstName || post.user.lastName || "User"
+              }
+            </a>
+          </h6>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <small class="text-muted">
+              <a href="/profile/${
+                post.user.id
+              }" class="text-decoration-none text-muted">@${
+        post.user.username
+      }</a>
+            </small>
+            <small class="text-muted">•</small>
+            <small class="text-muted">${formatDateTime(post.createdAt)}</small>
+          </div>
+        </div>
+        ${
+          post.user.id === currentUserId
+            ? `
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
+              Edit
+              </a></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
+                Delete
+              </a></li>
+            </ul>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    </div>
+  </div>
+  ${
+    post.content || post.photoUrl
+      ? `<div class="post-content">${
+          post.content
+            ? `<p>${post.content.replace(
+                /\n/g,
+                post.photoUrl ? "" : "<br>"
+              )}</p>`
+            : ""
+        }${
+          post.photoUrl
+            ? `<div class="post-photo"><img src="${post.photoUrl}" alt="Post photo" class="img-fluid rounded" style="width: 100%; max-height: 600px; height: auto; object-fit: contain; object-position: center; cursor: pointer; margin: 0; padding: 0; display: block;" onclick="openPhotoModal('${post.photoUrl}')" /></div>`
+            : ""
+        }</div>`
+      : ""
+  }
+
+  <!-- Post Actions -->
+  <div class="post-actions ${
+    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
+  } border-top">
+    <div class="d-flex justify-content-between align-items-center">
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm ${
+          post.likes &&
+          post.likes.some((like) => like.user.id === currentUserId)
+            ? "liked"
+            : "btn-outline-primary"
+        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        post.id
+      }')" data-post-id="${post.id}">
+          <i class="fas fa-heart" style="color: ${
+            post.likes &&
+            post.likes.some((like) => like.user.id === currentUserId)
+              ? "red"
+              : ""
+          };"></i> ${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Liked"
+          : "Like"
+      }
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          post.id
+        }')">
+          <i class="fas fa-comment"></i> Comment
+        </button>
+      </div>
+      <!-- Counters -->
+      <div class="text-muted small">
+        <span class="likes-count" id="likes-${
+          post.id
+        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+        (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+      } like${
+        ((post.likes && Array.isArray(post.likes) && post.likes.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+        <span class="comments-count ms-2" id="comments-${
+          post.id
+        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+        (post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+        0
+      } comment${
+        ((post.comments &&
+          Array.isArray(post.comments) &&
+          post.comments.length) ||
+          0) !== 1
+          ? "s"
+          : ""
+      }</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section mt-3 d-none" id="comments-section-${post.id}">
+    <div class="comments-list mb-3" id="comments-list-${post.id}">
+      ${
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (comment) => `
+        <div class="comment-item p-2 border-bottom" data-comment-id="${
+          comment.id
+        }">
+          <div class="d-flex align-items-start">
+            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+              ${getUserAvatar(comment.user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <small class="fw-bold">
+                    <a href="/profile/${
+                      comment.user.id
+                    }" class="text-decoration-none">
+                      ${comment.user.firstName || ""} ${
+                  comment.user.lastName || ""
+                }
+                    </a>
+                  </small>
+                  <div class="comment-content">${comment.content}</div>
+                  <small class="text-muted">${formatDateTime(
+                    comment.createdAt
+                  )}</small>
+                </div>
+                ${
+                  comment.user.id === currentUserId
+                    ? `
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                      comment.id
+                    }', '${post.id}', '${comment.content.replace(
+                        /'/g,
+                        "\\'"
+                      )}')" title="Edit comment">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="deleteComment('${
+                      comment.id
+                    }', '${post.id}')" title="Delete comment">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+              )
+              .join("")
+          : '<p class="text-muted text-center">No comments yet</p>'
+      }
+    </div>
+    <div class="comment-form">
+      <div class="input-group">
+        <input type="text" class="form-control form-control-sm" placeholder="Write a comment..." id="comment-input-${
+          post.id
+        }" onkeypress="handleCommentKeyPress(event, '${post.id}')">
+        <button class="btn btn-primary btn-sm" onclick="submitComment('${
+          post.id
+        }')">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`
+    )
+    .join("");
+
+  postsList.insertAdjacentHTML("beforeend", postsHTML);
+}
+
+function loadCommentsForPost(postId) {
+  fetch(`/posts/${postId}/comments`)
+    .then((response) => response.json())
+    .then((data) => {
+      const commentsList = document.getElementById(`comments-list-${postId}`);
+      if (data.comments.length === 0) {
+        commentsList.innerHTML =
+          '<p class="text-muted text-center">No comments yet</p>';
+      } else {
+        commentsList.innerHTML = data.comments
+          .map(
+            (comment) => `
+    <div class="comment-item p-2 border-bottom" data-comment-id="${comment.id}">
+      <div class="d-flex align-items-start">
+        <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.8rem;">
+          ${getUserAvatar(comment.user)}
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <small class="fw-bold">
+                <a href="/profile/${
+                  comment.user.id
+                }" class="text-decoration-none">
+                  ${comment.user.firstName || ""} ${comment.user.lastName || ""}
+                </a>
+              </small>
+              <div class="comment-content">${comment.content}</div>
+              <small class="text-muted">${formatDateTime(
+                comment.createdAt
+              )}</small>
+            </div>
+            ${
+              comment.user.id === currentUserId
+                ? `
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-sm btn-outline-primary" onclick="editComment('${
+                  comment.id
+                }', '${postId}', '${comment.content.replace(
+                    /'/g,
+                    "\\'"
+                  )}')" title="Edit comment">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${
+                  comment.id
+                }', '${postId}')" title="Delete comment">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+          )
+          .join("");
+      }
+
+      // Update comment count
+      const commentsElement = document.getElementById(`comments-${postId}`);
+      commentsElement.textContent = `${data.comments.length} comment${
+        data.comments.length !== 1 ? "s" : ""
+      }`;
+    })
+    .catch((error) => {
+      console.error("Error loading comments:", error);
+    });
+}
+
+function likePost(postId) {
+  fetch(`/posts/${postId}/like`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(`[PROFILE] Like response:`, data);
+      if (data.success) {
+        // Update the like button appearance
+        const likeBtn = document.getElementById(`like-btn-${postId}`);
+        const likeIcon = likeBtn.querySelector("i");
+        const likeText = likeBtn.textContent.trim();
+
+        if (data.liked) {
+          likeBtn.className = "btn btn-sm liked";
+          likeIcon.style.color = "red";
+          likeBtn.innerHTML =
+            '<i class="fas fa-heart" style="color: red;"></i> Liked';
+        } else {
+          likeBtn.className = "btn btn-sm btn-outline-primary";
+          likeIcon.style.color = "inherit";
+          likeBtn.innerHTML = '<i class="fas fa-heart"></i> Like';
+        }
+
+        // Update like count
+        const likesElement = document.getElementById(`likes-${postId}`);
+        console.log(`[PROFILE] Likes element found:`, likesElement);
+        console.log(`[PROFILE] Current likes text:`, likesElement?.textContent);
+        console.log(`[PROFILE] New likes count:`, data.likesCount);
+        if (likesElement) {
+          likesElement.textContent = `${data.likesCount} like${
+            data.likesCount !== 1 ? "s" : ""
+          }`;
+          console.log(
+            `[PROFILE] Updated likes text:`,
+            likesElement.textContent
+          );
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+function showLikesModal(postId) {
+  fetch(`/posts/${postId}/likes`)
+    .then((response) => response.json())
+    .then((data) => {
+      const likesList = document.getElementById("likesList");
+      if (data.likes.length === 0) {
+        likesList.innerHTML =
+          '<p class="text-muted text-center">No likes yet</p>';
+      } else {
+        likesList.innerHTML = data.likes
+          .map(
+            (like) => `
+    <div class="d-flex align-items-center mb-2">
+      <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+        ${getUserAvatar(like.user)}
+      </div>
+      <div class="flex-grow-1">
+        <div class="fw-bold">
+          <a href="/profile/${like.user.id}" class="text-decoration-none">
+            ${like.user.firstName || ""} ${like.user.lastName || ""}
+          </a>
+        </div>
+        <div class="text-muted small">
+          <a href="/profile/${
+            like.user.id
+          }" class="text-decoration-none text-muted">@${like.user.username}</a>
+        </div>
+      </div>
+    </div>
+  `
+          )
+          .join("");
+      }
+
+      const likesModal = new bootstrap.Modal(
+        document.getElementById("likesModal")
+      );
+      likesModal.show();
+    })
+    .catch((error) => {
+      console.error("Error fetching likes:", error);
+      alert("Failed to load likes");
+    });
 }
 
 function handleCommentKeyPress(event, postId) {
@@ -459,6 +1706,24 @@ function handleCommentKeyPress(event, postId) {
     event.preventDefault();
     submitComment(postId);
   }
+}
+
+function showNotification(message, type = "info") {
+  const alertDiv = document.createElement("div");
+  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+  alertDiv.style.cssText =
+    "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+  alertDiv.innerHTML = `
+<i class="fas fa-${type === "success" ? "check" : "info"}"></i> ${message}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+`;
+  document.body.appendChild(alertDiv);
+  setTimeout(() => alertDiv.remove(), 3000);
+}
+
+function addComment(event, postId) {
+  event.preventDefault();
+  submitComment(postId);
 }
 
 function submitComment(postId) {
@@ -488,19 +1753,8 @@ function submitComment(postId) {
       if (data.success) {
         commentInput.value = "";
 
-        // Update comment count - find the post container and then the comments count
-        const postContainer = document.querySelector(
-          `[data-post-id="${postId}"]`
-        );
-        const commentsElement = postContainer
-          ? postContainer.querySelector(".comments-count")
-          : null;
-        if (commentsElement) {
-          const currentComments = parseInt(commentsElement.textContent) || 0;
-          commentsElement.textContent = `${currentComments + 1} comment${
-            currentComments + 1 !== 1 ? "s" : ""
-          }`;
-        }
+        // Refresh the comments list to show the new comment (dashboard approach)
+        loadCommentsForPost(postId);
 
         // Add the new comment to the comments list
         const commentsList = document.getElementById(`comments-list-${postId}`);
@@ -561,6 +1815,33 @@ function submitComment(postId) {
         `;
 
         commentsList.appendChild(newComment);
+
+        // Update comment count in real-time
+        const commentsCountElement = document.getElementById(
+          `comments-${postId}`
+        );
+        console.log(
+          `[PROFILE] Comments count element found:`,
+          commentsCountElement
+        );
+        console.log(
+          `[PROFILE] Current comments text:`,
+          commentsCountElement?.textContent
+        );
+        if (commentsCountElement) {
+          // Extract just the number from the text (e.g., "5 comments" -> 5)
+          const text = commentsCountElement.textContent;
+          const match = text.match(/(\d+)/);
+          const currentCount = match ? parseInt(match[1]) : 0;
+          console.log(`[PROFILE] Extracted count:`, currentCount);
+          commentsCountElement.textContent = `${currentCount + 1} comment${
+            currentCount + 1 !== 1 ? "s" : ""
+          }`;
+          console.log(
+            `[PROFILE] Updated comments text:`,
+            commentsCountElement.textContent
+          );
+        }
       } else {
         const alertDiv = document.createElement("div");
         alertDiv.className =
@@ -589,40 +1870,96 @@ function submitComment(postId) {
     });
 }
 
-function deleteComment(commentId) {
-  if (confirm("Are you sure you want to delete this comment?")) {
+async function deleteComment(commentId, postId) {
+  // Use custom confirmation modal instead of browser confirm
+  const confirmed = await confirmDelete(
+    "Are you sure you want to delete this comment?"
+  );
+
+  if (confirmed) {
     fetch(`/posts/comments/${commentId}`, {
       method: "DELETE",
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          location.reload(); // Refresh to remove the deleted comment
+          // Remove the comment from the DOM immediately
+          const commentElement = document.querySelector(
+            `[data-comment-id="${commentId}"]`
+          );
+          if (commentElement) {
+            commentElement.remove();
+          }
+
+          // Check if this was the last comment and show "No comments yet" message
+          const commentsList = document.getElementById(
+            `comments-list-${postId}`
+          );
+
+          if (commentsList) {
+            const remainingComments =
+              commentsList.querySelectorAll(".comment-item");
+            if (remainingComments.length === 0) {
+              // No comments left, show the "No comments yet" message
+              const noCommentsMsg = commentsList.querySelector(
+                ".text-muted.text-center"
+              );
+              if (!noCommentsMsg) {
+                const noCommentsElement = document.createElement("p");
+                noCommentsElement.className = "text-muted text-center";
+                noCommentsElement.textContent = "No comments yet";
+                commentsList.appendChild(noCommentsElement);
+              }
+            }
+          } else {
+            console.log(`[PROFILE] Comments list not found for post ${postId}`);
+          }
+
+          // Also refresh the comments list to ensure consistency (dashboard approach)
+          loadCommentsForPost(postId);
+
+          // Update comment count in real-time
+          const commentsCountElement = document.getElementById(
+            `comments-${postId}`
+          );
+          console.log(
+            `[PROFILE] Delete comment - count element found:`,
+            commentsCountElement
+          );
+          console.log(
+            `[PROFILE] Delete comment - current text:`,
+            commentsCountElement?.textContent
+          );
+          if (commentsCountElement) {
+            // Extract just the number from the text (e.g., "5 comments" -> 5)
+            const text = commentsCountElement.textContent;
+            const match = text.match(/(\d+)/);
+            const currentCount = match ? parseInt(match[1]) : 1;
+            const newCount = Math.max(0, currentCount - 1);
+            console.log(
+              `[PROFILE] Delete comment - extracted count:`,
+              currentCount,
+              `new count:`,
+              newCount
+            );
+            commentsCountElement.textContent = `${newCount} comment${
+              newCount !== 1 ? "s" : ""
+            }`;
+            console.log(
+              `[PROFILE] Delete comment - updated text:`,
+              commentsCountElement.textContent
+            );
+          }
         } else {
-          const alertDiv = document.createElement("div");
-          alertDiv.className =
-            "alert alert-danger alert-dismissible fade show position-fixed";
-          alertDiv.innerHTML = `
-                <div><i class="fas fa-exclamation-triangle"></i> ${
-                  data.error || "Failed to delete comment"
-                }</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              `;
-          document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 5000);
+          showNotification(data.error || "Failed to delete comment", "danger");
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> Failed to delete comment. Please try again.</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
+        showNotification(
+          "Failed to delete comment. Please try again.",
+          "danger"
+        );
       });
   }
 }
@@ -660,12 +1997,15 @@ function saveEditedComment() {
   const content = document.getElementById("editCommentContent").value.trim();
 
   if (!content) {
-    alert("Please enter some content for your comment.");
+    showNotification("Please enter some content for your comment.", "warning");
     return;
   }
 
   if (content.length > 250) {
-    alert("Comment content cannot exceed 250 characters.");
+    showNotification(
+      "Comment content cannot exceed 250 characters.",
+      "warning"
+    );
     return;
   }
 
@@ -715,12 +2055,12 @@ function saveEditedComment() {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
       } else {
-        alert(data.error || "Failed to update comment");
+        showNotification(data.error || "Failed to update comment", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Failed to update comment. Please try again.");
+      showNotification("Failed to update comment. Please try again.", "danger");
     })
     .finally(() => {
       saveEditCommentBtn.innerHTML = originalText;
@@ -790,9 +2130,33 @@ function switchToAllUsers() {
 }
 
 function removeFriend(friendId, friendName) {
-  if (
-    confirm(`Are you sure you want to remove ${friendName} from your friends?`)
-  ) {
+  // Show the unfriend confirmation modal
+  const unfriendModal = new bootstrap.Modal(
+    document.getElementById("unfriendModal")
+  );
+  const unfriendUserName = document.getElementById("unfriendUserName");
+  const confirmUnfriendBtn = document.getElementById("confirmUnfriendBtn");
+
+  // Set the friend's name in the modal
+  unfriendUserName.textContent = friendName;
+
+  // Remove any existing event listeners
+  confirmUnfriendBtn.replaceWith(confirmUnfriendBtn.cloneNode(true));
+
+  // Get the fresh reference after cloning
+  const freshConfirmBtn = document.getElementById("confirmUnfriendBtn");
+
+  // Add event listener for confirmation
+  freshConfirmBtn.addEventListener("click", function () {
+    // Close the modal
+    unfriendModal.hide();
+
+    // Show loading state on the button
+    freshConfirmBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
+    freshConfirmBtn.disabled = true;
+
+    // Send the unfriend request
     fetch("/friends/remove", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -840,7 +2204,94 @@ function removeFriend(friendId, friendName) {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 5000);
       });
+  });
+
+  // Show the modal
+  unfriendModal.show();
+}
+
+// Function to cancel a sent friend request
+function cancelFriendRequest(requestId, userName) {
+  console.log(
+    `[PROFILE] cancelFriendRequest called for request ${requestId} (${userName})`
+  );
+
+  // Show loading state on the cancel button - use event.target to get the clicked button
+  let cancelBtn = event.target;
+
+  // Verify it's the right button by checking if it has the cancel text
+  if (cancelBtn && cancelBtn.textContent.includes("Cancel Request")) {
+    cancelBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...';
+    cancelBtn.disabled = true;
   }
+
+  fetch("/friends/cancel-request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requestId }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Show success notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+                <div><i class="fas fa-times"></i> Friend request to ${userName} cancelled</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 3000);
+
+        // Refresh the page to update the UI
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        // Reset button state on error
+        if (cancelBtn && cancelBtn.textContent.includes("Cancelling")) {
+          cancelBtn.innerHTML =
+            '<i class="fas fa-times me-1"></i> Cancel Request';
+          cancelBtn.disabled = false;
+        }
+
+        // Show error notification
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+                <div><i class="fas fa-exclamation-triangle"></i> ${
+                  data.error || "Failed to cancel request"
+                }</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      }
+    })
+    .catch((error) => {
+      console.error("Error cancelling friend request:", error);
+
+      // Reset button state on error
+      if (cancelBtn && cancelBtn.textContent.includes("Cancelling")) {
+        cancelBtn.innerHTML =
+          '<i class="fas fa-times me-1"></i> Cancel Request';
+        cancelBtn.disabled = false;
+      }
+
+      // Show error notification
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-danger alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> Failed to cancel request. Please try again.</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    });
 }
 
 // Bio editing functions
@@ -957,8 +2408,10 @@ function saveBio() {
 }
 
 function createInlinePost() {
+  console.log(`[PROFILE] createInlinePost called`);
   const content = document.getElementById("inlinePostContent").value.trim();
   const photoFile = document.getElementById("inlinePostPhoto").files[0];
+  console.log(`[PROFILE] Content: "${content}", Photo:`, photoFile);
 
   // Allow posts with just photos (no text required)
   if (!content && !photoFile) {
@@ -1004,8 +2457,14 @@ function createInlinePost() {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
+        console.log(`[PROFILE] Post created successfully, clearing form...`);
         document.getElementById("inlinePostContent").value = "";
         document.getElementById("inlineCharCount").textContent = "0";
+        console.log(
+          `[PROFILE] Form cleared, content: "${
+            document.getElementById("inlinePostContent").value
+          }", count: ${document.getElementById("inlineCharCount").textContent}`
+        );
 
         // Clear photo fields
         removeInlinePhoto();
@@ -1021,9 +2480,19 @@ function createInlinePost() {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Reload after a short delay to show the new post
+        // Soft refresh posts instead of page reload
         setTimeout(() => {
-          location.reload();
+          loadPosts(true);
+        }, 500);
+
+        // Double-check form is cleared after a delay
+        setTimeout(() => {
+          console.log(`[PROFILE] Double-checking form is cleared...`);
+          if (document.getElementById("inlinePostContent").value !== "") {
+            console.log(`[PROFILE] Form still has content, forcing clear...`);
+            document.getElementById("inlinePostContent").value = "";
+            document.getElementById("inlineCharCount").textContent = "0";
+          }
         }, 1000);
       } else {
         const alertDiv = document.createElement("div");
@@ -1041,15 +2510,42 @@ function createInlinePost() {
     })
     .catch((error) => {
       console.error("Error:", error);
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to create post. Please try again.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
+
+      // Check if it's a JSON parsing error that suggests the post was created
+      if (
+        error.message.includes("Unexpected token") ||
+        error.message.includes("JSON") ||
+        error.message.includes("<!DOCTYPE")
+      ) {
+        console.log(
+          "Detected HTML response instead of JSON, post may have been created successfully"
+        );
+        // Force refresh posts since the post was likely created successfully
+        setTimeout(() => {
+          console.log("Forcing posts refresh due to JSON parsing error...");
+          loadPosts(true);
+        }, 1000);
+
+        // Also clear the form since we're assuming the post was created
+        console.log(`[PROFILE] Clearing form due to JSON parsing error...`);
+        document.getElementById("inlinePostContent").value = "";
+        document.getElementById("inlineCharCount").textContent = "0";
+        console.log(
+          `[PROFILE] Form cleared, content: "${
+            document.getElementById("inlinePostContent").value
+          }", count: ${document.getElementById("inlineCharCount").textContent}`
+        );
+      } else {
+        const alertDiv = document.createElement("div");
+        alertDiv.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        alertDiv.innerHTML = `
+              <div><i class="fas fa-exclamation-triangle"></i> Failed to create post. Please try again.</div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      }
     })
     .finally(() => {
       createPostBtn.innerHTML = originalText;
@@ -1057,111 +2553,10 @@ function createInlinePost() {
     });
 }
 
-function createModalPost() {
-  const content = document.getElementById("modalPostContent").value.trim();
-  const photoFile = document.getElementById("modalPostPhoto").files[0];
-
-  // Allow posts with just photos (no text required)
-  if (!content && !photoFile) {
-    const alertDiv = document.createElement("div");
-    alertDiv.className =
-      "alert alert-warning alert-dismissible fade show position-fixed";
-    alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Please enter some content or add a photo for your post.</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);
-    return;
-  }
-
-  if (content && content.length > 250) {
-    const alertDiv = document.createElement("div");
-    alertDiv.className =
-      "alert alert-warning alert-dismissible fade show position-fixed";
-    alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Post content cannot exceed 250 characters.</div>
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-    document.body.appendChild(alertDiv);
-    setTimeout(() => alertDiv.remove(), 5000);
-    return;
-  }
-
-  const createPostBtn = document.getElementById("modalCreatePostBtn");
-  const originalText = createPostBtn.innerHTML;
-  createPostBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
-  createPostBtn.disabled = true;
-
-  // Create FormData for photo upload
-  const formData = new FormData();
-  if (content) formData.append("content", content);
-  if (photoFile) formData.append("photo", photoFile);
-
-  fetch("/posts", {
-    method: "POST",
-    body: formData, // Don't set Content-Type header for FormData
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        document.getElementById("modalPostContent").value = "";
-        document.getElementById("modalCharCount").textContent = "0";
-
-        // Clear photo fields
-        removeModalPhoto();
-
-        // Close modal
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("createPostModal")
-        );
-        modal.hide();
-
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-check"></i> Post created successfully!</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
-
-        // Reload after a short delay to show the new post
-        setTimeout(() => {
-          location.reload();
-        }, 1000);
-      } else {
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-danger alert-dismissible fade show position-fixed";
-        alertDiv.innerHTML = `
-              <div><i class="fas fa-exclamation-triangle"></i> ${
-                data.error || "Failed to create post"
-              }</div>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 5000);
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Failed to create post. Please try again.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
-    })
-    .finally(() => {
-      createPostBtn.innerHTML = originalText;
-      createPostBtn.disabled = false;
-    });
+// Missing functions that the dashboard uses
+function openPhotoModal(photoUrl) {
+  // Simple photo modal - you can enhance this with a proper modal library
+  window.open(photoUrl, "_blank");
 }
 
 // Profile editing functions
@@ -1583,14 +2978,14 @@ function handleInlinePhotoSelection(event) {
   if (file) {
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
+      showNotification("Please select a valid image file.", "warning");
       event.target.value = "";
       return;
     }
 
     // Validate file size (max 10MB for post photos)
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image size must be less than 10MB.");
+      showNotification("Image size must be less than 10MB.", "warning");
       event.target.value = "";
       return;
     }
@@ -1607,14 +3002,14 @@ function handlePhotoSelection(event) {
   if (file) {
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
+      showNotification("Please select a valid image file.", "warning");
       event.target.value = "";
       return;
     }
 
     // Validate file size (max 10MB for post photos)
     if (file.size > 10 * 1024 * 1024) {
-      alert("Image size must be less than 10MB.");
+      showNotification("Image size must be less than 10MB.", "warning");
       event.target.value = "";
       return;
     }

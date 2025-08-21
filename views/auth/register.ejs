@@ -86,6 +86,7 @@
       name="location"
       placeholder="City, Country (e.g., London, UK)"
       value="<%= typeof location != 'undefined' ? location : '' %>"
+      autocomplete="off"
     />
   </div>
 
@@ -114,12 +115,12 @@
   </div>
 
   <div class="d-grid">
-    <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+    <button type="submit" class="btn btn-primary btn-lg" style="margin: 10px 0 20px 0">Create Account</button>
   </div>
 </form>
 
 <div class="auth-footer">
-  <p class="mb-0">
+  <p class="mb-0" style="text-align: center">
     Already have an account?
     <a href="/auth/login">Sign in here</a>
   </p>

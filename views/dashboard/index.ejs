@@ -5,97 +5,22 @@
       <div class="row">
         <!-- Welcome Section with Create Post -->
         <div class="col-12 mb-4">
-          <div class="card">
-            <div class="card-header d-flex align-items-center">
-              <h4 class="mb-0 text-dark">Welcome back, <%= user.firstName %>!</h4>
-            </div>
-            <div class="card-body">
-              <div class="d-flex align-items-start">
-                <div class="user-avatar-large me-3 flex-shrink-0">
-                  <% if (user.useGravatar && user.email) { %>
-                    <img
-                      src="<%= getGravatarUrl(user.email, 200) %>"
-                      alt="Profile Picture"
-                      class="profile-image"
-                    />
-                  <% } else if (user.profilePicture &&
-                  (user.profilePicture.startsWith('http') ||
-                  user.profilePicture.startsWith('/uploads/') ||
-                  user.profilePicture.includes('cloudinary.com'))) { %>
-                    <img
-                      src="<%= user.profilePicture %>"
-                      alt="Profile Picture"
-                      class="profile-image"
-                    />
-                  <% } else { %>
-                    <%= user.firstName.charAt(0) %><%= user.lastName.charAt(0) %>
-                  <% } %>
-                </div>
-                <div class="flex-grow-1">
-                  
-                  <form id="inlineCreatePostForm" enctype="multipart/form-data">
-                    <div class="mb-3">
-                      <textarea
-                        id="inlinePostContent"
-                        class="form-control"
-                        rows="3"
-                        placeholder="What's on your mind, <%= user.firstName %>?"
-                        maxlength="250"
-                      ></textarea>
-                    </div>
-                    
-                    <!-- Photo upload section -->
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                      <div class="d-flex align-items-center">
-                        <input
-                          type="file"
-                          id="postPhoto"
-                          name="photo"
-                          accept="image/*"
-                          class="form-control form-control-sm"
-                          style="display: none"
-                        />
-                        <button
-                          type="button"
-                          class="btn btn-outline-secondary btn-sm me-2"
-                          onclick="document.getElementById('postPhoto').click()"
-                        >
-                          <i class="fas fa-camera me-1"></i> Add Photo
-                        </button>
-                        <span
-                          id="photoFileName"
-                          class="text-muted small me-2"
-                        ></span>
-                        <button
-                          type="button"
-                          id="removePhotoBtn"
-                          class="btn btn-outline-danger btn-sm"
-                          style="display: none"
-                          onclick="removePhoto()"
-                        >
-                          <i class="fas fa-times me-1"></i> Remove
-                        </button>
-                      </div>
-                      
-                      <div class="d-flex align-items-center">
-                        <small class="text-muted me-3">
-                          <span id="inlineCharCount">0</span>/250
-                        </small>
-                        <button
-                          type="button"
-                          class="btn btn-primary"
-                          onclick="createInlinePost()"
-                          id="inlineCreatePostBtn"
-                        >
-                          <i class="fas fa-paper-plane me-1"></i> Post
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
+          <%- include('../layouts/components/welcome-section', { 
+            user: user,
+            showCreatePost: true,
+            createPostConfig: {
+              formId: 'inlineCreatePostForm',
+              textareaId: 'inlinePostContent',
+              photoId: 'postPhoto',
+              buttonId: 'inlineCreatePostBtn',
+              charCountId: 'inlineCharCount',
+              placeholder: 'What\'s on your mind, ' + (user ? user.firstName : 'Guest') + '?',
+              maxLength: 250,
+              showPhotoUpload: true,
+              showCharCount: true,
+              onSubmit: 'createInlinePost()'
+            }
+          }) %>
         </div>
 
         <!-- Posts Feed -->
@@ -195,7 +120,7 @@
                   id="postContent"
                   class="form-control"
                   rows="6"
-                  placeholder="What's on your mind, <%= user.firstName.charAt(0) %>?"
+                  placeholder="What's on your mind, <%= user && user.firstName ? user.firstName.charAt(0) : 'G' %>?"
                   maxlength="250"
                 ></textarea>
                 <div class="form-text"><span id="charCount">0</span>/250</div>

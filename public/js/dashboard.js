@@ -7,10 +7,25 @@ const currentUserId = document
   .querySelector('meta[name="user-id"]')
   ?.getAttribute("content");
 
+// Log currentUserId for debugging
+console.log("Current User ID:", currentUserId);
+
 // Global variables for pagination
 let currentPage = 1;
 let hasNextPage = true;
 let isLoading = false;
+
+// Function to generate like button HTML
+function generateLikeButton(post) {
+  const isLiked = post.likes.some((like) => like.user.id === currentUserId);
+  const buttonClass = isLiked ? "liked" : "btn-outline-primary";
+  const iconColor = isLiked ? "red" : "inherit";
+  const buttonText = isLiked ? "Liked" : "Like";
+
+  return `<button class="btn btn-sm ${buttonClass} like-btn" id="like-btn-${post.id}" onclick="likePost('${post.id}')" data-post-id="${post.id}">
+    <i class="fas fa-heart" style="color: ${iconColor};"></i> ${buttonText}
+  </button>`;
+}
 
 // Function to get user avatar (Gravatar or initials)
 function getUserAvatar(user) {
@@ -173,12 +188,15 @@ function createInlinePost() {
 
   // Allow posts with just photos (no text required)
   if (!content && !photoFile) {
-    alert("Please add some content or a photo to your post.");
+    showNotification(
+      "Please add some content or a photo to your post.",
+      "warning"
+    );
     return;
   }
 
   if (content && content.length > 250) {
-    alert("Post content cannot exceed 250 characters.");
+    showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
   }
 
@@ -200,7 +218,13 @@ function createInlinePost() {
     method: "POST",
     body: formData,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         // Clear the form
@@ -211,27 +235,68 @@ function createInlinePost() {
         // Clear photo
         removePhoto();
 
-        loadPosts(); // Refresh posts list
+        // Show success notification first
+        showNotification("Post created successfully!", "success");
 
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
-        alertDiv.innerHTML = `
-  <i class="fas fa-check"></i> Post created successfully!
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        // Then refresh posts list with error handling and a small delay
+        setTimeout(() => {
+          console.log(
+            "Refreshing posts after successful inline post creation..."
+          );
+          // Force refresh posts regardless of any errors
+          try {
+            loadPosts()
+              .then(() => {
+                console.log(
+                  "Posts refreshed successfully after inline post creation"
+                );
+              })
+              .catch((loadError) => {
+                console.error("Error refreshing posts:", loadError);
+                // Force refresh even if there's an error
+                console.log("Forcing posts refresh...");
+                setTimeout(() => {
+                  loadPosts().catch((retryError) => {
+                    console.error("Retry failed:", retryError);
+                    // Last resort: force page reload
+                    console.log("Forcing page reload as last resort...");
+                    window.location.reload();
+                  });
+                }, 1000);
+              });
+          } catch (error) {
+            console.error("Error in loadPosts:", error);
+            // If all else fails, force page reload
+            console.log("Forcing page reload due to loadPosts error...");
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        }, 500); // Small delay to ensure post is fully saved
       } else {
-        alert(data.error || "Failed to create post");
+        showNotification(data.error || "Failed to create post", "danger");
       }
     })
     .catch((error) => {
-      console.error("Error:", error);
-      alert("Failed to create post. Please try again.");
+      console.error("Error creating post:", error);
+
+      // Check if it's a JSON parsing error that suggests the post was created
+      if (
+        error.message.includes("Unexpected token") ||
+        error.message.includes("JSON") ||
+        error.message.includes("<!DOCTYPE")
+      ) {
+        console.log(
+          "Detected HTML response instead of JSON, post may have been created successfully"
+        );
+        // Force refresh posts since the post was likely created successfully
+        setTimeout(() => {
+          console.log("Forcing posts refresh due to JSON parsing error...");
+          forceRefreshPosts();
+        }, 1000);
+      } else {
+        showNotification("Failed to create post. Please try again.", "danger");
+      }
     })
     .finally(() => {
       createPostBtn.innerHTML = originalText;
@@ -243,12 +308,12 @@ function createPost() {
   const content = document.getElementById("postContent").value.trim();
 
   if (!content) {
-    alert("Please enter some content for your post.");
+    showNotification("Please enter some content for your post.", "warning");
     return;
   }
 
   if (content.length > 250) {
-    alert("Post content cannot exceed 250 characters.");
+    showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
   }
 
@@ -264,31 +329,79 @@ function createPost() {
     },
     body: JSON.stringify({ content }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         createPostModal.hide();
-        loadPosts(); // Refresh posts list
 
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
-        alertDiv.innerHTML = `
-  <i class="fas fa-check"></i> Post created successfully!
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        // Show success notification first
+        showNotification("Post created successfully!", "success");
+
+        // Then refresh posts list with error handling and a small delay
+        setTimeout(() => {
+          console.log(
+            "Refreshing posts after successful modal post creation..."
+          );
+          // Force refresh posts regardless of any errors
+          try {
+            loadPosts()
+              .then(() => {
+                console.log(
+                  "Posts refreshed successfully after modal post creation"
+                );
+              })
+              .catch((loadError) => {
+                console.error("Error refreshing posts:", loadError);
+                // Force refresh even if there's an error
+                console.log("Forcing posts refresh...");
+                setTimeout(() => {
+                  loadPosts().catch((retryError) => {
+                    console.error("Retry failed:", retryError);
+                    // Last resort: force page reload
+                    console.log("Forcing page reload as last resort...");
+                    window.location.reload();
+                  });
+                }, 1000);
+              });
+          } catch (error) {
+            console.error("Error in loadPosts:", error);
+            // If all else fails, force page reload
+            console.log("Forcing page reload due to loadPosts error...");
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        }, 500); // Small delay to ensure post is fully saved
       } else {
-        alert(data.error || "Failed to create post");
+        showNotification(data.error || "Failed to create post", "danger");
       }
     })
     .catch((error) => {
-      console.error("Error:", error);
-      alert("Failed to create post. Please try again.");
+      console.error("Error creating post:", error);
+
+      // Check if it's a JSON parsing error that suggests the post was created
+      if (
+        error.message.includes("Unexpected token") ||
+        error.message.includes("JSON") ||
+        error.message.includes("<!DOCTYPE")
+      ) {
+        console.log(
+          "Detected HTML response instead of JSON, post may have been created successfully"
+        );
+        // Force refresh posts since the post was likely created successfully
+        setTimeout(() => {
+          console.log("Forcing posts refresh due to JSON parsing error...");
+          forceRefreshPosts();
+        }, 1000);
+      } else {
+        showNotification("Failed to create post. Please try again.", "danger");
+      }
     })
     .finally(() => {
       createPostBtn.innerHTML = originalText;
@@ -296,12 +409,24 @@ function createPost() {
     });
 }
 
+// Force refresh posts function as fallback
+function forceRefreshPosts() {
+  console.log("[DASHBOARD] Force refreshing posts...");
+  // Simple approach: just reload the page
+  window.location.reload();
+}
+
 function loadPosts(reset = true) {
+  console.log(`[DASHBOARD] loadPosts called with reset: ${reset}`);
+
   // if (noPosts) {
   //   noPosts.classList.add("d-none");
   // }
 
-  if (isLoading) return Promise.resolve();
+  if (isLoading) {
+    console.log("[DASHBOARD] Already loading posts, skipping...");
+    return Promise.resolve();
+  }
 
   const postsLoading = document.getElementById("postsLoading");
   const postsList = document.getElementById("postsList");
@@ -488,7 +613,15 @@ function displayPosts(posts) {
         } like-btn" id="like-btn-${post.id}" onclick="likePost('${
         post.id
       }')" data-post-id="${post.id}">
-          <i class="fas fa-heart"></i> Like
+          <i class="fas fa-heart" style="color: ${
+            post.likes.some((like) => like.user.id === currentUserId)
+              ? "red"
+              : "inherit"
+          };"></i> ${
+        post.likes.some((like) => like.user.id === currentUserId)
+          ? "Liked"
+          : "Like"
+      }
         </button>
         <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
           post.id
@@ -520,7 +653,9 @@ function displayPosts(posts) {
           ? post.comments
               .map(
                 (comment) => `
-        <div class="comment-item p-2 border-bottom">
+        <div class="comment-item p-2 border-bottom" data-comment-id="${
+          comment.id
+        }">
           <div class="d-flex align-items-start">
             <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
               ${getUserAvatar(comment.user)}
@@ -682,7 +817,15 @@ function appendPosts(posts) {
         } like-btn" id="like-btn-${post.id}" onclick="likePost('${
         post.id
       }')" data-post-id="${post.id}">
-          <i class="fas fa-heart"></i> Like
+          <i class="fas fa-heart" style="color: ${
+            post.likes.some((like) => like.user.id === currentUserId)
+              ? "red"
+              : "inherit"
+          };"></i> ${
+        post.likes.some((like) => like.user.id === currentUserId)
+          ? "Liked"
+          : "Like"
+      }
         </button>
         <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
           post.id
@@ -714,7 +857,9 @@ function appendPosts(posts) {
           ? post.comments
               .map(
                 (comment) => `
-        <div class="comment-item p-2 border-bottom">
+        <div class="comment-item p-2 border-bottom" data-comment-id="${
+          comment.id
+        }">
           <div class="d-flex align-items-start">
             <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
               ${getUserAvatar(comment.user)}
@@ -980,43 +1125,57 @@ function formatDateTime(dateString) {
   }
 }
 
-function deletePost(postId) {
-  if (confirm("Are you sure you want to delete this post?")) {
+async function deletePost(postId) {
+  // Use custom confirmation modal instead of browser confirm
+  const confirmed = await confirmDelete(
+    "Are you sure you want to delete this post?"
+  );
+
+  if (confirmed) {
     fetch(`/posts/${postId}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
           loadPosts(); // Refresh posts list
-
-          // Show success notification
-          const alertDiv = document.createElement("div");
-          alertDiv.className =
-            "alert alert-info alert-dismissible fade show position-fixed";
-          alertDiv.style.cssText =
-            "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
-          alertDiv.innerHTML = `
-   Post deleted
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-          document.body.appendChild(alertDiv);
-          setTimeout(() => alertDiv.remove(), 3000);
+          showNotification("Post deleted successfully", "success");
         } else {
-          alert(data.error || "Failed to delete post");
+          showNotification(data.error || "Failed to delete post", "danger");
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("Failed to delete post. Please try again.");
+        showNotification("Failed to delete post. Please try again.", "danger");
       });
   }
 }
 
 function editPost(postId) {
+  // Check if currentUserId is available
+  if (!currentUserId) {
+    showNotification(
+      "User authentication error. Please refresh the page.",
+      "danger"
+    );
+    return;
+  }
+
   // Fetch the post data and open edit modal
-  fetch(`/posts/${postId}`)
-    .then((response) => response.json())
+  fetch(`/posts/${postId}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.post) {
         // Check if the post belongs to the current user
@@ -1040,15 +1199,18 @@ function editPost(postId) {
           // Show the edit modal
           editPostModal.show();
         } else {
-          alert("You can only edit your own posts.");
+          showNotification("You can only edit your own posts.", "warning");
         }
       } else {
-        alert("Post not found.");
+        showNotification("Post not found.", "warning");
       }
     })
     .catch((error) => {
       console.error("Error fetching post:", error);
-      alert("Failed to load post for editing.");
+      showNotification(
+        "Failed to load post for editing. Please try again.",
+        "danger"
+      );
     });
 }
 
@@ -1057,12 +1219,12 @@ function saveEditedPost() {
   const content = document.getElementById("editPostContent").value.trim();
 
   if (!content) {
-    alert("Please enter some content for your post.");
+    showNotification("Please enter some content for your post.", "warning");
     return;
   }
 
   if (content.length > 250) {
-    alert("Post content cannot exceed 250 characters.");
+    showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
   }
 
@@ -1079,31 +1241,24 @@ function saveEditedPost() {
     },
     body: JSON.stringify({ content }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         editPostModal.hide();
         loadPosts(); // Refresh posts list
-
-        // Show success notification
-        const alertDiv = document.createElement("div");
-        alertDiv.className =
-          "alert alert-success alert-dismissible fade show position-fixed";
-        alertDiv.style.cssText =
-          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
-        alertDiv.innerHTML = `
-  <i class="fas fa-check"></i> Post updated successfully!
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        showNotification("Post updated successfully!", "success");
       } else {
-        alert(data.error || "Failed to update post");
+        showNotification(data.error || "Failed to update post", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Failed to update post. Please try again.");
+      showNotification("Failed to update post. Please try again.", "danger");
     })
     .finally(() => {
       saveEditPostBtn.innerHTML = originalText;
@@ -1139,7 +1294,9 @@ function likePost(postId) {
           // Like the post
           likeButton.classList.remove("btn-outline-primary");
           likeButton.classList.add("liked");
-          icon.style.color = "white";
+          // Keep the heart icon and add "Liked" text, then make it red
+          likeButton.innerHTML =
+            '<i class="fas fa-heart" style="color: red;"></i> Liked';
 
           // Update likes count
           const likesElement = document.getElementById(`likes-${postId}`);
@@ -1152,6 +1309,8 @@ function likePost(postId) {
           likeButton.classList.remove("liked");
           likeButton.classList.add("btn-outline-primary");
           icon.style.color = "";
+          // Keep the heart icon and revert to "Like" text
+          likeButton.innerHTML = '<i class="fas fa-heart"></i> Like';
 
           // Update likes count
           const likesElement = document.getElementById(`likes-${postId}`);
@@ -1197,7 +1356,7 @@ function loadCommentsForPost(postId) {
         commentsList.innerHTML = data.comments
           .map(
             (comment) => `
-    <div class="comment-item p-2 border-bottom">
+    <div class="comment-item p-2 border-bottom" data-comment-id="${comment.id}">
       <div class="d-flex align-items-start">
         <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
           ${getUserAvatar(comment.user)}
@@ -1303,12 +1462,13 @@ function showLikesModal(postId) {
     });
 }
 
-function submitComment(postId) {
-  const commentInput = document.getElementById(`comment-input-${postId}`);
+function addComment(event, postId) {
+  event.preventDefault();
+  const commentInput = document.querySelector(`[data-post-id="${postId}"]`);
   const comment = commentInput.value.trim();
 
   if (!comment) {
-    alert("Please enter a comment.");
+    showNotification("Please enter a comment.", "warning");
     return;
   }
 
@@ -1328,34 +1488,109 @@ function submitComment(postId) {
 
         showNotification("Comment added!", "success");
       } else {
-        alert(data.error || "Failed to add comment");
+        showNotification(data.error || "Failed to add comment", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Failed to add comment. Please try again.");
+      showNotification("Failed to add comment. Please try again.", "danger");
     });
 }
 
-function deleteComment(commentId, postId) {
-  if (confirm("Are you sure you want to delete this comment?")) {
+function submitComment(postId) {
+  const commentInput = document.getElementById(`comment-input-${postId}`);
+  const comment = commentInput.value.trim();
+
+  if (!comment) {
+    showNotification("Please enter a comment.", "warning");
+    return;
+  }
+
+  fetch(`/posts/${postId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: comment }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Clear input
+        commentInput.value = "";
+
+        // Refresh the comments list to show the new comment
+        loadCommentsForPost(postId);
+
+        showNotification("Comment added!", "success");
+      } else {
+        showNotification(data.error || "Failed to add comment", "danger");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showNotification("Failed to add comment. Please try again.", "danger");
+    });
+}
+
+async function deleteComment(commentId, postId) {
+  const confirmed = await confirmDelete(
+    "Are you sure you want to delete this comment?"
+  );
+  if (confirmed) {
     fetch(`/posts/comments/${commentId}`, {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         if (data.success) {
-          // Refresh the comments list to reflect the deletion
+          // Remove the comment from the DOM immediately
+          const commentElement = document.querySelector(
+            `[data-comment-id="${commentId}"]`
+          );
+          if (commentElement) {
+            commentElement.remove();
+          }
+
+          // Update comment count
+          const commentCountElement = document.getElementById(
+            `comments-${postId}`
+          );
+          if (commentCountElement) {
+            try {
+              const currentCount =
+                parseInt(commentCountElement.textContent.match(/\d+/)[0]) || 0;
+              const newCount = Math.max(0, currentCount - 1);
+              commentCountElement.textContent = `${newCount} comment${
+                newCount !== 1 ? "s" : ""
+              }`;
+            } catch (e) {
+              console.log(
+                "Could not parse comment count, will refresh instead"
+              );
+            }
+          }
+
+          // Also refresh the comments list to ensure consistency
           loadCommentsForPost(postId);
 
           showNotification("Comment deleted!", "success");
         } else {
-          alert(data.error || "Failed to delete comment");
+          showNotification(data.error || "Failed to delete comment", "danger");
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("Failed to delete comment. Please try again.");
+        showNotification(
+          "Failed to delete comment. Please try again.",
+          "danger"
+        );
       });
   }
 }
@@ -1393,12 +1628,15 @@ function saveEditedComment() {
   const content = document.getElementById("editCommentContent").value.trim();
 
   if (!content) {
-    alert("Please enter some content for your comment.");
+    showNotification("Please enter some content for your comment.", "warning");
     return;
   }
 
   if (content.length > 250) {
-    alert("Comment content cannot exceed 250 characters.");
+    showNotification(
+      "Comment content cannot exceed 250 characters.",
+      "warning"
+    );
     return;
   }
 
@@ -1415,7 +1653,12 @@ function saveEditedComment() {
     },
     body: JSON.stringify({ content }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
       if (data.success) {
         const editCommentModal = bootstrap.Modal.getInstance(
@@ -1439,12 +1682,12 @@ function saveEditedComment() {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
       } else {
-        alert(data.error || "Failed to update comment");
+        showNotification(data.error || "Failed to update comment", "danger");
       }
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Failed to update comment. Please try again.");
+      showNotification("Failed to update comment. Please try again.", "danger");
     })
     .finally(() => {
       saveEditCommentBtn.innerHTML = originalText;
@@ -1544,6 +1787,60 @@ function handleCommentKeyPress(event, postId) {
   }
 }
 
+function confirmDelete(message) {
+  return new Promise((resolve) => {
+    const modalHTML = `
+      <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Confirm Delete</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Remove existing modal if any
+    const existingModal = document.getElementById("confirmDeleteModal");
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Add modal to page
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+    // Show modal
+    const confirmModal = new bootstrap.Modal(
+      document.getElementById("confirmDeleteModal")
+    );
+    confirmModal.show();
+
+    // Handle confirm button click
+    document
+      .getElementById("confirmDeleteBtn")
+      .addEventListener("click", () => {
+        confirmModal.hide();
+        resolve(true);
+      });
+
+    // Handle modal close
+    document
+      .getElementById("confirmDeleteModal")
+      .addEventListener("hidden.bs.modal", () => {
+        resolve(false);
+      });
+  });
+}
+
 function showNotification(message, type = "info") {
   const alertDiv = document.createElement("div");
   alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
@@ -1569,14 +1866,14 @@ function handlePhotoSelection() {
       if (file) {
         // Validate file size (10MB limit)
         if (file.size > 10 * 1024 * 1024) {
-          alert("Photo size must be less than 10MB");
+          showNotification("Photo size must be less than 10MB", "warning");
           this.value = "";
           return;
         }
 
         // Validate file type
         if (!file.type.startsWith("image/")) {
-          alert("Please select an image file");
+          showNotification("Please select an image file", "warning");
           this.value = "";
           return;
         }

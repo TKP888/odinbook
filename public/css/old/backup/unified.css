@@ -24,8 +24,9 @@
   /* Typography */
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --font-size-base: 1rem;
+  --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
@@ -347,15 +348,11 @@ p {
 .user-avatar,
 .user-avatar-small {
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--accent-color) 0%,
-    var(--secondary-color) 100%
-  );
+  background: var(--light-gray);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--white);
+  color: var(--dark-gray);
   font-weight: bold;
   transition: transform var(--transition-fast);
 }
@@ -370,8 +367,8 @@ p {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--light-gray);
+  color: var(--dark-gray);
   font-weight: bold;
   transition: transform var(--transition-fast);
 }
@@ -388,6 +385,7 @@ p {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 2;
 }
 
 .user-avatar-small {
@@ -415,6 +413,21 @@ p {
 
 .user-menu {
   position: relative;
+}
+
+/* Ensure user menu avatar shows only the profile image */
+.user-menu .user-avatar {
+  background: transparent !important;
+}
+
+.user-menu .user-avatar .profile-image {
+  z-index: 3;
+  position: relative;
+}
+
+/* Remove any dropdown toggle styling from user avatar */
+.user-menu .user-avatar.dropdown-toggle::after {
+  display: none !important;
 }
 
 .dropdown-menu {
@@ -618,7 +631,6 @@ p {
 
 .card-footer {
   background: var(--light-gray);
-  border-top: 1px solid var(--medium-gray);
   padding: var(--spacing-lg) var(--spacing-xl);
 }
 
@@ -849,7 +861,9 @@ p {
   align-items: flex-start;
   justify-content: center;
   padding: var(--spacing-xl);
-  padding-top: 80px; /* Reduced from 120px to eliminate dead space */
+  padding-top: calc(
+    var(--header-height) + var(--spacing-lg)
+  ); /* Account for fixed header */
 }
 
 .auth-card {
@@ -908,6 +922,25 @@ p {
 }
 
 /* ========================================
+   AUTH PAGE STYLES
+   ======================================== */
+body.auth-page {
+  padding-top: 0 !important;
+}
+
+body.auth-page .auth-header-bar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: var(--z-header) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* ========================================
    ERROR PAGE STYLES
    ======================================== */
 body.error-page {
@@ -959,13 +992,14 @@ body.error-page {
   word-wrap: break-word;
   margin: 0 !important;
   padding: 0 !important;
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
   /* Force remove any browser default spacing */
   display: block !important;
   box-sizing: border-box !important;
+  margin-bottom: var(--spacing-md) !important;
 }
 
 /* Reduce gap between text and image in posts */
@@ -1271,7 +1305,7 @@ body.error-page {
 /* .post-content rules consolidated above */
 
 .post-content p {
-  font-size: 1rem !important;
+  font-size: var(--font-size-sm) !important;
   line-height: 1.2 !important;
   margin: 0 !important;
   padding: 0.75rem 0 !important; /* Simple padding above and below */
@@ -1309,10 +1343,22 @@ div.post-content,
   line-height: 1.2 !important;
 }
 
-/* Ensure no spacing between post content and actions */
+/* Ensure proper spacing between post content and actions */
 .post-content + .post-actions {
-  margin-top: var(--spacing-xs) !important;
-  padding-top: var(--spacing-xs) !important;
+  margin-top: var(--spacing-md) !important;
+  padding-top: var(--spacing-md) !important;
+  border-top: 1px solid var(--light-gray);
+}
+
+/* Add spacing between post actions and stats */
+.post-actions + .post-stats {
+  margin-left: var(--spacing-lg) !important;
+}
+
+/* Ensure all post-stats have proper spacing from buttons */
+.post-stats {
+  margin-left: var(--spacing-lg) !important;
+  padding-left: var(--spacing-lg) !important;
 }
 
 /* Final nuclear option: Override ALL possible spacing sources */
@@ -1327,7 +1373,7 @@ div.post-content,
   margin: 0 !important;
   padding: 0 !important;
   line-height: 1.2 !important;
-  font-size: 1rem !important;
+  font-size: var(--font-size-sm) !important;
 }
 
 /* Target any Bootstrap utility classes that might be applied */
@@ -1711,9 +1757,41 @@ div.post-content img {
 
 /* MOBILE DEVICES (320px - 768px) */
 @media (max-width: 768px) {
-  /* Header Mobile Optimizations */
+  /* ========================================
+     MOBILE TYPOGRAPHY SYSTEM
+     ======================================== */
+
+  /* Base text sizes for mobile */
+  body {
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+  h4 {
+    font-size: var(--font-size-base);
+  }
+  h5 {
+    font-size: var(--font-size-sm);
+  }
+  h6 {
+    font-size: var(--font-size-sm);
+  }
+
+  /* ========================================
+     MOBILE HEADER SYSTEM
+     ======================================== */
+
   .main-header {
-    height: 56px; /* Slightly smaller header for mobile */
+    height: 56px;
   }
 
   .header-container {
@@ -1721,33 +1799,30 @@ div.post-content img {
   }
 
   .logo {
-    font-size: var(--font-size-xl); /* Smaller logo for mobile */
+    font-size: var(--font-size-xl);
   }
 
-  /* Hide desktop navigation on mobile */
   .nav-menu {
     display: none;
   }
 
-  /* Mobile search bar */
   .header-search {
-    max-width: 150px; /* Smaller search on mobile */
+    max-width: 150px;
     margin: 0 var(--spacing-sm);
   }
 
   .search-input {
     font-size: var(--font-size-sm);
     padding: 8px var(--spacing-sm);
-    height: 36px; /* Touch-friendly height */
+    height: 36px;
   }
 
   .search-btn {
     padding: 0 var(--spacing-sm);
     height: 36px;
-    min-width: 36px; /* Touch-friendly width */
+    min-width: 36px;
   }
 
-  /* Mobile header right section */
   .header-right {
     gap: var(--spacing-sm);
   }
@@ -1756,7 +1831,7 @@ div.post-content img {
   .user-menu .user-avatar {
     height: 36px;
     width: 36px;
-    min-width: 36px; /* Touch-friendly sizing */
+    min-width: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1766,28 +1841,43 @@ div.post-content img {
     font-size: var(--font-size-sm);
   }
 
-  /* Main content mobile optimizations */
+  /* ========================================
+     MOBILE LAYOUT SYSTEM
+     ======================================== */
+
   .main-content {
     padding: var(--spacing-md);
     margin-top: var(--spacing-md);
     margin-bottom: var(--spacing-md);
   }
 
-  /* Dashboard mobile layout */
   .container-fluid {
     padding: 0;
   }
 
+  /* ========================================
+     MOBILE CARD SYSTEM
+     ======================================== */
+
   .card {
     border-radius: var(--border-radius-sm);
     margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
   }
 
   .card-body {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
-  /* Welcome section mobile layout */
+  .card-header {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--medium-gray);
+  }
+
+  /* ========================================
+     MOBILE WELCOME & USER SECTION
+     ======================================== */
+
   .welcome-avatar {
     margin-right: var(--spacing-sm) !important;
   }
@@ -1804,44 +1894,76 @@ div.post-content img {
     margin-bottom: var(--spacing-sm);
   }
 
-  /* Create post form mobile layout */
+  /* ========================================
+     MOBILE POST CREATION SYSTEM
+     ======================================== */
+
   .flex-grow-1 {
     margin-top: var(--spacing-sm);
   }
 
   #inlinePostContent {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     min-height: 80px;
     resize: none;
+    line-height: 1.4;
   }
 
-  /* Photo upload mobile layout */
-  .mt-2 {
-    margin-top: v5ar(--spacing-sm) !important;
+  /* ========================================
+     MOBILE BUTTON SYSTEM
+     ======================================== */
+
+  .btn {
+    white-space: nowrap;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    height: 40px;
+    min-width: 80px;
+    border-radius: var(--border-radius-sm);
   }
 
   .btn-sm {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    height: 36px; /* Touch-friendly height */
-    min-width: 80px; /* Touch-friendly width */
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    height: 36px;
+    min-width: 70px;
   }
 
-  /* Post button mobile optimization */
+  .btn-lg {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+    height: 48px;
+    min-width: 100px;
+  }
+
   .btn-primary {
     padding: var(--spacing-sm) var(--spacing-lg);
-    font-size: var(--font-size-base);
-    height: 40px; /* Touch-friendly height */
-    min-width: 80px; /* Touch-friendly width */
+    font-size: var(--font-size-sm);
+    height: 40px;
+    min-width: 80px;
   }
 
-  /* Character count mobile */
-  .form-text {
+  /* ========================================
+     MOBILE FORM SYSTEM
+     ======================================== */
+
+  .form-control {
+    border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
+    padding: var(--spacing-sm);
+    height: 40px;
+  }
+
+  .form-text {
+    font-size: var(--font-size-xs);
     margin-top: var(--spacing-xs);
   }
 
-  /* Mobile-specific layout improvements */
+  /* ========================================
+     MOBILE LAYOUT UTILITIES
+     ======================================== */
+
   .flex-column.flex-md-row {
     gap: var(--spacing-md);
   }
@@ -1858,18 +1980,6 @@ div.post-content img {
     width: 100% !important;
   }
 
-  /* Mobile button improvements */
-  .btn {
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  /* Mobile form improvements */
-  .form-control {
-    border-radius: var(--border-radius-sm);
-  }
-
-  /* Mobile spacing improvements */
   .mb-3.mb-md-0 {
     margin-bottom: var(--spacing-md) !important;
   }
@@ -1878,9 +1988,19 @@ div.post-content img {
     margin-top: var(--spacing-sm) !important;
   }
 
-  /* Posts feed mobile */
+  .gap-2 {
+    gap: var(--spacing-sm) !important;
+  }
+  .gap-3 {
+    gap: var(--spacing-md) !important;
+  }
+
+  /* ========================================
+     MOBILE POSTS FEED SYSTEM
+     ======================================== */
+
   .card-header {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .card-header h5 {
@@ -1889,63 +2009,123 @@ div.post-content img {
 
   .card-header .btn-sm {
     padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
   }
 
-  /* Post items mobile */
+  /* ========================================
+     MOBILE POST ITEMS SYSTEM
+     ======================================== */
+
   .post-item {
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
   }
 
   .post-item .card-body {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-md);
   }
 
   .post-header {
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
   }
 
   .post-header h6 {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     margin-bottom: 0;
   }
 
   .post-content {
-    font-size: var(--font-size-base);
-    line-height: 1.2 !important;
+    font-size: var(--font-size-xs);
+    line-height: 1.4 !important;
     margin: 0 !important;
     padding: 0 !important;
+    margin-bottom: var(--spacing-sm) !important;
   }
 
   .post-content p {
     margin-bottom: 0 !important;
   }
 
-  /* Post actions mobile */
+  /* ========================================
+     MOBILE POST METADATA SYSTEM
+     ======================================== */
+
+  .post-header .text-muted,
+  .post-header .small,
+  .post-meta {
+    font-size: var(--font-size-xs) !important;
+  }
+
+  /* ========================================
+     MOBILE POST INTERACTIONS SYSTEM
+     ======================================== */
+
   .post-actions {
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-xs);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--light-gray);
   }
 
   .post-actions .btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    height: 32px; /* Touch-friendly height */
-    min-width: 60px; /* Touch-friendly width */
+    font-size: var(--font-size-xs) !important;
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    height: 32px;
+    min-width: 60px;
   }
 
-  /* Post stats mobile */
   .post-stats {
     gap: var(--spacing-sm);
-    margin-top: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    margin-left: var(--spacing-lg);
   }
 
   .post-stats span {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs) !important;
     cursor: pointer;
   }
 
-  /* Mobile post layout improvements */
+  /* ========================================
+     MOBILE COMMENTS SYSTEM
+     ======================================== */
+
+  .comments-section {
+    margin-top: var(--spacing-sm);
+  }
+
+  .comment-item {
+    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-xs);
+  }
+
+  .comment-author {
+    font-size: var(--font-size-xs) !important;
+    font-weight: 600;
+  }
+
+  .comment-text {
+    font-size: var(--font-size-xs) !important;
+    line-height: 1.4 !important;
+    margin-top: var(--spacing-xs);
+  }
+
+  .comment-timestamp {
+    font-size: var(--font-size-xs) !important;
+    color: var(--medium-gray);
+  }
+
+  /* Comment input mobile - smaller placeholder text */
+  .comment-form .form-control::placeholder {
+    font-size: var(--font-size-xs) !important;
+  }
+
+  .comment-form .btn {
+    font-size: var(--font-size-xs) !important;
+  }
+
+  /* ========================================
+     MOBILE POST LAYOUT SYSTEM
+     ======================================== */
+
   .post-item .card {
     border-radius: var(--border-radius-sm);
     box-shadow: var(--shadow-sm);
@@ -1971,7 +2151,10 @@ div.post-content img {
     transform: scale(0.98);
   }
 
-  /* Mobile post content spacing */
+  /* ========================================
+     MOBILE POST CONTENT SYSTEM
+     ======================================== */
+
   .post-content .post-photo {
     margin-top: var(--spacing-xs) !important;
     margin-bottom: 0 !important;
@@ -1979,10 +2162,13 @@ div.post-content img {
 
   .post-content img {
     border-radius: var(--border-radius-sm);
-    max-height: 400px; /* Smaller max height on mobile */
+    max-height: 400px;
   }
 
-  /* Mobile touch improvements */
+  /* ========================================
+     MOBILE TOUCH & ACCESSIBILITY SYSTEM
+     ======================================== */
+
   .btn,
   .form-control,
   .dropdown-toggle,
@@ -1991,7 +2177,6 @@ div.post-content img {
     touch-action: manipulation;
   }
 
-  /* Mobile accessibility improvements */
   .btn:focus,
   .form-control:focus,
   .dropdown-toggle:focus {
@@ -1999,13 +2184,15 @@ div.post-content img {
     outline-offset: 2px;
   }
 
-  /* Mobile scroll improvements */
   .main-content {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
 
-  /* Mobile image optimization */
+  /* ========================================
+     MOBILE IMAGE & INTERACTION SYSTEM
+     ======================================== */
+
   img {
     max-width: 100%;
     height: auto;
@@ -2015,7 +2202,6 @@ div.post-content img {
     user-select: none;
   }
 
-  /* Mobile text selection */
   .post-content,
   .comment-content {
     -webkit-user-select: text;
@@ -2024,37 +2210,39 @@ div.post-content img {
     user-select: text;
   }
 
-  /* Mobile button states */
   .btn:active {
     transform: scale(0.98);
     transition: transform 0.1s ease;
   }
 
-  /* Mobile form improvements */
+  /* ========================================
+     MOBILE FORM & UI COMPONENTS SYSTEM
+     ======================================== */
+
   input[type="file"] {
     font-size: var(--font-size-sm);
   }
 
-  /* Mobile dropdown improvements */
   .dropdown-menu {
     border: none;
     box-shadow: var(--shadow-lg);
     border-radius: var(--border-radius-sm);
   }
 
-  /* Mobile alert improvements */
   .alert {
     border-radius: var(--border-radius-sm);
     margin: var(--spacing-sm);
   }
 
-  /* Mobile modal improvements */
   .modal-content {
     border-radius: var(--border-radius-sm);
     margin: var(--spacing-sm);
   }
 
-  /* Mobile utility improvements */
+  /* ========================================
+     MOBILE UTILITY CLASSES SYSTEM
+     ======================================== */
+
   .d-sm-inline {
     display: inline !important;
   }
@@ -2063,18 +2251,28 @@ div.post-content img {
     display: none !important;
   }
 
-  /* Mobile spacing utilities */
-  .gap-2 {
-    gap: var(--spacing-sm) !important;
-  }
+  /* ========================================
+     MOBILE COMMENTS SECTION SYSTEM
+     ======================================== */
 
-  .gap-3 {
-    gap: var(--spacing-md) !important;
-  }
-
-  /* Comments mobile */
   .comments-section {
     margin-top: var(--spacing-md);
+  }
+
+  /* ========================================
+     MOBILE COMMENT INPUT SYSTEM
+     ======================================== */
+
+  .add-comment .input-group {
+    align-items: stretch;
+  }
+
+  .add-comment .form-control {
+    border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm);
+  }
+
+  .add-comment .btn {
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
   }
 
   .comment-item {
@@ -2086,24 +2284,98 @@ div.post-content img {
     font-size: var(--font-size-sm);
   }
 
-  /* Comment form mobile */
+  /* ========================================
+     MOBILE COMMENT FORM SYSTEM
+     ======================================== */
+
+  .add-comment {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
   .comment-form {
     margin-top: var(--spacing-sm);
   }
 
   .comment-form .form-control {
     font-size: var(--font-size-sm);
-    min-height: 60px;
+    min-height: 40px;
+    max-height: 80px;
     resize: none;
+    padding: var(--spacing-sm);
   }
 
   .comment-form .btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    height: 32px;
+    padding: 0 var(--spacing-sm) !important;
+    font-size: var(--font-size-sm) !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    min-width: 60px !important;
+    max-width: 80px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid var(--medium-gray) !important;
+    border-left: none !important;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0 !important;
+    line-height: 1 !important; /* Ensure consistent line height */
+    margin: 0 !important; /* Remove any default margins */
+    vertical-align: top !important; /* Ensure top alignment */
+    box-sizing: border-box !important;
   }
 
-  /* Modal mobile optimizations */
+  /* ========================================
+     MOBILE COMMENT FORM LAYOUT SYSTEM
+     ======================================== */
+
+  .comment-form .input-group {
+    gap: 0 !important;
+    align-items: flex-start !important;
+    display: flex !important;
+  }
+
+  .comment-form .input-group .form-control {
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    border: 1px solid var(--medium-gray) !important;
+    border-right: none !important;
+    border-radius: var(--border-radius-sm) 0 0 var(--border-radius-sm) !important;
+    padding: var(--spacing-sm) !important;
+    line-height: 1.2 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    vertical-align: top !important;
+  }
+
+  .comment-form .input-group .btn {
+    padding: 0 var(--spacing-sm) !important;
+    font-size: var(--font-size-sm) !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    min-width: 60px !important;
+    max-width: 80px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid var(--medium-gray) !important;
+    border-left: none !important;
+    border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0 !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    vertical-align: top !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ========================================
+     MOBILE MODAL SYSTEM
+     ======================================== */
+
   .modal-dialog {
     margin: var(--spacing-sm);
     max-width: calc(100vw - 2rem);
@@ -2116,7 +2388,7 @@ div.post-content img {
   .modal-header,
   .modal-body,
   .modal-footer {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 
   .modal-title {
@@ -2274,28 +2546,6 @@ div.post-content img {
 
   .card-body {
     padding: var(--spacing-sm);
-  }
-
-  .btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    height: 36px;
-    min-width: 70px;
-  }
-
-  .btn-lg {
-    height: 44px;
-    font-size: var(--font-size-base);
-  }
-
-  .form-control {
-    font-size: var(--font-size-sm);
-    padding: var(--spacing-xs);
-    height: 36px;
-  }
-
-  .form-control[rows] {
-    min-height: 70px;
   }
 
   .user-avatar-large {
@@ -3799,5 +4049,369 @@ button.like-btn:focus {
 
   .users-page .user-item {
     gap: var(--spacing-xs) !important;
+  }
+}
+
+/* ========================================
+   IPHONE SE & SMALL SCREEN OPTIMIZATIONS
+   ======================================== */
+
+/* iPhone SE and very small screens (375px and below) */
+@media (max-width: 375px) {
+  /* Prevent horizontal scrolling */
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Container adjustments */
+  .container-fluid {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .card {
+    margin-bottom: 8px !important;
+    border-radius: 6px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .card-body {
+    padding: 8px !important;
+  }
+
+  .card-header {
+    padding: 8px !important;
+  }
+
+  /* Post creation form - fix horizontal overflow */
+  #inlineCreatePostForm {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #inlineCreatePostForm .form-control {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+    min-height: 36px !important;
+    max-width: 100% !important;
+  }
+
+  #inlineCreatePostForm .btn {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    height: 36px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Post creation layout fixes */
+  .create-post-section .row {
+    margin: 0 !important;
+  }
+
+  .create-post-section .col-md-8,
+  .create-post-section .col-md-4 {
+    padding: 0 4px !important;
+  }
+
+  /* Post cards */
+  .post-item {
+    margin-bottom: 8px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .post-content {
+    padding: 6px 8px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .post-content p {
+    font-size: 13px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 4px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Post header adjustments */
+  .post-header {
+    padding: 6px 8px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .post-header .avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .post-header .user-info .name {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  .post-header .user-info .username,
+  .post-header .user-info .timestamp {
+    font-size: 10px !important;
+    color: var(--medium-gray) !important;
+  }
+
+  /* Post action buttons - make them smaller and stack if needed */
+  .post-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    max-width: 100% !important;
+    margin-bottom: 4px !important;
+    justify-content: flex-start !important;
+  }
+
+  .post-actions .btn {
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+    height: 26px !important;
+    min-width: unset !important;
+    flex: 1 !important;
+    max-width: calc(50% - 2px) !important;
+    border-radius: 6px !important;
+  }
+
+  .post-actions .btn i {
+    font-size: 10px !important;
+  }
+
+  /* Ensure post actions don't overflow */
+  .post-actions-container {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Post metadata */
+  .post-meta {
+    font-size: 11px !important;
+    margin-bottom: 6px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .post-meta .username {
+    font-size: 11px !important;
+  }
+
+  .post-meta .timestamp {
+    font-size: 10px !important;
+  }
+
+  /* Like and comment counts - fix positioning */
+  .post-stats {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+    text-align: left !important;
+    width: 100% !important;
+    color: var(--medium-gray) !important;
+    font-weight: normal !important;
+    line-height: 1.2 !important;
+    padding-left: var(--spacing-lg) !important;
+    margin-left: var(--spacing-lg) !important;
+  }
+
+  /* Specific styling for like/comment text */
+  .post-stats span,
+  .post-stats .like-count,
+  .post-stats .comment-count {
+    font-size: 9px !important;
+    color: var(--medium-gray) !important;
+    font-weight: normal !important;
+  }
+
+  /* User avatars */
+  .avatar {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .avatar-lg {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* Header adjustments */
+  .navbar-brand {
+    font-size: 16px !important;
+  }
+
+  .navbar-nav .btn {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+  }
+
+  /* Search bar */
+  .header-search {
+    max-width: 150px !important;
+    margin: 0 4px !important;
+  }
+
+  .search-input {
+    font-size: 13px !important;
+    height: 32px !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Button sizing */
+  .btn {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+    height: 36px !important;
+    white-space: nowrap !important;
+  }
+
+  .btn-sm {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+  }
+
+  .btn-lg {
+    font-size: 14px !important;
+    padding: 8px 16px !important;
+    height: 40px !important;
+  }
+
+  /* Form controls */
+  .form-control {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+    height: 36px !important;
+  }
+
+  /* Spacing adjustments */
+  .mb-3 {
+    margin-bottom: 8px !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 12px !important;
+  }
+
+  .p-3 {
+    padding: 8px !important;
+  }
+
+  .p-4 {
+    padding: 12px !important;
+  }
+
+  /* Text sizing */
+  h1 {
+    font-size: 20px !important;
+  }
+  h2 {
+    font-size: 18px !important;
+  }
+  h3 {
+    font-size: 16px !important;
+  }
+  h4 {
+    font-size: 14px !important;
+  }
+  h5 {
+    font-size: 13px !important;
+  }
+  h6 {
+    font-size: 11px !important;
+  }
+
+  /* Character counter */
+  .char-counter {
+    font-size: 10px !important;
+    margin-top: 2px !important;
+    text-align: center !important;
+  }
+
+  /* Post creation area */
+  .create-post-section {
+    margin-bottom: 12px !important;
+  }
+
+  .create-post-section .card-body {
+    padding: 12px !important;
+  }
+
+  /* Recent posts section */
+  .recent-posts-section .card-header {
+    padding: 8px 12px !important;
+  }
+
+  .recent-posts-section .card-header h5 {
+    font-size: 14px !important;
+  }
+
+  .recent-posts-section .btn {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    height: 28px !important;
+  }
+
+  /* Fix for post creation layout */
+  .create-post-section .d-flex {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .create-post-section .d-flex > * {
+    width: 100% !important;
+  }
+
+  /* Ensure no horizontal overflow anywhere */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .col,
+  .col-md-8,
+  .col-md-4,
+  .col-12 {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+}
+
+/* Extra small screens (320px and below) */
+@media (max-width: 320px) {
+  .container-fluid {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .card-body {
+    padding: 8px !important;
+  }
+
+  .post-content {
+    padding: 8px !important;
+  }
+
+  .btn {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+    height: 36px !important;
+  }
+
+  .form-control {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+    height: 36px !important;
   }
 }

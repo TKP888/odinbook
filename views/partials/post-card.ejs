@@ -1,0 +1,195 @@
+<%# Post Card Component - Usage: include('post-card', { post: post, showActions:
+true, showComments: true, currentUser: user }) %> <%# Default values %>
+
+<div class="post-card card mb-4" data-post-id="<%= post.id %>">
+  <!-- Post Header -->
+  <div class="card-header d-flex align-items-center">
+    <div class="post-user-info d-flex align-items-center">
+      <div class="user-avatar me-3">
+        <%- include('user-avatar', { user: post.user, size: 'small' }) %>
+      </div>
+      <div>
+        <h6 class="mb-0">
+          <a
+            href="/profile/<%= post.user.username %>"
+            class="text-decoration-none"
+          >
+            <%= post.user.firstName %> <%= post.user.lastName %>
+          </a>
+        </h6>
+        <small class="text-muted">
+          @<%= post.user.username %> •
+          <span class="post-timestamp" data-timestamp="<%= post.createdAt %>">
+            <%= new Date(post.createdAt).toLocaleDateString() %>
+          </span>
+        </small>
+      </div>
+    </div>
+
+    <%# Post Actions Menu (for post owner) %> <% if (currentUser && post.userId
+    === currentUser.id) { %>
+    <div class="dropdown ms-auto">
+      <button
+        class="btn btn-link btn-sm text-muted"
+        type="button"
+        data-bs-toggle="dropdown"
+      >
+        <i class="fas fa-ellipsis-h"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <button class="dropdown-item" onclick="editPost('<%= post.id %>')">
+            <i class="fas fa-edit me-2"></i>Edit
+          </button>
+        </li>
+        <li>
+          <button
+            class="dropdown-item text-danger"
+            onclick="deletePost('<%= post.id %>')"
+          >
+            <i class="fas fa-trash me-2"></i>Delete
+          </button>
+        </li>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Post Content -->
+  <div class="card-body">
+    <p class="post-content mb-3"><%= post.content %></p>
+
+    <%# Post Photo %> <% if (post.photoUrl) { %>
+    <div class="post-photo mb-3">
+      <img
+        src="<%= post.photoUrl %>"
+        alt="Post photo"
+        class="img-fluid rounded"
+        style="max-height: 400px; width: 100%; object-fit: cover"
+      />
+    </div>
+    <% } %>
+  </div>
+
+  <%# Post Actions %> <% if (typeof showActions !== 'undefined' && showActions)
+  { %>
+  <div class="card-footer">
+    <div class="post-actions d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <!-- Like Button -->
+        <button
+          class="btn btn-link text-muted me-3"
+          onclick="toggleLike('<%= post.id %>')"
+          data-post-id="<%= post.id %>"
+        >
+          <i class="fas fa-heart <%= post.isLiked ? 'text-danger' : '' %>"></i>
+          <span class="like-count ms-1"><%= post.likesCount || 0 %></span>
+        </button>
+
+        <!-- Comment Button -->
+        <button
+          class="btn btn-link text-muted me-3"
+          onclick="focusCommentInput('<%= post.id %>')"
+        >
+          <i class="fas fa-comment"></i>
+          <span class="comment-count ms-1"><%= post.commentsCount || 0 %></span>
+        </button>
+      </div>
+
+      <!-- Share Button -->
+      <button
+        class="btn btn-link text-muted"
+        onclick="sharePost('<%= post.id %>')"
+      >
+        <i class="fas fa-share"></i>
+      </button>
+    </div>
+  </div>
+  <% } %> <%# Comments Section %> <% if ((typeof showComments !== 'undefined' &&
+  showComments) && post.comments && post.comments.length > 0) { %>
+  <div class="comments-section">
+    <div class="comments-header p-3 border-top">
+      <h6 class="mb-0">Comments (<%= post.comments.length %>)</h6>
+    </div>
+
+    <div class="comments-list">
+      <% post.comments.forEach(function(comment) { %>
+      <div
+        class="comment-item p-3 border-bottom"
+        data-comment-id="<%= comment.id %>"
+      >
+        <div class="d-flex">
+          <div class="user-avatar me-2">
+            <%- include('user-avatar', { user: comment.user, size: 'small' }) %>
+          </div>
+          <div class="comment-content flex-grow-1">
+            <div class="comment-header mb-1">
+              <strong
+                ><%= comment.user.firstName %> <%= comment.user.lastName
+                %></strong
+              >
+              <small class="text-muted ms-2">
+                <%= new Date(comment.createdAt).toLocaleDateString() %>
+              </small>
+            </div>
+            <p class="comment-text mb-1"><%= comment.content %></p>
+
+            <%# Comment Actions %>
+            <div class="comment-actions">
+              <button
+                class="btn btn-link btn-sm text-muted p-0 me-2"
+                onclick="likeComment('<%= comment.id %>')"
+              >
+                <i
+                  class="fas fa-heart <%= comment.isLiked ? 'text-danger' : '' %>"
+                ></i>
+                <span class="comment-like-count"
+                  ><%= comment.likesCount || 0 %></span
+                >
+              </button>
+
+              <% if (currentUser && comment.userId === currentUser.id) { %>
+              <button
+                class="btn btn-link btn-sm text-muted p-0 me-2"
+                onclick="editComment('<%= comment.id %>', '<%= post.id %>', '<%= comment.content %>')"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button
+                class="btn btn-link btn-sm text-danger p-0"
+                onclick="deleteComment('<%= comment.id %>', '<%= post.id %>')"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <% } %> <%# Add Comment Form %> <% if (typeof showComments !== 'undefined' &&
+  showComments) { %>
+  <div class="add-comment p-3 border-top">
+    <div class="comment-form">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control comment-input"
+          placeholder="Write a comment..."
+          maxlength="250"
+          id="comment-input-<%= post.id %>"
+          onkeypress="handleCommentKeyPress(event, '<%= post.id %>')"
+        />
+        <button
+          class="btn btn-primary"
+          onclick="submitComment('<%= post.id %>')"
+        >
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <% } %>
+</div>

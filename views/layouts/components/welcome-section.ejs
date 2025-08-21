@@ -1,0 +1,26 @@
+<%# Welcome Section Component - Usage:
+include('layouts/components/welcome-section', { user: user, title: 'Welcome
+back, ' + user.firstName + '!', subtitle: null, showCreatePost: true,
+createPostConfig: { formId: 'inlineCreatePostForm', textareaId:
+'inlinePostContent', photoId: 'postPhoto', buttonId: 'inlineCreatePostBtn',
+charCountId: 'inlineCharCount', placeholder: 'What\'s on your mind, ' +
+user.firstName + '?', maxLength: 250, showPhotoUpload: true, showCharCount:
+true, onSubmit: 'createInlinePost()' } }) %>
+
+<div class="welcome-section-component">
+  <div class="card">
+    <div class="card-header d-flex align-items-center">
+      <h4 class="mb-0 text-dark">Welcome back, <%= user.firstName %>!</h4>
+    </div>
+
+    <% if (typeof subtitle !== 'undefined' && subtitle) { %>
+    <div class="card-body">
+      <p class="text-muted mb-0"><%= subtitle %></p>
+    </div>
+    <% } %> <% if (typeof showCreatePost !== 'undefined' && showCreatePost) { %>
+    <div class="card-body">
+      <%- include('./post-create', createPostConfig) %>
+    </div>
+    <% } %>
+  </div>
+</div>

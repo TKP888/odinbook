@@ -1,0 +1,123 @@
+<%# Header Component - Usage: include('../partials/header', { showSearch: true,
+showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
+
+<header class="main-header">
+  <div class="header-container">
+    <div class="header-left">
+      <a href="/dashboard" class="logo">OdinBook</a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a
+              href="/dashboard"
+              class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>"
+            >
+              <span>Home</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="/profile"
+              class="nav-link <%= activePage === 'profile' ? 'active' : '' %>"
+            >
+              <span>Profile</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="/friends/users"
+              class="nav-link <%= activePage === 'users' ? 'active' : '' %>"
+            >
+              <span>Users</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <%# Search Bar %> <% if (showSearch) { %>
+    <div class="header-search">
+      <div class="search-container">
+        <div class="input-group input-group-rounded">
+          <input
+            type="text"
+            class="form-control search-input"
+            id="headerSearchInput"
+            placeholder="Search users..."
+            autocomplete="off"
+          />
+        </div>
+        <!-- Search Results Dropdown -->
+        <div id="headerSearchResults" class="search-results-dropdown d-none">
+          <div id="headerUsersList"></div>
+          <div id="headerNoResults" class="text-center text-muted p-3 d-none">
+            <i class="fas fa-search fa-lg mb-2"></i>
+            <p class="mb-0">No users found</p>
+          </div>
+          <div id="headerSearchLoading" class="text-center p-3 d-none">
+            <div
+              class="spinner-border spinner-border-sm text-primary"
+              role="status"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Searching...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="header-right">
+      <%# Friend Requests Dropdown %> <% if (showFriendRequests) { %>
+      <div class="friend-requests dropdown me-3">
+        <button
+          class="btn btn-purple dropdown-toggle"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-user-plus"></i>
+          <span id="headerRequestCount" class="badge bg-danger ms-1 d-none"
+            >0</span
+          >
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" id="headerRequestsList">
+          <li class="dropdown-item text-center text-muted p-3">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span class="ms-2">Loading...</span>
+          </li>
+        </ul>
+      </div>
+      <% } %> <%# User Menu %> <% if (showUserMenu) { %>
+      <div class="user-menu dropdown">
+        <div class="user-avatar dropdown-toggle" data-bs-toggle="dropdown">
+          <%- include('user-avatar', { user: user, size: 'medium' }) %>
+        </div>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" href="/profile">
+              <i class="fas fa-user"></i>
+              My Profile
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="/friends/users?tab=friends">
+              <i class="fas fa-user-friends"></i>
+              My Friends
+            </a>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <a class="dropdown-item" href="/auth/logout">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</header>

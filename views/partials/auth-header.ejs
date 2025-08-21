@@ -1,0 +1,32 @@
+<%# Auth Header Component - Usage: include('auth-header', { activePage: 'login' }) %>
+
+<header class="auth-header-bar">
+  <div class="header-container">
+    <div class="header-left">
+      <a href="/" class="logo">OdinBook</a>
+    </div>
+
+    <div class="header-right">
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a
+              href="/auth/login"
+              class="nav-link <%= activePage === 'login' ? 'active' : '' %>"
+            >
+              <span class="d-none d-md-inline">Sign In</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="/auth/register"
+              class="nav-link <%= activePage === 'register' ? 'active' : '' %>"
+            >
+              <span class="d-none d-md-inline">Sign Up</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>

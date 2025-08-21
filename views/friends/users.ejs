@@ -1,63 +1,55 @@
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-12">
-      <h2>Users</h2>
-
-      <!-- Search Bar -->
-      <div class="mb-3">
-        <input
-          type="text"
-          id="usersSearchInput"
-          class="form-control"
-          placeholder="Search users..."
-          autocomplete="off"
-        />
+<!-- Tabs -->
+<div class="outer-content-container">
+  <div class="content-container">
+    <div class="tabs-container">
+      <div class="container">
+        <ul class="nav nav-tabs" id="userTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active"
+              id="all-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#all"
+              type="button"
+              role="tab"
+            >
+              All Users
+              <span class="badge bg-primary ms-2" id="allUsersCount">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="friends-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#friends"
+              type="button"
+              role="tab"
+            >
+              Friends
+              <span class="badge bg-success ms-2" id="friendsCount">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              id="requests-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#requests"
+              type="button"
+              role="tab"
+            >
+              Sent Requests
+              <span class="badge bg-warning ms-2" id="requestCount">0</span>
+            </button>
+          </li>
+        </ul>
       </div>
+    </div>
 
-      <!-- Tabs -->
-      <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link active"
-            id="all-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#all"
-            type="button"
-            role="tab"
-          >
-            All Users
-            <span class="badge bg-primary ms-1" id="allUsersCount">0</span>
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="friends-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#friends"
-            type="button"
-            role="tab"
-          >
-            Friends
-            <span class="badge bg-success ms-1" id="friendsCount">0</span>
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link"
-            id="requests-tab"
-            data-bs-toggle="tab"
-            data-bs-target="#requests"
-            type="button"
-            role="tab"
-          >
-            Sent Requests
-            <span class="badge bg-warning ms-1" id="requestCount">0</span>
-          </button>
-        </li>
-      </ul>
+    <!-- Content -->
 
-      <!-- Tab Content -->
+    <div class="container">
       <div class="tab-content" id="userTabsContent">
         <!-- All Users Tab -->
         <div class="tab-pane fade show active" id="all" role="tabpanel">
@@ -90,379 +82,697 @@
       </div>
     </div>
   </div>
-</div>
 
-<script src="/js/friends.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let allUsers = [];
-    let friends = [];
-    let requests = [];
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let allUsers = [];
+      let friends = [];
+      let requests = [];
 
-    // Check URL parameters for tab switching
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get("tab");
+      // Load users on page load
+      loadUsers();
 
-    // Load users on page load
-    loadUsers();
+      async function loadUsers() {
+        try {
+          console.log("Loading users...");
+          const response = await fetch("/friends/users", {
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+              Accept: "application/json",
+            },
+          });
 
-    // Switch to the correct tab if specified in URL
-    if (activeTab) {
-      setTimeout(() => {
-        switchToTab(activeTab);
-      }, 100); // Small delay to ensure tabs are loaded
-    }
+          if (!response.ok) throw new Error("Failed to fetch users");
 
-    // Function to switch tabs
-    function switchToTab(tabName) {
-      // Remove active class from all tabs and content
-      document.querySelectorAll(".nav-link").forEach((tab) => {
-        tab.classList.remove("active");
-      });
-      document.querySelectorAll(".tab-pane").forEach((content) => {
-        content.classList.remove("show", "active");
-      });
+          allUsers = await response.json();
+          console.log("Users loaded:", allUsers.length);
 
-      // Activate the specified tab
-      const targetTab = document.getElementById(`${tabName}-tab`);
-      const targetContent = document.getElementById(tabName);
+          // Categorize users
+          friends = allUsers.filter((user) => user.status === "friend");
+          requests = allUsers.filter((user) => user.status === "request_sent");
 
-      if (targetTab && targetContent) {
-        targetTab.classList.add("active");
-        targetContent.classList.add("show", "active");
-      }
-    }
-
-    // Simple search functionality - filter existing users
-    const searchInput = document.getElementById("usersSearchInput");
-
-    if (searchInput) {
-      searchInput.addEventListener("input", function (e) {
-        const searchTerm = e.target.value.toLowerCase().trim();
-
-        if (searchTerm.length === 0) {
-          // Show all users when search is empty
+          // Render all tabs
           renderUsers("allUsersList", allUsers);
-          document.getElementById("allUsersCount").textContent =
-            allUsers.length;
+          renderUsers("friendsList", friends);
+          renderRequests("requestsList", requests);
+
+          // Update counts
+          updateCounts();
+        } catch (error) {
+          console.error("Error loading users:", error);
+          showError("Failed to load users. Please try again.");
+        }
+      }
+
+      function renderUsers(containerId, users) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (users.length === 0) {
+          container.innerHTML =
+            '<div class="col-12"><p class="text-muted text-center py-5">No users found.</p></div>';
           return;
         }
 
-        // Filter users based on search term
-        const filteredUsers = allUsers.filter(
-          (user) =>
-            user.username.toLowerCase().includes(searchTerm) ||
-            (user.firstName &&
-              user.firstName.toLowerCase().includes(searchTerm)) ||
-            (user.lastName && user.lastName.toLowerCase().includes(searchTerm))
-        );
-
-        // Render filtered results
-        renderUsers("allUsersList", filteredUsers);
-        document.getElementById(
-          "allUsersCount"
-        ).textContent = `${filteredUsers.length} results`;
-      });
-    }
-
-    async function loadUsers() {
-      try {
-        const response = await fetch("/friends/users", {
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            Accept: "application/json",
-          },
-        });
-        if (!response.ok) throw new Error("Failed to fetch users");
-
-        allUsers = await response.json();
-
-        // Categorize users
-        friends = allUsers.filter((user) => user.status === "friend");
-        requests = allUsers.filter((user) => user.status === "request_sent");
-
-        // Render all tabs
-        renderUsers("allUsersList", allUsers);
-        renderUsers("friendsList", friends);
-        renderRequests("requestsList", requests);
-
-        // Update all counts
-        updateAllCounts();
-      } catch (error) {
-        console.error("Error loading users:", error);
-        showError("Failed to load users. Please try again.");
-      }
-    }
-
-    function renderUsers(containerId, users) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      if (users.length === 0) {
-        container.innerHTML =
-          '<div class="col-12"><p class="text-muted">No users found.</p></div>';
-        return;
-      }
-
-      container.innerHTML = users
-        .map(
-          (user) => `
-      <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
-        <div class="card user-card clickable-user-card" data-username="${
-          user.username
-        }" data-is-friend="${user.status === "friend"}">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="user-avatar-large me-3">
+        const userCardsHTML = users
+          .map(
+            (user) => `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="user-card">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar" data-initials="${getUserInitials(user)}">
                 ${getUserAvatar(user)}
               </div>
-              <div class="user-info">
-                <h6 class="mb-0 user-name">${
+              <div class="user-info flex-grow-1">
+                <h6>${
                   user.firstName || user.lastName
                     ? `${user.firstName || ""} ${user.lastName || ""}`
                     : user.username
                 }</h6>
-                <p class="text-muted mb-0 small username">@${user.username}</p>
+                <p>@${user.username}</p>
               </div>
-            </div>
-            <div id="friend-actions-${user.id}">
-              ${getActionButton(user)}
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-        )
-        .join("");
-
-      // Add event listeners for buttons
-      // addButtonEventListeners(); // This line is removed as per the edit hint
-
-      // Add click event listeners for all user cards (in all tabs)
-      const userCards = container.querySelectorAll(".clickable-user-card");
-      userCards.forEach((card) => {
-        card.addEventListener("click", function (e) {
-          // Don't navigate if clicking on a button
-          if (e.target.closest("button")) {
-            return;
-          }
-
-          const username = this.getAttribute("data-username");
-          if (username) {
-            navigateToProfile(username);
-          }
-        });
-      });
-
-      // Debug: Log button elements to see if they're being rendered correctly
-      if (containerId === "allUsersList") {
-        const addFriendButtons = container.querySelectorAll(".add-friend-btn");
-        console.log(
-          `Found ${addFriendButtons.length} add-friend buttons in ${containerId}:`,
-          addFriendButtons
-        );
-        addFriendButtons.forEach((btn) => {
-          console.log("Button data:", {
-            id: btn.id,
-            userId: btn.getAttribute("data-user-id"),
-            userName: btn.getAttribute("data-user-name"),
-          });
-        });
-      }
-    }
-
-    function getUserAvatar(user) {
-      if (user.gravatarUrl) {
-        return `<img src="${user.gravatarUrl}" alt="${user.username}" class="rounded-circle profile-image" style="width: 100%; height: 100%; object-fit: cover;">`;
-      }
-
-      if (user.profilePicture) {
-        return `<img src="${user.profilePicture}" alt="${user.username}" class="rounded-circle profile-image" style="width: 100%; height: 100%; object-fit: cover;">`;
-      } else {
-        const firstName = user.firstName || "";
-        const lastName = user.lastName || "";
-        const initials = (
-          firstName.charAt(0) + lastName.charAt(0)
-        ).toUpperCase();
-        return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">${initials}</div>`;
-      }
-    }
-
-    function renderRequests(containerId, requests) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-
-      if (requests.length === 0) {
-        container.innerHTML = "";
-        document.getElementById("noRequests").classList.remove("d-none");
-        return;
-      }
-
-      document.getElementById("noRequests").classList.add("d-none");
-      container.innerHTML = requests
-        .map(
-          (user) => `
-      <div class="col-md-6 col-lg-4 mb-3" data-user-id="${user.id}">
-        <div class="card user-card clickable-user-card">
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-3">
-              <div class="user-avatar-large me-3">
-                ${getUserAvatar(user)}
-              </div>
-              <div class="user-info">
-                <h6 class="mb-0 user-name">${
-                  user.firstName || user.lastName
-                    ? `${user.firstName || ""} ${user.lastName || ""}`
-                    : user.username
-                }</h6>
-                <p class="text-muted mb-0 small username">@${user.username}</p>
-              </div>
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted">Request sent ${formatRequestDate(
-                user.requestSentAt || user.createdAt
-              )}</small>
-              <div id="friend-actions-${user.id}">
+              <div class="ms-auto">
                 ${getActionButton(user)}
               </div>
             </div>
           </div>
         </div>
-      </div>
-    `
-        )
-        .join("");
+      `
+          )
+          .join("");
 
-      // Add event listeners for request buttons
-      // addRequestButtonEventListeners(); // This line is removed as per the edit hint
-    }
-
-    function getActionButton(user) {
-      switch (user.status) {
-        case "friend":
-          return `<button class="btn btn-outline-danger btn-sm remove-friend-btn" data-user-id="${
-            user.id
-          }" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}">
-            <i class="fas fa-user-minus"></i> Remove Friend
-          </button>`;
-        case "request_sent":
-          return `<button class="btn btn-outline-secondary btn-sm cancel-request-btn" id="cancel-request-btn-${
-            user.id
-          }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}" data-request-id="${user.requestId}">
-            <i class="fas fa-times"></i> Cancel Request
-          </button>`;
-        case "request_received":
-          return `<div class="d-flex gap-2">
-            <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${user.requestId}">
-              <i class="fas fa-check"></i> Accept
-            </button>
-            <button class="btn btn-danger btn-sm decline-request-btn" data-request-id="${user.requestId}">
-              <i class="fas fa-times"></i> Decline
-            </button>
-          </div>`;
-        default:
-          return `<button class="btn btn-primary btn-sm add-friend-btn" id="add-friend-btn-${
-            user.id
-          }" data-user-id="${user.id}" data-user-name="${user.firstName || user.lastName ? `${user.firstName || ""} ${user.lastName || ""}` : user.username}">
-            <i class="fas fa-user-plus"></i> Add Friend
-          </button>`;
-      }
-    }
-
-    // Event delegation is handled by friends.js - no need to duplicate here
-
-    // Remove the old event listener functions since we're using event delegation
-    // function addButtonEventListeners() { ... }
-    // function addRequestButtonEventListeners() { ... }
-
-    function updateAllCounts() {
-      const allUsersCountBadge = document.getElementById("allUsersCount");
-      const friendsCountBadge = document.getElementById("friendsCount");
-      const requestCountBadge = document.getElementById("requestCount");
-
-      allUsersCountBadge.textContent = allUsers.length;
-      friendsCountBadge.textContent = friends.length;
-      requestCountBadge.textContent = requests.length;
-
-      if (allUsers.length > 0) {
-        allUsersCountBadge.classList.remove("d-none");
-      } else {
-        allUsersCountBadge.classList.add("d-none");
+        container.innerHTML = userCardsHTML;
       }
 
-      if (friends.length > 0) {
-        friendsCountBadge.classList.remove("d-none");
-      } else {
-        friendsCountBadge.classList.add("d-none");
+      function renderRequests(containerId, requests) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (requests.length === 0) {
+          container.innerHTML = "";
+          document.getElementById("noRequests").classList.remove("d-none");
+          return;
+        }
+
+        document.getElementById("noRequests").classList.add("d-none");
+
+        const requestCardsHTML = requests
+          .map(
+            (user) => `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="user-card">
+            <div class="d-flex align-items-center">
+              <div class="user-avatar" data-initials="${getUserInitials(user)}">
+                ${getUserAvatar(user)}
+              </div>
+              <div class="user-info flex-grow-1">
+                <h6>${
+                  user.firstName || user.lastName
+                    ? `${user.firstName || ""} ${user.lastName || ""}`
+                    : user.username
+                }</h6>
+                <p>@${user.username}</p>
+                <small class="text-muted">Request sent recently</small>
+              </div>
+              <div class="ms-auto">
+                ${getActionButton(user)}
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+          )
+          .join("");
+
+        container.innerHTML = requestCardsHTML;
       }
 
-      if (requests.length > 0) {
-        requestCountBadge.classList.remove("d-none");
-      } else {
-        requestCountBadge.classList.add("d-none");
+      function getUserInitials(user) {
+        const firstName = user.firstName || "";
+        const lastName = user.lastName || "";
+        const initials = (
+          firstName.charAt(0) + lastName.charAt(0)
+        ).toUpperCase();
+        return initials || user.username.charAt(0).toUpperCase();
       }
-    }
 
-    // Function to refresh counts after friend status changes
-    function refreshCounts() {
-      // Re-categorize users based on current status
-      friends = allUsers.filter((user) => user.status === "friend");
-      requests = allUsers.filter((user) => user.status === "request_sent");
+      function getUserAvatar(user) {
+        if (user.gravatarUrl) {
+          return `<img src="${user.gravatarUrl}" alt="${user.username}">`;
+        }
 
-      // Update the display
-      updateAllCounts();
-    }
+        if (user.profilePicture) {
+          return `<img src="${user.profilePicture}" alt="${user.username}">`;
+        }
 
-    // Make refreshCounts available globally so friends.js can call it
-    window.refreshCounts = refreshCounts;
-
-    // Function to navigate to user profile
-    function navigateToProfile(username) {
-      // Find the user object to get the ID
-      const user = allUsers.find((u) => u.username === username);
-      if (user) {
-        window.location.href = `/profile/${user.id}`;
+        const firstName = user.firstName || "";
+        const lastName = user.lastName || "";
+        const initials = (
+          firstName.charAt(0) + lastName.charAt(0)
+        ).toUpperCase();
+        return `<span class="avatar-initials">${
+          initials || user.username.charAt(0).toUpperCase()
+        }</span>`;
       }
-    }
 
-    // Make navigateToProfile available globally so onclick handlers can call it
-    window.navigateToProfile = navigateToProfile;
+      function getActionButton(user) {
+        switch (user.status) {
+          case "friend":
+            return `<button class="btn btn-remove-friend" onclick="removeFriend('${
+              user.id
+            }', '${user.firstName || user.username}')">
+          <i class="fas fa-user-minus"></i> Remove
+        </button>`;
+          case "request_sent":
+            return `<button class="btn btn-cancel-request" onclick="cancelRequest('${
+              user.id
+            }', '${user.requestId}', '${user.firstName || user.username}')">
+          <i class="fas fa-times"></i> Cancel
+        </button>`;
+          case "request_received":
+            return `<div class="d-flex gap-2">
+          <button class="btn btn-success btn-sm" onclick="acceptRequest('${
+            user.requestId
+          }', '${user.firstName || user.username}')">
+            <i class="fas fa-check"></i> Accept
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="declineRequest('${
+            user.requestId
+          }', '${user.firstName || user.username}')">
+            <i class="fas fa-times"></i> Decline
+          </button>
+        </div>`;
+          default:
+            return `<button class="btn btn-add-friend" onclick="sendFriendRequest('${
+              user.id
+            }', '${user.firstName || user.username}')">
+          <i class="fas fa-user-plus"></i> Add Friend
+        </button>`;
+        }
+      }
 
-    // Function to format request date
-    function formatRequestDate(dateString) {
-      if (!dateString) return "recently";
+      function updateCounts() {
+        document.getElementById("allUsersCount").textContent = allUsers.length;
+        document.getElementById("friendsCount").textContent = friends.length;
+        document.getElementById("requestCount").textContent = requests.length;
+      }
 
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "recently";
-
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) return "yesterday";
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
-      if (diffDays < 365) return `${Math.ceil(diffDays / 30)} months ago`;
-
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    }
-
-    function showError(message) {
-      // Create error alert
-      const errorAlert = document.createElement("div");
-      errorAlert.className = "alert alert-danger alert-dismissible fade show";
-      errorAlert.innerHTML = `
-        ${message}
+      function showError(message) {
+        const errorAlert = document.createElement("div");
+        errorAlert.className =
+          "alert alert-danger alert-dismissible fade show position-fixed";
+        errorAlert.style.cssText =
+          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        errorAlert.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i> ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       `;
+        document.body.appendChild(errorAlert);
+        setTimeout(() => errorAlert.remove(), 5000);
+      }
 
-      // Insert at the top of the container
-      const container = document.querySelector(".container");
-      container.insertBefore(errorAlert, container.firstChild);
-    }
-  });
-</script>
+      function showSuccess(message) {
+        const successAlert = document.createElement("div");
+        successAlert.className =
+          "alert alert-success alert-dismissible fade show position-fixed";
+        successAlert.style.cssText =
+          "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        successAlert.innerHTML = `
+        <i class="fas fa-check-circle"></i> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+        document.body.appendChild(successAlert);
+        setTimeout(() => successAlert.remove(), 5000);
+      }
+
+      // Make functions globally available for onclick handlers
+      window.sendFriendRequest = function (userId, userName) {
+        // Send the friend request directly without modal
+        fetch("/friends/request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ receiverId: userId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              showSuccess("Friend request sent!");
+              loadUsers(); // Reload to update UI
+            } else {
+              showError(data.error || "Failed to send request");
+            }
+          })
+          .catch(() => {
+            showError("Failed to send request. Please try again.");
+          });
+      };
+
+      window.removeFriend = function (userId, userName) {
+        // Show the remove friend confirmation modal
+        const removeFriendModal = new bootstrap.Modal(
+          document.getElementById("removeFriendModal")
+        );
+        const removeFriendUserName = document.getElementById(
+          "removeFriendUserName"
+        );
+        const confirmRemoveFriendBtn = document.getElementById(
+          "confirmRemoveFriendBtn"
+        );
+
+        // Set the friend's name in the modal
+        removeFriendUserName.textContent = userName;
+
+        // Remove any existing event listeners
+        confirmRemoveFriendBtn.replaceWith(
+          confirmRemoveFriendBtn.cloneNode(true)
+        );
+
+        // Get the fresh reference after cloning
+        const freshConfirmBtn = document.getElementById(
+          "confirmRemoveFriendBtn"
+        );
+
+        // Add event listener for confirmation
+        freshConfirmBtn.addEventListener("click", function () {
+          // Close the modal
+          removeFriendModal.hide();
+
+          // Show loading state on the button
+          freshConfirmBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-1"></i>Removing...';
+          freshConfirmBtn.disabled = true;
+
+          // Send the remove friend request
+          fetch("/friends/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ friendId: userId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                showSuccess("Friend removed!");
+                loadUsers(); // Reload to update UI
+              } else {
+                showError(data.error || "Failed to remove friend");
+              }
+            })
+            .catch(() => {
+              showError("Failed to remove friend. Please try again.");
+            });
+        });
+
+        // Show the modal
+        removeFriendModal.show();
+      };
+
+      window.cancelRequest = function (userId, requestId, userName) {
+        // Show the cancel request confirmation modal
+        const cancelRequestModal = new bootstrap.Modal(
+          document.getElementById("cancelRequestModal")
+        );
+        const cancelRequestUserName = document.getElementById(
+          "cancelRequestUserName"
+        );
+        const confirmCancelRequestBtn = document.getElementById(
+          "confirmCancelRequestBtn"
+        );
+
+        // Set the user's name in the modal
+        cancelRequestUserName.textContent = userName;
+
+        // Remove any existing event listeners
+        confirmCancelRequestBtn.replaceWith(
+          confirmCancelRequestBtn.cloneNode(true)
+        );
+
+        // Get the fresh reference after cloning
+        const freshConfirmBtn = document.getElementById(
+          "confirmCancelRequestBtn"
+        );
+
+        // Add event listener for confirmation
+        freshConfirmBtn.addEventListener("click", function () {
+          // Close the modal
+          cancelRequestModal.hide();
+
+          // Show loading state on the button
+          freshConfirmBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...';
+          freshConfirmBtn.disabled = true;
+
+          // Send the cancel request
+          fetch("/friends/cancel-request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ requestId: requestId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                showSuccess("Request cancelled!");
+                loadUsers(); // Reload to update UI
+              } else {
+                showError(data.error || "Failed to cancel request");
+              }
+            })
+            .catch(() => {
+              showError("Failed to cancel request. Please try again.");
+            });
+        });
+
+        // Show the modal
+        cancelRequestModal.show();
+      };
+
+      window.acceptRequest = function (requestId, userName) {
+        // Show the accept friend request confirmation modal
+        const acceptRequestModal = new bootstrap.Modal(
+          document.getElementById("acceptRequestModal")
+        );
+        const acceptRequestUserName = document.getElementById(
+          "acceptRequestUserName"
+        );
+        const confirmAcceptRequestBtn = document.getElementById(
+          "confirmAcceptRequestBtn"
+        );
+
+        // Set the user's name in the modal
+        acceptRequestUserName.textContent = userName;
+
+        // Remove any existing event listeners
+        confirmAcceptRequestBtn.replaceWith(
+          confirmAcceptRequestBtn.cloneNode(true)
+        );
+
+        // Get the fresh reference after cloning
+        const freshConfirmBtn = document.getElementById(
+          "confirmAcceptRequestBtn"
+        );
+
+        // Add event listener for confirmation
+        freshConfirmBtn.addEventListener("click", function () {
+          // Close the modal
+          acceptRequestModal.hide();
+
+          // Show loading state on the button
+          freshConfirmBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-1"></i>Accepting...';
+          freshConfirmBtn.disabled = true;
+
+          // Send the accept request
+          fetch("/friends/accept", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ requestId: requestId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                showSuccess("Friend request accepted!");
+                loadUsers(); // Reload to update UI
+              } else {
+                showError(data.error || "Failed to accept request");
+              }
+            })
+            .catch(() => {
+              showError("Failed to accept request. Please try again.");
+            });
+        });
+
+        // Show the modal
+        acceptRequestModal.show();
+      };
+
+      window.declineRequest = function (requestId, userName) {
+        // Show the decline friend request confirmation modal
+        const declineRequestModal = new bootstrap.Modal(
+          document.getElementById("declineRequestModal")
+        );
+        const declineRequestUserName = document.getElementById(
+          "declineRequestUserName"
+        );
+        const confirmDeclineRequestBtn = document.getElementById(
+          "confirmDeclineRequestBtn"
+        );
+
+        // Set the user's name in the modal
+        declineRequestUserName.textContent = userName;
+
+        // Remove any existing event listeners
+        confirmDeclineRequestBtn.replaceWith(
+          confirmDeclineRequestBtn.cloneNode(true)
+        );
+
+        // Get the fresh reference after cloning
+        const freshConfirmBtn = document.getElementById(
+          "confirmDeclineRequestBtn"
+        );
+
+        // Add event listener for confirmation
+        freshConfirmBtn.addEventListener("click", function () {
+          // Close the modal
+          declineRequestModal.hide();
+
+          // Show loading state on the button
+          freshConfirmBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin me-1"></i>Declining...';
+          freshConfirmBtn.disabled = true;
+
+          // Send the decline request
+          fetch("/friends/decline", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ requestId: requestId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                showSuccess("Friend request declined!");
+                loadUsers(); // Reload to update UI
+              } else {
+                showError(data.error || "Failed to decline request");
+              }
+            })
+            .catch(() => {
+              showError("Failed to decline request. Please try again.");
+            });
+        });
+
+        // Show the modal
+        declineRequestModal.show();
+      };
+    });
+  </script>
+
+  <!-- Cancel Friend Request Confirmation Modal -->
+  <div
+    class="modal fade"
+    id="cancelRequestModal"
+    tabindex="-1"
+    aria-labelledby="cancelRequestModalLabel"
+    aria-hidden="true"
+    style="z-index: 9999"
+  >
+    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cancelRequestModalLabel">
+            <i class="fas fa-times text-warning me-2"></i>Cancel Friend Request
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Are you sure you want to cancel your friend request to
+            <strong id="cancelRequestUserName"></strong>?
+          </p>
+          <p class="text-muted small mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            You can send a new friend request later if you change your mind.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Keep Request
+          </button>
+          <button
+            type="button"
+            class="btn btn-warning"
+            id="confirmCancelRequestBtn"
+          >
+            <i class="fas fa-times me-1"></i>Cancel Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove Friend Confirmation Modal -->
+  <div
+    class="modal fade"
+    id="removeFriendModal"
+    tabindex="-1"
+    aria-labelledby="removeFriendModalLabel"
+    aria-hidden="true"
+    style="z-index: 9999"
+  >
+    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="removeFriendModalLabel">
+            <i class="fas fa-user-minus text-danger me-2"></i>Remove Friend
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Are you sure you want to remove
+            <strong id="removeFriendUserName"></strong> from your friends?
+          </p>
+          <p class="text-muted small mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            This action cannot be undone. You'll need to send a new friend
+            request to reconnect.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Keep Friend
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="confirmRemoveFriendBtn"
+          >
+            <i class="fas fa-user-minus me-1"></i>Remove Friend
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accept Friend Request Confirmation Modal -->
+  <div
+    class="modal fade"
+    id="acceptRequestModal"
+    tabindex="-1"
+    aria-labelledby="acceptRequestModalLabel"
+    aria-hidden="true"
+    style="z-index: 9999"
+  >
+    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="acceptRequestModalLabel">
+            <i class="fas fa-check text-success me-2"></i>Accept Friend Request
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Accept friend request from
+            <strong id="acceptRequestUserName"></strong>?
+          </p>
+          <p class="text-muted small mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            You'll be added to each other's friends list and can see each
+            other's posts.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Decline
+          </button>
+          <button
+            type="button"
+            class="btn btn-success"
+            id="confirmAcceptRequestBtn"
+          >
+            <i class="fas fa-check me-1"></i>Accept Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decline Friend Request Confirmation Modal -->
+  <div
+    class="modal fade"
+    id="declineRequestModal"
+    tabindex="-1"
+    aria-labelledby="declineRequestModalLabel"
+    aria-hidden="true"
+    style="z-index: 9999"
+  >
+    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="declineRequestModalLabel">
+            <i class="fas fa-times text-danger me-2"></i>Decline Friend Request
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Decline friend request from
+            <strong id="declineRequestUserName"></strong>?
+          </p>
+          <p class="text-muted small mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            This will reject the request. They won't be notified, but you can
+            send them a request later if you change your mind.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Keep Request
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            id="confirmDeclineRequestBtn"
+          >
+            <i class="fas fa-times me-1"></i>Decline Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

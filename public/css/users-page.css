@@ -1,0 +1,676 @@
+/* ========================================
+   USERS/FRIENDS PAGE DEDICATED STYLESHEET
+   ======================================== */
+
+/* ========================================
+   IMPORTANT: EXCLUDE HEADER SEARCH FROM USERS PAGE STYLES
+   ======================================== */
+/* Ensure header search functionality is not affected by users page styles */
+.main-header .search-container,
+.main-header .search-results-dropdown,
+.main-header .search-result-item,
+.main-header .search-result-item .user-avatar-small,
+.main-header .search-result-item .btn,
+.main-header .search-result-item .fw-bold,
+.main-header .search-result-item .text-muted.small {
+  /* These elements should use header/search.css styles, not users-page.css */
+  all: revert;
+}
+
+/* ========================================
+   PAGE LAYOUT & STRUCTURE
+   ======================================== */
+
+/* Body padding for fixed header - now handled by main layout */
+.users-page {
+  background-color: #311555;
+}
+
+/* Main container */
+.users-page .container-fluid {
+  padding: 0;
+}
+
+/* ========================================
+   FRIEND REQUESTS DROPDOWN - Match other pages
+   ======================================== */
+
+/* Friend requests dropdown styling to match other pages */
+.users-page .friend-requests .dropdown-menu {
+  min-width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0;
+  margin: 0;
+  list-style: none;
+}
+
+.users-page .friend-requests .dropdown-menu .dropdown-item {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0.75rem;
+  color: #495057;
+  transition: background-color 0.2s;
+}
+
+.users-page .friend-requests .dropdown-menu .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #311555;
+}
+
+.users-page .friend-requests .dropdown-menu .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.users-page .friend-requests .btn-group .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Empty state styling for friend requests */
+.users-page .friend-requests .dropdown-item.text-center.text-muted {
+  padding: 2rem 1rem;
+  color: #6c757d;
+}
+
+.users-page .friend-requests .dropdown-item.text-center.text-muted i {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.8;
+  color: #495057;
+}
+
+/* ========================================
+   TABS SECTION
+   ======================================== */
+
+/* Tabs container */
+.users-page .tabs-container {
+  background: white;
+  padding: 1rem 0 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+  margin-top: 0;
+
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab navigation */
+.users-page .nav-tabs {
+  border: none;
+  gap: 0.5rem;
+}
+
+.users-page .nav-tabs .nav-item {
+  margin: 0;
+}
+
+.users-page .nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: transparent;
+  position: relative;
+}
+
+.users-page .nav-tabs .nav-link:hover {
+  background-color: #e9ecef;
+  color: #495057;
+  transform: translateY(-1px);
+}
+
+.users-page .nav-tabs .nav-link.active {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Badge styling */
+.users-page .badge {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.users-page .badge.bg-primary {
+  background-color: #007bff !important;
+}
+
+.users-page .badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.users-page .badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+/* ========================================
+   CONTENT CONTAINER
+   ======================================== */
+.outer-content-container {
+  padding: 0 12px;
+}
+
+/* Content container */
+.users-page .content-container {
+  background: var(--card-background);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 0 300px;
+  min-height: 500px;
+  border: 1px solid var(--medium-gray);
+}
+
+/* Tab content */
+.users-page .tab-content {
+  padding-top: 1rem;
+}
+
+.users-page .tab-pane {
+  transition: opacity 0.3s ease;
+}
+
+.users-page .tab-pane.fade:not(.show) {
+  opacity: 0;
+}
+
+.users-page .tab-pane.fade.show {
+  opacity: 1;
+}
+
+/* ========================================
+   USER CARDS
+   ======================================== */
+
+/* User cards grid */
+.users-page .row {
+  margin: 0 -0.75rem;
+}
+
+.users-page .col-md-6,
+.users-page .col-lg-4 {
+  padding: 0 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* User card styling */
+.users-page .user-card {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.users-page .user-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.users-page .user-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #311555, #764ba2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.users-page .user-card:hover::before {
+  opacity: 1;
+}
+
+/* User card layout */
+.users-page .user-card .d-flex {
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+/* ========================================
+   USER AVATARS (ONLY FOR USER CARDS, NOT HEADER)
+   ======================================== */
+
+/* User avatar - ONLY for user cards, not header */
+.users-page .user-card .user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #311555, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 0;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.users-page .user-card .user-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.users-page .user-card:hover .user-avatar img {
+  transform: scale(1.05);
+}
+
+.users-page .user-card .user-avatar .avatar-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Avatar fallback colors - ONLY for user cards */
+.users-page .user-card .user-avatar[data-initials*="A"] {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+.users-page .user-card .user-avatar[data-initials*="B"] {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+.users-page .user-card .user-avatar[data-initials*="C"] {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+.users-page .user-card .user-avatar[data-initials*="D"] {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+.users-page .user-card .user-avatar[data-initials*="E"] {
+  background: linear-gradient(135deg, #fa709a, #fee140);
+}
+.users-page .user-card .user-avatar[data-initials*="F"] {
+  background: linear-gradient(135deg, #a8edea, #fed6e3);
+}
+.users-page .user-card .user-avatar[data-initials*="G"] {
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+}
+.users-page .user-card .user-avatar[data-initials*="H"] {
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+}
+.users-page .user-card .user-avatar[data-initials*="I"] {
+  background: linear-gradient(135deg, #a8caba, #5d4e75);
+}
+.users-page .user-card .user-avatar[data-initials*="J"] {
+  background: linear-gradient(135deg, #d299c2, #fef9d7);
+}
+.users-page .user-card .user-avatar[data-initials*="K"] {
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+}
+.users-page .user-card .user-avatar[data-initials*="L"] {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+.users-page .user-card .user-avatar[data-initials*="M"] {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+.users-page .user-card .user-avatar[data-initials*="N"] {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+.users-page .user-card .user-avatar[data-initials*="O"] {
+  background: linear-gradient(135deg, #fa709a, #fee140);
+}
+.users-page .user-card .user-avatar[data-initials*="P"] {
+  background: linear-gradient(135deg, #a8edea, #fed6e3);
+}
+.users-page .user-card .user-avatar[data-initials*="Q"] {
+  background: linear-gradient(135deg, #ffecd2, #fcb69f);
+}
+.users-page .user-card .user-avatar[data-initials*="R"] {
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+}
+.users-page .user-card .user-avatar[data-initials*="S"] {
+  background: linear-gradient(135deg, #a8caba, #5d4e75);
+}
+.users-page .user-card .user-avatar[data-initials*="T"] {
+  background: linear-gradient(135deg, #d299c2, #fef9d7);
+}
+.users-page .user-card .user-avatar[data-initials*="U"] {
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+}
+.users-page .user-card .user-avatar[data-initials*="V"] {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+.users-page .user-card .user-avatar[data-initials*="W"] {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+.users-page .user-card .user-avatar[data-initials*="X"] {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+.users-page .user-card .user-avatar[data-initials*="Y"] {
+  background: linear-gradient(135deg, #fa709a, #fee140);
+}
+.users-page .user-card .user-avatar[data-initials*="Z"] {
+  background: linear-gradient(135deg, #a8edea, #fed6e3);
+}
+
+/* ========================================
+   USER INFORMATION
+   ======================================== */
+
+/* User info section */
+.users-page .user-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 0;
+}
+
+.users-page .user-info h6 {
+  color: #212529;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users-page .user-info p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users-page .user-info small {
+  color: #868e96;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+
+/* Button container */
+.users-page .ms-auto {
+  flex-shrink: 0;
+}
+
+/* Action buttons */
+.users-page .user-card .btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.users-page .user-card .btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.users-page .user-card .btn:hover::before {
+  left: 100%;
+}
+
+/* Add friend button */
+.users-page .btn-add-friend {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.users-page .btn-add-friend:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+}
+
+.users-page .btn-add-friend:active {
+  transform: translateY(0);
+}
+
+/* Remove friend button */
+.users-page .btn-remove-friend {
+  background: #dc3545;
+  color: white;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.users-page .btn-remove-friend:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+.users-page .btn-remove-friend:active {
+  transform: translateY(0);
+}
+
+/* Cancel request button */
+.users-page .btn-cancel-request {
+  background: #6c757d;
+  color: white;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+.users-page .btn-cancel-request:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
+}
+
+.users-page .btn-cancel-request:active {
+  transform: translateY(0);
+}
+
+/* Accept/Decline button group */
+.users-page .d-flex.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.users-page .d-flex.gap-2 .btn {
+  min-width: 80px;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.users-page .d-flex.gap-2 .btn-success {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+.users-page .d-flex.gap-2 .btn-danger {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+/* Button icons */
+.users-page .user-card .btn i {
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+}
+
+.users-page .user-card .btn:hover i {
+  transform: scale(1.1);
+}
+
+/* Loading state */
+.users-page .user-card .btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.users-page .user-card .btn:disabled::before {
+  display: none;
+}
+
+/* ========================================
+   EMPTY STATES & LOADING
+   ======================================== */
+
+/* Empty state styling */
+.users-page .text-muted {
+  color: #6c757d;
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.users-page .text-muted i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Loading states */
+.users-page .spinner-border {
+  color: #311555;
+}
+
+.users-page .loading-text {
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+/* ========================================
+   ANIMATIONS & TRANSITIONS
+   ======================================== */
+
+/* Card entrance animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.users-page .user-card {
+  animation: slideInUp 0.3s ease forwards;
+}
+
+.users-page .user-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.users-page .user-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.users-page .user-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.users-page .user-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.users-page .user-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.users-page .user-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+/* Button click animation */
+@keyframes buttonClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.users-page .user-card .btn:active {
+  animation: buttonClick 0.1s ease;
+}
+
+/* ========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ======================================== */
+
+/* Focus states */
+.users-page .user-card .btn:focus {
+  outline: 2px solid #311555;
+  outline-offset: 2px;
+}
+
+.users-page .nav-tabs .nav-link:focus {
+  outline: 2px solid #311555;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .users-page .user-card {
+    border: 2px solid #000;
+  }
+
+  .users-page .nav-tabs .nav-link.active {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .users-page .user-card,
+  .users-page .user-card .btn,
+  .users-page .nav-tabs .nav-link {
+    transition: none;
+    animation: none;
+  }
+
+  .users-page .user-card:hover {
+    transform: none;
+  }
+
+  .users-page .user-card .btn:hover {
+    transform: none;
+  }
+}
