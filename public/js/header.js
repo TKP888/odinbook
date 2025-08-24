@@ -1,7 +1,68 @@
 // Extracted from views/layouts/main.ejs (header search and friend request logic)
 
+// Mobile Menu Functions
+function initializeMobileMenu() {
+  const hamburgerBtn = document.getElementById("hamburgerMenuBtn");
+  const mobileMenuPanel = document.getElementById("mobileMenuPanel");
+  const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+
+  if (!hamburgerBtn || !mobileMenuPanel || !mobileMenuOverlay) {
+    return;
+  }
+
+  // Toggle mobile menu
+  hamburgerBtn.addEventListener("click", function () {
+    mobileMenuPanel.classList.toggle("active");
+    mobileMenuOverlay.classList.toggle("active");
+  });
+
+  // Close menu when clicking overlay
+  mobileMenuOverlay.addEventListener("click", function () {
+    mobileMenuPanel.classList.remove("active");
+    mobileMenuOverlay.classList.remove("active");
+  });
+
+  // Close menu when clicking menu items
+  const mobileMenuItems = mobileMenuPanel.querySelectorAll(".mobile-menu-item");
+  mobileMenuItems.forEach((item) => {
+    item.addEventListener("click", function () {
+      // Close mobile menu
+      mobileMenuPanel.classList.remove("active");
+      mobileMenuOverlay.classList.remove("active");
+      
+      // If navigating to users page with tab, ensure proper tab switching
+      const href = this.getAttribute("href");
+      if (href && href.includes("/friends/users") && href.includes("tab=")) {
+        // Extract tab parameter
+        const url = new URL(href, window.location.origin);
+        const tab = url.searchParams.get("tab");
+        
+        // Store tab preference for when page loads
+        if (tab) {
+          sessionStorage.setItem("preferredTab", tab);
+        }
+      }
+    });
+  });
+
+  // Close menu on escape key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      mobileMenuPanel.classList.remove("active");
+      mobileMenuOverlay.classList.remove("active");
+    }
+  });
+}
+
+// Initialize mobile menu when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initializeMobileMenu();
+  initializeMobileSearch();
+});
+
 // Header Search Functions
 let headerSearchTimeout;
+let mobileHeaderSearchTimeout;
 
 function headerSearchUsers() {
   const searchTerm = document.getElementById("headerSearchInput").value.trim();
@@ -118,7 +179,9 @@ function sendFriendRequestFromHeader(userId, userName = "") {
               <button class="btn btn-secondary btn-sm" disabled>
                 <i class="fas fa-clock"></i> Request Sent
               </button>
-              <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${data.requestId}', '${userName || "user"}', event)">
+              <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${
+                data.requestId
+              }', '${userName || "user"}', event)">
                 <i class="fas fa-times"></i>
               </button>
             `;
@@ -172,15 +235,17 @@ function sendFriendRequestFromHeader(userId, userName = "") {
 
 // Function to cancel a sent friend request from header search
 function cancelFriendRequestFromHeader(requestId, userName, event) {
-  console.log(`[HEADER] cancelFriendRequestFromHeader called for request ${requestId} (${userName})`);
-  
+  console.log(
+    `[HEADER] cancelFriendRequestFromHeader called for request ${requestId} (${userName})`
+  );
+
   // Show loading state on the cancel button
   const cancelBtn = event.target;
   if (cancelBtn) {
     cancelBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     cancelBtn.disabled = true;
   }
-  
+
   fetch("/friends/cancel-request", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -204,16 +269,17 @@ function cancelFriendRequestFromHeader(requestId, userName, event) {
         // Use event.target to find the button that was clicked, then traverse up to find the user item
         const cancelBtn = event.target;
         if (cancelBtn) {
-          const userItem = cancelBtn.closest('.search-result-item');
+          const userItem = cancelBtn.closest(".search-result-item");
           if (userItem) {
-            const userId = userItem.getAttribute('data-user-id');
+            const userId = userItem.getAttribute("data-user-id");
             const buttonContainerDiv = userItem.querySelector(".d-flex.gap-1");
             if (buttonContainerDiv) {
               // Replace with "Add Friend" button
               const addFriendBtn = document.createElement("button");
               addFriendBtn.className = "btn btn-primary btn-sm";
               addFriendBtn.innerHTML = '<i class="fas fa-user-plus"></i>';
-              addFriendBtn.onclick = () => sendFriendRequestFromHeader(userId, userName);
+              addFriendBtn.onclick = () =>
+                sendFriendRequestFromHeader(userId, userName);
               buttonContainerDiv.replaceWith(addFriendBtn);
             }
           }
@@ -224,7 +290,7 @@ function cancelFriendRequestFromHeader(requestId, userName, event) {
           cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
           cancelBtn.disabled = false;
         }
-        
+
         // Show error notification
         const alertDiv = document.createElement("div");
         alertDiv.className =
@@ -241,13 +307,13 @@ function cancelFriendRequestFromHeader(requestId, userName, event) {
     })
     .catch((error) => {
       console.error("Error cancelling friend request:", error);
-      
+
       // Reset button state on error
       if (cancelBtn) {
         cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
         cancelBtn.disabled = false;
       }
-      
+
       // Show error notification
       const alertDiv = document.createElement("div");
       alertDiv.className =
@@ -312,6 +378,118 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+// Mobile Search Functions
+function initializeMobileSearch() {
+  const mobileSearchInput = document.getElementById('mobileSearchInput');
+  if (!mobileSearchInput) return;
+
+  // Add event listeners for mobile search
+  mobileSearchInput.addEventListener('input', function() {
+    clearTimeout(mobileHeaderSearchTimeout);
+    const searchTerm = this.value.trim();
+
+    if (searchTerm.length === 0) {
+      hideMobileSearchResults();
+      return;
+    }
+
+    mobileHeaderSearchTimeout = setTimeout(() => {
+      mobileSearchUsers();
+    }, 300);
+  });
+
+  // Close search results when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.mobile-menu-search')) {
+      hideMobileSearchResults();
+    }
+  });
+}
+
+function mobileSearchUsers() {
+  const searchTerm = document.getElementById('mobileSearchInput').value.trim();
+
+  if (searchTerm.length === 0) {
+    hideMobileSearchResults();
+    return;
+  }
+
+  showMobileSearchLoading();
+
+  const searchUrl = `/friends/search?q=${encodeURIComponent(searchTerm)}`;
+
+  fetch(searchUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      hideMobileSearchLoading();
+      displayMobileSearchResults(data.users);
+    })
+    .catch((error) => {
+      console.error('Mobile search error:', error);
+      hideMobileSearchLoading();
+      hideMobileSearchResults();
+    });
+}
+
+function showMobileSearchLoading() {
+  const resultsDiv = document.getElementById('mobileSearchResults');
+  const loadingDiv = document.getElementById('mobileSearchLoading');
+  const noResultsDiv = document.getElementById('mobileNoResults');
+  
+  resultsDiv.classList.remove('d-none');
+  loadingDiv.classList.remove('d-none');
+  noResultsDiv.classList.add('d-none');
+}
+
+function hideMobileSearchLoading() {
+  const loadingDiv = document.getElementById('mobileSearchLoading');
+  loadingDiv.classList.add('d-none');
+}
+
+function displayMobileSearchResults(users) {
+  const resultsDiv = document.getElementById('mobileSearchResults');
+  const usersListDiv = document.getElementById('mobileUsersList');
+  const noResultsDiv = document.getElementById('mobileNoResults');
+
+  if (users.length === 0) {
+    noResultsDiv.classList.remove('d-none');
+    usersListDiv.innerHTML = '';
+    resultsDiv.classList.remove('d-none');
+    return;
+  }
+
+  noResultsDiv.classList.add('d-none');
+  resultsDiv.classList.remove('d-none');
+
+  usersListDiv.innerHTML = users
+    .map(
+      (user) => `
+        <div class="search-result-item" data-user-id="${user.id}">
+          <div class="d-flex align-items-center">
+            <div class="user-avatar-small me-3">
+              ${getUserAvatar(user)}
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">
+                <a href="/profile/${user.id}" class="text-decoration-none text-dark user-profile-link">
+                  ${user.firstName || ''} ${user.lastName || ''}
+                </a>
+              </div>
+              <div class="text-muted small">@${user.username}</div>
+            </div>
+            ${getActionButton(user)}
+          </div>
+        </div>
+      `
+    )
+    .join('');
+}
+
+function hideMobileSearchResults() {
+  const resultsDiv = document.getElementById('mobileSearchResults');
+  resultsDiv.classList.add('d-none');
+}
 
 // Update header friend request count badge and dropdown content
 function updateHeaderRequestCount() {
@@ -777,7 +955,9 @@ function getActionButton(user) {
         <button class="btn btn-secondary btn-sm" disabled>
           <i class="fas fa-clock"></i> Request Sent
         </button>
-        <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${user.requestId}', '${user.firstName || ""} ${user.lastName || ""}', event)">
+        <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequestFromHeader('${
+          user.requestId
+        }', '${user.firstName || ""} ${user.lastName || ""}', event)">
           <i class="fas fa-times"></i>
         </button>
       </div>`;

@@ -18,7 +18,7 @@
                 showOverlay: (typeof profileUser === 'undefined')
               }) %>
               <% if (typeof profileUser === 'undefined') { %>
-                <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                <input type="file" id="profilePictureInput" accept="image/*" class="hidden-input">
               <% } %>
             </div>
           </div>
@@ -81,10 +81,9 @@
     </div>
 
     <!-- Main Content Row -->
-    <div class="col-split" style="display: flex; flex-direction: row; gap: 16px; margin-bottom: 16px;" 
-         data-is-friend="<%= typeof profileUser !== 'undefined' ? isFriend : 'true' %>">
+    <div class="col-split" data-is-friend="<%= typeof profileUser !== 'undefined' ? isFriend : 'true' %>">
         <!-- About Section -->
-        <div class="card" style="flex: 1; margin-right: 0px;">
+        <div class="card about-section-card">
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="fas fa-info-circle me-2"></i>About
@@ -195,7 +194,7 @@
             </div>
           </div>
                   <!-- Friends Section -->
-        <div class="card" style="flex: 1; margin-left: 0px;">
+        <div class="card friends-section-card">
             <div class="card-header">
               <h5 class="mb-0">
                 <i class="fas fa-users me-2"></i>
@@ -356,8 +355,7 @@
                     id="inlinePostPhoto"
                     name="photo"
                     accept="image/*"
-                    class="form-control form-control-sm"
-                    style="display: none"
+                    class="form-control form-control-sm hidden-input"
                   />
                   <button
                     type="button"
@@ -373,8 +371,7 @@
                   <button
                     type="button"
                     id="inlineRemovePhotoBtn"
-                    class="btn btn-outline-danger btn-sm"
-                    style="display: none"
+                    class="btn btn-outline-danger btn-sm hidden-button"
                     onclick="removeInlinePhoto()"
                   >
                     <i class="fas fa-times me-1"></i> Remove
@@ -521,9 +518,9 @@
   tabindex="-1"
   aria-labelledby="unfriendModalLabel"
   aria-hidden="true"
-  style="z-index: 9999;"
+
 >
-  <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh;">
+          <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="unfriendModalLabel">
@@ -696,8 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 id="postPhoto"
                 name="photo"
                 accept="image/*"
-                class="form-control form-control-sm"
-                style="display: none"
+                class="form-control form-control-sm hidden-input"
               />
               <button
                 type="button"
@@ -713,8 +709,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <button
                 type="button"
                 id="removePhotoBtn"
-                class="btn btn-outline-danger btn-sm ms-2"
-                style="display: none"
+                class="btn btn-outline-danger btn-sm ms-2 hidden-button"
                 onclick="removePhoto()"
               >
                 <i class="fas fa-times"></i>

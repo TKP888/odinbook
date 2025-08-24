@@ -20,16 +20,28 @@
     <link href="/css/header.css" rel="stylesheet" />
     <% if (typeof activePage !== 'undefined' && activePage === 'users') { %>
     <link href="/css/users-page.css" rel="stylesheet" />
+    <% } %> <% if (typeof activePage !== 'undefined' && activePage ===
+    'dashboard') { %>
+    <link href="/css/dashboard-mobile.css" rel="stylesheet" />
+    <% } %> <% if (typeof activePage !== 'undefined' && activePage ===
+    'profile') { %>
+    <link href="/css/profile-mobile.css" rel="stylesheet" />
+    <% } %> <% if (typeof activePage !== 'undefined' && activePage ===
+    'friends') { %>
+    <link href="/css/friends-mobile.css" rel="stylesheet" />
     <% } %>
     <link href="/css/search.css" rel="stylesheet" />
+    <link href="/css/search-mobile.css" rel="stylesheet" />
+    <link href="/css/mobile.css" rel="stylesheet" />
   </head>
   <body
-    class="<%= typeof activePage !== 'undefined' && activePage === 'users' ? 'users-page' : '' %>"
+    class="<%= typeof activePage !== 'undefined' && activePage === 'users' ? 'users-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? ' dashboard-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'profile' ? ' profile-page' : '' %>"
   >
     <!-- Header -->
     <%- include('../partials/header', { user: user, showSearch: true,
     showFriendRequests: true, showUserMenu: true, activePage: typeof activePage
-    !== 'undefined' ? activePage : '' }) %>
+    !== 'undefined' ? activePage : '', tab: typeof tab !== 'undefined' ? tab :
+    '' }) %>
 
     <!-- Main Content -->
     <main class="main-content">

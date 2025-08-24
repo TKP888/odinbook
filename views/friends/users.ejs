@@ -89,6 +89,21 @@
       let friends = [];
       let requests = [];
 
+      // Check for preferred tab from mobile menu navigation
+      const preferredTab = sessionStorage.getItem("preferredTab");
+      if (preferredTab) {
+        // Clear the stored preference
+        sessionStorage.removeItem("preferredTab");
+        
+        // Switch to the preferred tab
+        const tabButton = document.querySelector(`[data-bs-target="#${preferredTab}"]`);
+        if (tabButton) {
+          // Trigger tab click
+          const tab = new bootstrap.Tab(tabButton);
+          tab.show();
+        }
+      }
+
       // Load users on page load
       loadUsers();
 

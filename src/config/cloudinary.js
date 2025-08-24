@@ -76,7 +76,7 @@ const uploadPostPhoto = async (file, options = {}) => {
       mimetype: file.mimetype,
       size: file.size,
       hasBuffer: !!file.buffer,
-      hasPath: !!file.path
+      hasPath: !!file.path,
     });
 
     let uploadData;
@@ -97,7 +97,7 @@ const uploadPostPhoto = async (file, options = {}) => {
       transformation: [
         { width: 800, height: 600, crop: "limit" },
         { quality: "auto", fetch_format: "auto" },
-      ]
+      ],
     });
 
     const result = await cloudinary.uploader.upload(uploadData, {
@@ -114,7 +114,7 @@ const uploadPostPhoto = async (file, options = {}) => {
       url: result.secure_url,
       public_id: result.public_id,
       width: result.width,
-      height: result.height
+      height: result.height,
     });
 
     return {

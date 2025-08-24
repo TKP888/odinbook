@@ -119,12 +119,12 @@ if (allChecksPassed) {
   console.log("   npm start          # Production mode");
   console.log("   npm run dev        # Development mode with hot reload");
   console.log("   ./start.sh         # Using the startup script");
-  
+
   console.log("\n🧪 To run tests:");
   console.log("   npm test           # Run all tests");
   console.log("   npm run test:all   # Run all tests with detailed output");
   console.log("   npm run test:user  # Run user tests only");
-  
+
   console.log("\n🔧 Maintenance:");
   console.log("   npm run clean      # Check project structure");
   console.log("   npm run status     # Check project health");
@@ -151,20 +151,28 @@ if (fs.existsSync(oldPostsRoute) && fs.existsSync(newPostsRoute)) {
 
 // Check organization quality
 console.log("\n🏗️ Organization Quality:");
-const rootFiles = fs.readdirSync(".").filter(file => 
-  !file.startsWith(".") && 
-  !file.includes("node_modules") &&
-  !file.includes("package")
+const rootFiles = fs
+  .readdirSync(".")
+  .filter(
+    (file) =>
+      !file.startsWith(".") &&
+      !file.includes("node_modules") &&
+      !file.includes("package")
+  );
+
+const organizedFiles = rootFiles.filter(
+  (file) =>
+    fs.statSync(file).isDirectory() ||
+    file.endsWith(".md") ||
+    file.endsWith(".sh") ||
+    (file.endsWith(".js") && file.includes("check")) ||
+    file.includes("start")
 );
 
-const organizedFiles = rootFiles.filter(file => 
-  fs.statSync(file).isDirectory() || 
-  file.endsWith(".md") ||
-  file.endsWith(".sh") ||
-  file.endsWith(".js") && file.includes("check") || file.includes("start")
-);
-
-const organizationScore = (organizedFiles.length / rootFiles.length * 100).toFixed(1);
+const organizationScore = (
+  (organizedFiles.length / rootFiles.length) *
+  100
+).toFixed(1);
 console.log(`   Root directory organization: ${organizationScore}%`);
 
 if (organizationScore >= 80) {

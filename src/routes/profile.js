@@ -73,8 +73,10 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    console.log(`[PROFILE POSTS] Checking visibility for user ${req.user.id} viewing ${userId}'s posts`);
-    
+    console.log(
+      `[PROFILE POSTS] Checking visibility for user ${req.user.id} viewing ${userId}'s posts`
+    );
+
     // Check if the current user is friends with the profile user
     const currentUser = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -88,8 +90,14 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    console.log(`[PROFILE POSTS] Current user friends:`, currentUser?.friends?.map(f => f.id));
-    console.log(`[PROFILE POSTS] Current user friendOf:`, currentUser?.friendOf?.map(f => f.id));
+    console.log(
+      `[PROFILE POSTS] Current user friends:`,
+      currentUser?.friends?.map((f) => f.id)
+    );
+    console.log(
+      `[PROFILE POSTS] Current user friendOf:`,
+      currentUser?.friendOf?.map((f) => f.id)
+    );
 
     // Find mutual friends (users who are in both lists)
     const outgoingFriends =
@@ -103,12 +111,15 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
     console.log(`[PROFILE POSTS] Mutual friend IDs:`, mutualFriendIds);
 
     // Check if current user can see the profile user's posts
-    const canSeePosts = req.user.id === userId || mutualFriendIds.includes(userId);
-    
-    console.log(`[PROFILE POSTS] Can see posts: ${canSeePosts} (current user: ${req.user.id}, profile user: ${userId})`);
+    const canSeePosts =
+      req.user.id === userId || mutualFriendIds.includes(userId);
+
+    console.log(
+      `[PROFILE POSTS] Can see posts: ${canSeePosts} (current user: ${req.user.id}, profile user: ${userId})`
+    );
 
     if (!canSeePosts) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: "You need to be friends to see this user's posts",
         posts: [],
         pagination: {
@@ -116,7 +127,7 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
           totalPages: 0,
           currentPage: page,
           hasNextPage: false,
-        }
+        },
       });
     }
 
@@ -194,7 +205,9 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    console.log(`[PROFILE POSTS] Found ${postsToReturn.length} posts for user ${userId}, total: ${totalPosts}`);
+    console.log(
+      `[PROFILE POSTS] Found ${postsToReturn.length} posts for user ${userId}, total: ${totalPosts}`
+    );
 
     // Return the expected format with posts and pagination
     res.json({
@@ -743,8 +756,10 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    console.log(`[PROFILE POSTS] Checking visibility for user ${req.user.id} viewing ${userId}'s posts`);
-    
+    console.log(
+      `[PROFILE POSTS] Checking visibility for user ${req.user.id} viewing ${userId}'s posts`
+    );
+
     // Check if the current user is friends with the profile user
     const currentUser = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -758,8 +773,14 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
       },
     });
 
-    console.log(`[PROFILE POSTS] Current user friends:`, currentUser?.friends?.map(f => f.id));
-    console.log(`[PROFILE POSTS] Current user friendOf:`, currentUser?.friendOf?.map(f => f.id));
+    console.log(
+      `[PROFILE POSTS] Current user friends:`,
+      currentUser?.friends?.map((f) => f.id)
+    );
+    console.log(
+      `[PROFILE POSTS] Current user friendOf:`,
+      currentUser?.friendOf?.map((f) => f.id)
+    );
 
     // Find mutual friends (users who are in both lists)
     const outgoingFriends =
@@ -773,12 +794,15 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
     console.log(`[PROFILE POSTS] Mutual friend IDs:`, mutualFriendIds);
 
     // Check if current user can see the profile user's posts
-    const canSeePosts = req.user.id === userId || mutualFriendIds.includes(userId);
-    
-    console.log(`[PROFILE POSTS] Can see posts: ${canSeePosts} (current user: ${req.user.id}, profile user: ${userId})`);
+    const canSeePosts =
+      req.user.id === userId || mutualFriendIds.includes(userId);
+
+    console.log(
+      `[PROFILE POSTS] Can see posts: ${canSeePosts} (current user: ${req.user.id}, profile user: ${userId})`
+    );
 
     if (!canSeePosts) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: "You need to be friends to see this user's posts",
         posts: [],
         pagination: {
@@ -786,7 +810,7 @@ router.get("/:userId/posts", ensureAuthenticated, async (req, res) => {
           totalPages: 0,
           currentPage: page,
           hasNextPage: false,
-        }
+        },
       });
     }
 

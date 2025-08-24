@@ -238,8 +238,10 @@ class PostService {
 
   async toggleLike(postId, userId) {
     try {
-      console.log(`[POST SERVICE] toggleLike called for post ${postId} by user ${userId}`);
-      
+      console.log(
+        `[POST SERVICE] toggleLike called for post ${postId} by user ${userId}`
+      );
+
       const existingLike = await prisma.like.findUnique({
         where: { userId_postId: { userId, postId } },
       });

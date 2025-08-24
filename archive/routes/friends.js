@@ -63,9 +63,9 @@ router.get("/users", ensureAuthenticated, async (req, res) => {
   // Check if this is an AJAX request (for the API)
   if (
     req.xhr ||
-    req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+    req.headers["x-requested-with"] === "XMLHttpRequest" ||
     (req.headers.accept && req.headers.accept.includes("application/json")) ||
-    req.headers['content-type'] === 'application/json'
+    req.headers["content-type"] === "application/json"
   ) {
     try {
       const currentUser = await prisma.user.findUnique({
@@ -143,7 +143,7 @@ router.get("/users", ensureAuthenticated, async (req, res) => {
         // Generate gravatar URL if user uses gravatar
         let gravatarUrl = null;
         if (user.useGravatar && user.email) {
-          const crypto = require('crypto');
+          const crypto = require("crypto");
           const hash = crypto
             .createHash("md5")
             .update(user.email.toLowerCase().trim())
@@ -212,8 +212,10 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
     });
 
     // Find mutual friends (users who are in both lists)
-    const outgoingFriends = currentUser?.friends?.map((friend) => friend.id) || [];
-    const incomingFriends = currentUser?.friendOf?.map((friend) => friend.id) || [];
+    const outgoingFriends =
+      currentUser?.friends?.map((friend) => friend.id) || [];
+    const incomingFriends =
+      currentUser?.friendOf?.map((friend) => friend.id) || [];
     const mutualFriendIds = outgoingFriends.filter((id) =>
       incomingFriends.includes(id)
     );
@@ -251,12 +253,12 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
     });
 
     console.log(`Found ${users.length} users matching "${searchTerm}"`);
-    
+
     // Add friendship status and gravatar URLs to search results
-    const usersWithStatus = users.map(user => {
+    const usersWithStatus = users.map((user) => {
       let gravatarUrl = null;
       if (user.useGravatar && user.email) {
-        const crypto = require('crypto');
+        const crypto = require("crypto");
         const hash = crypto
           .createHash("md5")
           .update(user.email.toLowerCase().trim())
@@ -266,14 +268,18 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
 
       // Check friendship status
       const isFriend = mutualFriendIds.includes(user.id);
-      
+
       // Check for pending requests
-      const sentRequest = currentUser.sentRequests.find(req => req.receiverId === user.id);
-      const receivedRequest = currentUser.receivedRequests.find(req => req.senderId === user.id);
-      
+      const sentRequest = currentUser.sentRequests.find(
+        (req) => req.receiverId === user.id
+      );
+      const receivedRequest = currentUser.receivedRequests.find(
+        (req) => req.senderId === user.id
+      );
+
       let status = "none";
       let requestId = null;
-      
+
       if (isFriend) {
         status = "friend";
       } else if (sentRequest) {
@@ -283,7 +289,7 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
         status = "request_received";
         requestId = receivedRequest.id;
       }
-      
+
       return {
         ...user,
         gravatarUrl,
@@ -291,7 +297,7 @@ router.get("/search", ensureAuthenticated, async (req, res) => {
         requestId,
       };
     });
-    
+
     res.json({ users: usersWithStatus });
   } catch (error) {
     console.error("Search error:", error);

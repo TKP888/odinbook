@@ -118,6 +118,106 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
         </ul>
       </div>
       <% } %>
+
+      <!-- Mobile Hamburger Menu Button -->
+      <button
+        class="hamburger-menu d-md-none"
+        id="hamburgerMenuBtn"
+        aria-label="Toggle mobile menu"
+      >
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+      </button>
     </div>
   </div>
 </header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+<!-- Mobile Menu Panel -->
+<div class="mobile-menu-panel" id="mobileMenuPanel">
+  <div class="mobile-menu-header">
+    <div class="d-flex align-items-center">
+      <div class="mobile-user-avatar me-3">
+        <%- include('user-avatar', { user: user, size: 'medium' }) %>
+      </div>
+            <div class="mobile-user-info">
+        <div class="mobile-user-name"><%= user.firstName %> <%= user.lastName %></div>
+        <div class="mobile-user-handle">@<%= user.username %></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mobile Search Bar -->
+  <div class="mobile-menu-search">
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        id="mobileSearchInput"
+        placeholder="Search by name, username, or email..."
+        autocomplete="off"
+      />
+    </div>
+    <!-- Mobile Search Results -->
+    <div id="mobileSearchResults" class="mobile-search-results d-none">
+      <div id="mobileUsersList"></div>
+      <div id="mobileNoResults" class="text-center text-muted p-3 d-none">
+        <i class="fas fa-search fa-lg mb-2"></i>
+        <p class="mb-0">No users found</p>
+      </div>
+      <div id="mobileSearchLoading" class="text-center p-3 d-none">
+        <div
+          class="spinner-border spinner-border-sm text-primary"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="ms-2">Searching...</span>
+      </div>
+    </div>
+  </div>
+  
+  <a
+    href="/dashboard"
+    class="mobile-menu-item <%= activePage === 'dashboard' ? 'active' : '' %>"
+  >
+    <i class="fas fa-home"></i>
+    Home
+  </a>
+
+  <a
+    href="/profile"
+    class="mobile-menu-item <%= activePage === 'profile' ? 'active' : '' %>"
+  >
+    <i class="fas fa-user"></i>
+    Profile
+  </a>
+
+  <a
+    href="/friends/users"
+    class="mobile-menu-item <%= activePage === 'users' ? 'active' : '' %>"
+  >
+    <i class="fas fa-users"></i>
+    Users
+  </a>
+
+  <% if (showFriendRequests) { %>
+  <a href="/friends/users?tab=requests" class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'requests' ? 'active' : '' %>">
+    <i class="fas fa-user-plus"></i>
+    Friend Requests
+  </a>
+  <% } %>
+
+  <a href="/friends/users?tab=friends" class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'friends' ? 'active' : '' %>">
+    <i class="fas fa-user-friends"></i>
+    My Friends
+  </a>
+
+  <a href="/auth/logout" class="mobile-menu-item">
+    <i class="fas fa-sign-out-alt"></i>
+    Logout
+  </a>
+</div>

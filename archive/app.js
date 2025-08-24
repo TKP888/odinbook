@@ -50,9 +50,9 @@ app.use((req, res, next) => {
   res.locals.error_msg = req.flash("error_msg");
   res.locals.error = req.flash("error");
   res.locals.user = req.user || null;
-  
+
   // Gravatar helper function
-  res.locals.getGravatarUrl = function(email, size = 200) {
+  res.locals.getGravatarUrl = function (email, size = 200) {
     if (!email) return null;
     const hash = crypto
       .createHash("md5")
@@ -60,7 +60,7 @@ app.use((req, res, next) => {
       .digest("hex");
     return `https://www.gravatar.com/avatar/${hash}?s=${size}&d=identicon&r=pg`;
   };
-  
+
   next();
 });
 
@@ -103,5 +103,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log("🤖 Auto-accept system for seed users is active");
-  console.log(`📊 Current pending auto-accept jobs: ${getPendingJobs().length}`);
+  console.log(
+    `📊 Current pending auto-accept jobs: ${getPendingJobs().length}`
+  );
 });

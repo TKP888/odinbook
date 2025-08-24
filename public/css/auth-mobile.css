@@ -1,0 +1,364 @@
+/* ========================================
+   AUTH PAGE MOBILE-SPECIFIC STYLES
+   iPhone SE minimum size (320px width) and up
+   ======================================== */
+
+@media (max-width: 767px) {
+  /* ========================================
+     MOBILE AUTH PAGE LAYOUT
+     ======================================== */
+
+  /* Mobile auth page layout */
+  .auth-page {
+    padding: 0.5rem !important;
+    min-height: 100vh !important;
+    align-items: flex-start !important;
+    padding-top: calc(var(--header-height) + 1rem) !important;
+    font-family: var(--font-family) !important;
+  }
+
+  /* Mobile auth container */
+  .auth-page .auth-container {
+    max-width: 100% !important;
+    padding: 0 0.5rem !important;
+    padding-top: 1rem !important;
+  }
+
+  /* Mobile auth card */
+  .auth-page .auth-card {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    margin: 0 !important;
+  }
+
+  /* ========================================
+     MOBILE AUTH HEADER
+     ======================================== */
+
+  /* Mobile auth header */
+  .auth-page .auth-header {
+    padding: 1.5rem 1rem !important;
+  }
+
+  .auth-page .auth-header h1 {
+    font-size: 2rem !important;
+    margin-bottom: 0.5rem !important;
+    font-family: var(--font-family) !important;
+  }
+
+  .auth-page .auth-header p {
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+    font-family: var(--font-family) !important;
+  }
+
+  /* ========================================
+     MOBILE AUTH BODY
+     ======================================== */
+
+  /* Mobile auth body */
+  .auth-page .auth-body {
+    padding: 1.5rem 1rem !important;
+  }
+
+  /* ========================================
+     MOBILE FORM CONTROLS
+     ======================================== */
+
+  /* Mobile form controls */
+  .auth-page .form-control {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 0.75rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #dee2e6 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .auth-page .form-control:focus {
+    border-color: #311555 !important;
+    box-shadow: 0 0 0 0.2rem rgba(49, 21, 85, 0.25) !important;
+    outline: none !important;
+  }
+
+  /* Mobile form labels */
+  .auth-page .form-label {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: #212529 !important;
+    margin-bottom: 0.5rem !important;
+    font-family: var(--font-family) !important;
+  }
+
+  /* ========================================
+     MOBILE FORM SPACING
+     ======================================== */
+
+  /* Mobile form spacing */
+  .auth-page .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+
+  .auth-page .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* ========================================
+     MOBILE BUTTONS
+     ======================================== */
+
+  /* Mobile buttons */
+  .auth-page .btn {
+    padding: 0.875rem 1.5rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    min-height: 48px !important; /* Touch target size */
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+    font-family: var(--font-family) !important;
+  }
+
+  .auth-page .btn-lg {
+    padding: 1rem 2rem !important;
+    font-size: 1rem !important;
+    min-height: 52px !important;
+  }
+
+  .auth-page .btn-primary {
+    background: #311555 !important;
+    border-color: #311555 !important;
+    box-shadow: 0 2px 8px rgba(49, 21, 85, 0.3) !important;
+  }
+
+  .auth-page .btn-primary:hover {
+    background: #764ba2 !important;
+    border-color: #764ba2 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(49, 21, 85, 0.4) !important;
+  }
+
+  .auth-page .btn-outline-secondary {
+    border-color: #6c757d !important;
+    color: #ffffff !important;
+    background: #311555 !important;
+  }
+
+  .auth-page .btn-outline-secondary:hover {
+    background: #f8f9fa !important;
+    border-color: #495057 !important;
+    color: #495057 !important;
+  }
+
+  /* ========================================
+     MOBILE FORM LAYOUT
+     ======================================== */
+
+  /* Mobile form rows */
+  .auth-page .row {
+    margin: 0 -0.5rem !important;
+  }
+
+  .auth-page .col-md-6 {
+    padding: 0 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* ========================================
+     MOBILE AUTH FOOTER
+     ======================================== */
+
+  /* Mobile auth footer */
+  .auth-page .auth-footer {
+    margin-top: 1.5rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid #e9ecef !important;
+    text-align: center !important;
+  }
+
+  .auth-page .auth-footer p {
+    font-size: 0.85rem !important;
+    color: #6c757d !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .auth-page .auth-footer a {
+    color: #311555 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+
+  .auth-page .auth-footer a:hover {
+    color: #764ba2 !important;
+    text-decoration: underline !important;
+  }
+
+  /* ========================================
+     MOBILE HEADER BAR
+     ======================================== */
+
+  /* Mobile header bar adjustments */
+  .auth-page .auth-header-bar {
+    height: 50px !important;
+    width: 100vw !important;
+  }
+
+  .auth-page .auth-header-bar .header-container {
+    padding: 0 0.5rem !important;
+  }
+
+  .auth-page .auth-header-bar .header-left .logo {
+    font-size: 1.25rem !important;
+  }
+
+  .auth-page .auth-header-bar .nav-link {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    font-family: var(--font-family) !important;
+  }
+
+  .auth-page .auth-header-bar .nav-link.active {
+    background: #311555 !important;
+    color: white !important;
+    border-radius: 6px !important;
+  }
+
+  .auth-page .auth-header-bar .nav-link:hover {
+    background: #f8f9fa !important;
+    color: #311555 !important;
+    border-radius: 6px !important;
+  }
+
+  /* ========================================
+     MOBILE TOUCH OPTIMIZATIONS
+     ======================================== */
+
+  /* Mobile touch optimizations */
+  .auth-page .form-control,
+  .auth-page .btn {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* ========================================
+     MOBILE FOCUS STATES
+     ======================================== */
+
+  /* Mobile focus states */
+  .auth-page .form-control:focus,
+  .auth-page .btn:focus {
+    outline: 2px solid #311555 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* ========================================
+     MOBILE ANIMATIONS
+     ======================================== */
+
+  /* Mobile animations
+  .auth-page .auth-card {
+    animation: slideInUp 0.3s ease-out !important;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  } */
+
+  /* ========================================
+     MOBILE PERFORMANCE
+     ======================================== */
+
+  /* Mobile performance optimizations */
+  .auth-page .auth-card,
+  .auth-page .form-control,
+  .auth-page .btn {
+    transition: all 0.15s ease !important;
+  }
+
+  /* ========================================
+     MOBILE ACCESSIBILITY
+     ======================================== */
+
+  /* Mobile accessibility improvements */
+  .auth-page .form-control::placeholder {
+    color: #adb5bd !important;
+    opacity: 1 !important;
+  }
+
+  .auth-page .form-control:disabled {
+    background-color: #e9ecef !important;
+    opacity: 0.65 !important;
+  }
+
+  /* ========================================
+     MOBILE ERROR STATES
+     ======================================== */
+
+  /* Mobile error states */
+  .auth-page .form-control.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+  }
+
+  .auth-page .invalid-feedback {
+    font-size: 0.8rem !important;
+    color: #dc3545 !important;
+    margin-top: 0.25rem !important;
+  }
+
+  /* ========================================
+     MOBILE SUCCESS STATES
+     ======================================== */
+
+  /* Mobile success states */
+  .auth-page .form-control.is-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+  }
+
+  .auth-page .valid-feedback {
+    font-size: 0.8rem !important;
+    color: #28a745 !important;
+    margin-top: 0.25rem !important;
+  }
+}
+
+/* ========================================
+   EXTRA SMALL MOBILE OPTIMIZATIONS
+   ======================================== */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 5rem 1.25rem 2.25rem 1.25rem !important;
+  }
+
+  .auth-page .auth-container {
+    padding: 0 0.25rem !important;
+  }
+
+  .auth-page .auth-header {
+    padding: 1rem 0.75rem !important;
+  }
+
+  .auth-page .auth-body {
+    padding: 1rem 0.75rem !important;
+  }
+
+  .auth-page .btn {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .auth-page .btn-lg {
+    padding: 0.875rem 1.75rem !important;
+    font-size: 0.9rem !important;
+  }
+}

@@ -233,20 +233,22 @@ router.delete(
 // Toggle like on a post
 router.post("/:id/like", ensureAuthenticated, async (req, res) => {
   try {
-    console.log(`[POSTS ROUTE] Like request for post ${req.params.id} by user ${req.user.id}`);
-    
+    console.log(
+      `[POSTS ROUTE] Like request for post ${req.params.id} by user ${req.user.id}`
+    );
+
     const result = await postService.toggleLike(req.params.id, req.user.id);
-    
+
     console.log(`[POSTS ROUTE] Service returned:`, result);
-    
+
     const response = {
       success: true,
       liked: result.liked,
       likesCount: result.likesCount,
     };
-    
+
     console.log(`[POSTS ROUTE] Sending response:`, response);
-    
+
     res.json(response);
   } catch (error) {
     console.error("Error toggling like:", error);
