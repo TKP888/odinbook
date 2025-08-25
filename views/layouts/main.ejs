@@ -33,6 +33,9 @@
     <link href="/css/search.css" rel="stylesheet" />
     <link href="/css/search-mobile.css" rel="stylesheet" />
     <link href="/css/mobile.css" rel="stylesheet" />
+    <% if (typeof activePage !== 'undefined' && activePage === 'profile') { %>
+    <link href="/css/profile-header-override.css" rel="stylesheet" />
+    <% } %>
   </head>
   <body
     class="<%= typeof activePage !== 'undefined' && activePage === 'users' ? 'users-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? ' dashboard-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'profile' ? ' profile-page' : '' %>"

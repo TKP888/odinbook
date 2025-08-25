@@ -40,6 +40,7 @@ compact: false }) %>
         class="btn btn-link btn-sm text-muted"
         type="button"
         data-bs-toggle="dropdown"
+        aria-expanded="false"
       >
         <i class="fas fa-ellipsis-h"></i>
       </button>
@@ -104,16 +105,6 @@ compact: false }) %>
           <span class="comment-count ms-1"><%= post.commentsCount || 0 %></span>
         </button>
       </div>
-
-      <%# Share Button %> <% if (typeof showShare !== 'undefined' && showShare)
-      { %>
-      <button
-        class="btn btn-link text-muted"
-        onclick="sharePost('<%= post.id %>')"
-      >
-        <i class="fas fa-share"></i>
-      </button>
-      <% } %>
     </div>
   </div>
   <% } %> <%# Comments Section %> <% if ((typeof showComments !== 'undefined' &&

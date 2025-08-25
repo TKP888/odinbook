@@ -15,6 +15,206 @@ let currentPage = 1;
 let hasNextPage = true;
 let isLoading = false;
 
+// ========================================
+// MOBILE DROPDOWN ENHANCEMENTS
+// ========================================
+
+// Function to close all dropdowns
+function closeAllDropdowns() {
+  document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
+    menu.classList.remove("show");
+  });
+}
+
+// Simple function to toggle dropdown manually
+function toggleDropdown(button) {
+  const dropdown = button.nextElementSibling;
+  if (dropdown && dropdown.classList.contains("dropdown-menu")) {
+    const isOpen = dropdown.classList.contains("show");
+
+    // Close all other dropdowns first
+    closeAllDropdowns();
+
+    // Toggle current dropdown
+    if (!isOpen) {
+      dropdown.classList.add("show");
+    }
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener("click", function (e) {
+  if (!e.target.closest(".dropdown")) {
+    closeAllDropdowns();
+  }
+});
+
+// ========================================
+// MOBILE DETECTION & RESPONSIVE POST GENERATION
+// ========================================
+
+// Function to detect if user is on mobile
+function isMobileDevice() {
+  // Check multiple conditions for mobile detection
+  const screenWidth = window.innerWidth;
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  // Primary check: screen width
+  const isMobileByWidth = screenWidth <= 767;
+
+  // Secondary check: user agent
+  const isMobileByAgent = /mobile|android|iphone|ipad|phone|tablet/i.test(
+    userAgent
+  );
+
+  // Final decision: prioritize screen width but consider user agent
+  const isMobile = isMobileByWidth || (screenWidth <= 1024 && isMobileByAgent);
+
+  console.log(
+    `[DASHBOARD] isMobileDevice() called: ${isMobile} (width: ${screenWidth}px, agent: ${userAgent.substring(
+      0,
+      50
+    )}...)`
+  );
+  return isMobile;
+}
+
+// Function to generate mobile-optimized post actions
+function generateMobilePostActions(post, currentUserId) {
+  console.log(
+    `[DASHBOARD] generateMobilePostActions called for post ${post.id}`
+  );
+  const isLiked = post.likes.some((like) => like.user.id === currentUserId);
+  const likeButtonClass = isLiked ? "liked" : "btn-outline-primary";
+  const likeIconColor = isLiked ? "red" : "inherit";
+
+  return `
+    <div class="post-actions ${
+      post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
+    } border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Action Buttons - Mobile: Icon Only -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm ${likeButtonClass} like-btn" id="like-btn-${
+    post.id
+  }" onclick="likePost('${post.id}')" data-post-id="${post.id}">
+            <i class="fas fa-heart" style="color: ${likeIconColor};"></i>
+            <span class="like-count">${post.likes.length}</span>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+            post.id
+          }')">
+            <i class="fas fa-comment"></i>
+            <span class="comment-count">${post.comments.length}</span>
+          </button>
+        </div>
+        <!-- Counters - Mobile: Hidden since they're in buttons -->
+        <div class="text-muted small d-none">
+          <span class="likes-count" id="likes-${
+            post.id
+          }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+    post.likes.length
+  } like${post.likes.length !== 1 ? "s" : ""}</span>
+          <span class="comments-count ms-2" id="comments-${
+            post.id
+          }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+    post.comments.length
+  } comment${post.comments.length !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Function to generate desktop post actions (original)
+function generateDesktopPostActions(post, currentUserId) {
+  console.log(
+    `[DASHBOARD] generateDesktopPostActions called for post ${post.id}`
+  );
+  const isLiked = post.likes.some((like) => like.user.id === currentUserId);
+  const likeButtonClass = isLiked ? "liked" : "btn-outline-primary";
+  const likeIconColor = isLiked ? "red" : "inherit";
+
+  return `
+    <div class="post-actions ${
+      post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
+    } border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Action Buttons - Desktop: Full Text -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm ${likeButtonClass} like-btn" id="like-btn-${
+    post.id
+  }" onclick="likePost('${post.id}')" data-post-id="${post.id}">
+            <i class="fas fa-heart" style="color: ${likeIconColor};"></i> ${
+    isLiked ? "Liked" : "Like"
+  }
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+            post.id
+          }')">
+            <i class="fas fa-comment"></i> Comment
+          </button>
+        </div>
+        <!-- Counters - Desktop: Visible -->
+        <div class="text-muted small">
+          <span class="likes-count" id="likes-${
+            post.id
+          }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+    post.likes.length
+  } like${post.likes.length !== 1 ? "s" : ""}</span>
+          <span class="comments-count ms-2" id="comments-${
+            post.id
+          }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+    post.comments.length
+  } comment${post.comments.length !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ========================================
+// EXISTING FUNCTIONS
+// ========================================
+
+// Add window resize listener for responsive switching
+window.addEventListener("resize", function () {
+  // Debounce resize events to avoid excessive updates
+  clearTimeout(window.resizeTimeout);
+  window.resizeTimeout = setTimeout(function () {
+    console.log(
+      "[DASHBOARD] Window resized, checking if posts need mobile/desktop update"
+    );
+
+    // Check if we need to refresh posts due to layout change
+    const wasMobile = window.lastKnownMobileState;
+    const isNowMobile = isMobileDevice();
+
+    if (wasMobile !== isNowMobile) {
+      console.log(
+        `[DASHBOARD] Layout changed from ${
+          wasMobile ? "mobile" : "desktop"
+        } to ${isNowMobile ? "mobile" : "desktop"}, refreshing posts`
+      );
+      // Refresh posts to get the correct layout
+      if (typeof loadPosts === "function") {
+        loadPosts(true);
+      }
+    }
+
+    // Update the last known state
+    window.lastKnownMobileState = isNowMobile;
+  }, 250);
+});
+
+// Initialize mobile state when page loads
+document.addEventListener("DOMContentLoaded", function () {
+  window.lastKnownMobileState = isMobileDevice();
+  console.log(
+    `[DASHBOARD] Initial mobile state: ${window.lastKnownMobileState}`
+  );
+});
+
 // Function to generate like button HTML
 function generateLikeButton(post) {
   const isLiked = post.likes.some((like) => like.user.id === currentUserId);
@@ -60,6 +260,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeModals();
   initializeInlinePost();
   handlePhotoSelection(); // Add this line
+  // initializeMobileDropdowns(); // Initialize mobile dropdown enhancements - REMOVED
 });
 
 // Function to refresh posts (force reload)
@@ -564,16 +765,20 @@ function displayPosts(posts) {
           post.user.id === currentUserId
             ? `
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
               <i class="fas fa-ellipsis-h"></i>
             </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
-              Edit
-              </a></li>
-              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
-                Delete
-              </a></li>
+            <ul class="dropdown-menu dropdown-menu-end" role="menu">
+              <li role="none">
+                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}'); closeAllDropdowns();">
+                  <i class="fas fa-edit me-2"></i>Edit
+                </button>
+              </li>
+              <li role="none">
+                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}'); closeAllDropdowns();">
+                  <i class="fas fa-trash me-2"></i>Delete
+                </button>
+              </li>
             </ul>
           </div>
         `
@@ -600,49 +805,17 @@ function displayPosts(posts) {
   }
 
   <!-- Post Actions -->
-  <div class="post-actions ${
-    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
-  } border-top">
-    <div class="d-flex justify-content-between align-items-center">
-      <!-- Action Buttons -->
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm ${
-          post.likes.some((like) => like.user.id === currentUserId)
-            ? "liked"
-            : "btn-outline-primary"
-        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
-        post.id
-      }')" data-post-id="${post.id}">
-          <i class="fas fa-heart" style="color: ${
-            post.likes.some((like) => like.user.id === currentUserId)
-              ? "red"
-              : "inherit"
-          };"></i> ${
-        post.likes.some((like) => like.user.id === currentUserId)
-          ? "Liked"
-          : "Like"
-      }
-        </button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
-          post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment
-        </button>
-      </div>
-      <!-- Counters -->
-      <div class="text-muted small">
-        <span class="likes-count" id="likes-${
-          post.id
-        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
-        post.likes.length
-      } like${post.likes.length !== 1 ? "s" : ""}</span>
-        <span class="comments-count ms-2" id="comments-${
-          post.id
-        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
-        post.comments.length
-      } comment${post.comments.length !== 1 ? "s" : ""}</span>
-      </div>
-    </div>
+  ${
+    isMobileDevice()
+      ? generateMobilePostActions(post, currentUserId)
+      : generateDesktopPostActions(post, currentUserId)
+  }
+
+  <!-- Debug Info -->
+  <div class="d-none">
+    <small class="text-muted">Debug: Mobile=${isMobileDevice()}, Width=${
+        window.innerWidth
+      }px</small>
   </div>
 
   <!-- Comments Section -->
@@ -768,16 +941,20 @@ function appendPosts(posts) {
           post.user.id === currentUserId
             ? `
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
               <i class="fas fa-ellipsis-h"></i>
             </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
-              Edit
-              </a></li>
-              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
-                Delete
-              </a></li>
+            <ul class="dropdown-menu dropdown-menu-end" role="menu">
+              <li role="none">
+                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}'); closeAllDropdowns();">
+                  <i class="fas fa-edit me-2"></i>Edit
+                </button>
+              </li>
+              <li role="none">
+                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}'); closeAllDropdowns();">
+                  <i class="fas fa-trash me-2"></i>Delete
+                </button>
+              </li>
             </ul>
           </div>
         `
@@ -804,49 +981,17 @@ function appendPosts(posts) {
   }
 
   <!-- Post Actions -->
-  <div class="post-actions ${
-    post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
-  } border-top">
-    <div class="d-flex justify-content-between align-items-center">
-      <!-- Action Buttons -->
-      <div class="d-flex gap-2">
-        <button class="btn btn-sm ${
-          post.likes.some((like) => like.user.id === currentUserId)
-            ? "liked"
-            : "btn-outline-primary"
-        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
-        post.id
-      }')" data-post-id="${post.id}">
-          <i class="fas fa-heart" style="color: ${
-            post.likes.some((like) => like.user.id === currentUserId)
-              ? "red"
-              : "inherit"
-          };"></i> ${
-        post.likes.some((like) => like.user.id === currentUserId)
-          ? "Liked"
-          : "Like"
-      }
-        </button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
-          post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment
-        </button>
-      </div>
-      <!-- Counters -->
-      <div class="text-muted small">
-        <span class="likes-count" id="likes-${
-          post.id
-        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
-        post.likes.length
-      } like${post.likes.length !== 1 ? "s" : ""}</span>
-        <span class="comments-count ms-2" id="comments-${
-          post.id
-        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
-        post.comments.length
-      } comment${post.comments.length !== 1 ? "s" : ""}</span>
-      </div>
-    </div>
+  ${
+    isMobileDevice()
+      ? generateMobilePostActions(post, currentUserId)
+      : generateDesktopPostActions(post, currentUserId)
+  }
+
+  <!-- Debug Info -->
+  <div class="d-none">
+    <small class="text-muted">Debug: Mobile=${isMobileDevice()}, Width=${
+        window.innerWidth
+      }px</small>
   </div>
 
   <!-- Comments Section -->

@@ -1,0 +1,37 @@
+/* PROFILE HEADER OVERRIDE - Loaded last to ensure highest priority */
+
+/* Force 12px border-radius on profile header for ALL screen sizes */
+.profile-header-main,
+.profile-header-main.card,
+.profile-header-main.card-body,
+body .profile-header-main,
+body .profile-header-main.card,
+.profile-page .profile-header-main,
+.profile-page .profile-header-main.card,
+.profile-page .profile-header-main.card-body {
+  border-radius: 12px !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 767px) {
+  .profile-header-main,
+  .profile-header-main.card,
+  .profile-header-main.card-body,
+  body .profile-header-main,
+  body .profile-header-main.card,
+  .profile-page .profile-header-main,
+  .profile-page .profile-header-main.card,
+  .profile-page .profile-header-main.card-body {
+    border-radius: 12px !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+    border-bottom-left-radius: 12px !important;
+    border-bottom-right-radius: 12px !important;
+    overflow: hidden !important;
+  }
+}
