@@ -94,9 +94,11 @@
       if (preferredTab) {
         // Clear the stored preference
         sessionStorage.removeItem("preferredTab");
-        
+
         // Switch to the preferred tab
-        const tabButton = document.querySelector(`[data-bs-target="#${preferredTab}"]`);
+        const tabButton = document.querySelector(
+          `[data-bs-target="#${preferredTab}"]`
+        );
         if (tabButton) {
           // Trigger tab click
           const tab = new bootstrap.Tab(tabButton);
@@ -153,7 +155,9 @@
           .map(
             (user) => `
         <div class="col-md-6 col-lg-4 mb-4">
-          <div class="user-card">
+          <div class="user-card" onclick="viewUserProfile('${
+            user.id
+          }')" style="cursor: pointer;">
             <div class="d-flex align-items-center">
               <div class="user-avatar" data-initials="${getUserInitials(user)}">
                 ${getUserAvatar(user)}
@@ -195,7 +199,9 @@
           .map(
             (user) => `
         <div class="col-md-6 col-lg-4 mb-4">
-          <div class="user-card">
+          <div class="user-card" onclick="viewUserProfile('${
+            user.id
+          }')" style="cursor: pointer;">
             <div class="d-flex align-items-center">
               <div class="user-avatar" data-initials="${getUserInitials(user)}">
                 ${getUserAvatar(user)}
@@ -253,32 +259,32 @@
       function getActionButton(user) {
         switch (user.status) {
           case "friend":
-            return `<button class="btn btn-remove-friend" onclick="removeFriend('${
+            return `<button class="btn btn-remove-friend" onclick="event.stopPropagation(); removeFriend('${
               user.id
             }', '${user.firstName || user.username}')">
           <i class="fas fa-user-minus"></i> Remove
         </button>`;
           case "request_sent":
-            return `<button class="btn btn-cancel-request" onclick="cancelRequest('${
+            return `<button class="btn btn-cancel-request" onclick="event.stopPropagation(); cancelRequest('${
               user.id
             }', '${user.requestId}', '${user.firstName || user.username}')">
           <i class="fas fa-times"></i> Cancel
         </button>`;
           case "request_received":
             return `<div class="d-flex gap-2">
-          <button class="btn btn-success btn-sm" onclick="acceptRequest('${
+          <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); acceptRequest('${
             user.requestId
           }', '${user.firstName || user.username}')">
             <i class="fas fa-check"></i> Accept
           </button>
-          <button class="btn btn-danger btn-sm" onclick="declineRequest('${
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); declineRequest('${
             user.requestId
           }', '${user.firstName || user.username}')">
             <i class="fas fa-times"></i> Decline
           </button>
         </div>`;
           default:
-            return `<button class="btn btn-add-friend" onclick="sendFriendRequest('${
+            return `<button class="btn btn-add-friend" onclick="event.stopPropagation(); sendFriendRequest('${
               user.id
             }', '${user.firstName || user.username}')">
           <i class="fas fa-user-plus"></i> Add Friend
@@ -319,6 +325,11 @@
         document.body.appendChild(successAlert);
         setTimeout(() => successAlert.remove(), 5000);
       }
+
+      // Function to view user profile
+      window.viewUserProfile = function (userId) {
+        window.location.href = `/profile/${userId}`;
+      };
 
       // Make functions globally available for onclick handlers
       window.sendFriendRequest = function (userId, userName) {

@@ -53,7 +53,7 @@
   body.dashboard-page .card {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto 1rem auto !important;
+    margin: 0 auto 0 auto !important;
     border-radius: 12px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid #e9ecef !important;
@@ -64,7 +64,7 @@
   body.dashboard-page .welcome-section-component {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 0 1rem 0 !important;
+
     padding: 0 !important;
   }
 
@@ -79,22 +79,18 @@
   }
 
   body.dashboard-page .welcome-section-component .card-header {
-    text-align: center !important;
-    padding: 1rem !important;
-    border-bottom: 1px solid #e9ecef !important;
-    background-color: #f8f9fa !important;
-    border-radius: 12px 12px 0 0 !important;
+    padding: var(--spacing-md) !important;
+    border-bottom: 1px solid var(--medium-gray) !important;
   }
 
   body.dashboard-page .welcome-section-component .card-header h4 {
-    font-size: 1.3rem !important;
     margin: 0 !important;
-    color: #311555 !important;
-    font-weight: 600 !important;
+    color: var(--primary-color) !important;
+    font-size: 1.1rem !important;
   }
 
   body.dashboard-page .welcome-section-component .card-body {
-    padding: 1rem !important;
+    padding: var(--spacing-md) !important;
   }
 
   /* CRITICAL: Override post-create component layout to match profile styling */
@@ -108,13 +104,13 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: flex-start !important;
-    gap: 1rem !important;
+    gap: 0.5rem !important;
     width: 100% !important;
   }
 
   /* Avatar positioning - left side like profile page */
   body.dashboard-page .post-create-component .me-3 {
-    margin-right: 0.75rem !important;
+    margin-right: 0.5rem !important;
     margin-bottom: 0 !important;
     align-self: flex-start !important;
     order: 1 !important;
@@ -157,7 +153,7 @@
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 12px !important;
-    margin: 0 auto 1rem auto !important;
+    margin: 0 auto 0 auto !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid #e9ecef !important;
     overflow: hidden !important;
@@ -165,24 +161,20 @@
 
   /* Ensure Recent Posts section is centered */
   body.dashboard-page .col-12 .card {
-    margin: 0 auto 1rem auto !important;
+    margin: 0 auto 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
   body.dashboard-page .card-header {
-    padding: 1rem !important;
-    border-radius: 12px 12px 0 0 !important;
-    font-size: 1.1rem !important;
-    background-color: #f8f9fa !important;
-    border-bottom: 1px solid #e9ecef !important;
+    padding: var(--spacing-md) !important;
+    border-bottom: 1px solid var(--medium-gray) !important;
   }
 
   body.dashboard-page .card-header h5 {
-    font-size: 1.2rem !important;
-    font-weight: 600 !important;
-    color: #311555 !important;
     margin: 0 !important;
+    color: var(--primary-color) !important;
+    font-size: 1rem !important;
   }
 
   body.dashboard-page .card-header .btn {
@@ -198,8 +190,7 @@
   }
 
   body.dashboard-page .card-body {
-    padding: 1rem !important;
-    border-radius: 12px !important;
+    padding: var(--spacing-md) !important;
   }
 
   /* =================================
@@ -210,7 +201,7 @@
   body.dashboard-page .post-item {
     border: 1px solid #e9ecef !important;
     border-radius: 16px !important;
-    margin-bottom: 1.25rem !important;
+    margin-bottom: 0 !important;
     background-color: white !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
     width: 100% !important;
@@ -299,61 +290,7 @@
     white-space: nowrap !important;
   }
 
-  /* Edit button - minimal, right-aligned */
-  body.dashboard-page .post-item .dropdown {
-    margin-left: auto !important;
-    flex-shrink: 0 !important;
-  }
-
-  body.dashboard-page .post-item .dropdown .btn {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    border: none !important;
-    background: transparent !important;
-    color: #65676b !important;
-    font-size: 16px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    cursor: pointer !important;
-    transition: background-color 0.2s ease !important;
-  }
-
-  body.dashboard-page .post-item .dropdown .btn:hover {
-    background-color: #f2f3f5 !important;
-  }
-
-  /* Ensure dropdown menu is visible when shown */
-  body.dashboard-page .post-item .dropdown .dropdown-menu {
-    display: none;
-  }
-
-  body.dashboard-page .post-item .dropdown .dropdown-menu.show {
-    display: block !important;
-  }
-
-  /* Basic dropdown styling */
-  body.dashboard-page .post-item .dropdown .dropdown-item {
-    padding: 0.5rem 1rem;
-    color: #333;
-    text-decoration: none;
-    display: block;
-    border: none;
-    background: transparent;
-    width: 100%;
-    text-align: left;
-  }
-
-  body.dashboard-page .post-item .dropdown .dropdown-item:hover {
-    background-color: #f8f9fa;
-  }
-
-  body.dashboard-page .post-item .dropdown .dropdown-item.text-danger {
-    color: #dc3545 !important;
-  }
+  /* Remove mobile dropdown overrides - use Bootstrap default */
 
   /* ROW 2: Content with perfect spacing */
   body.dashboard-page .post-item .post-content {
@@ -624,16 +561,10 @@
   }
 
   /* Additional profile-like styling */
-  body.dashboard-page .welcome-section-component .card-header h4 {
-    font-size: 1.5rem !important;
-    font-weight: 600 !important;
-    color: #311555 !important;
-    margin: 0 !important;
-  }
 
   /* Better button spacing in welcome section */
   body.dashboard-page .welcome-section-component .card-body {
-    padding: 1.5rem 1rem !important;
+    padding: 1rem 1rem !important;
   }
 
   /* Improved post card spacing */
@@ -642,12 +573,6 @@
   }
 
   /* Better card header styling */
-  body.dashboard-page .card-header h5 {
-    font-size: 1.25rem !important;
-    font-weight: 600 !important;
-    color: #311555 !important;
-    margin: 0 !important;
-  }
 
   /* Consistent button styling across all cards */
   body.dashboard-page .card .btn {
@@ -751,6 +676,16 @@
    CREATE POST FORM LAYOUT - ALL SCREEN SIZES - EXACT COPY FROM PROFILE
    ======================================== */
 
+/* Remove margin-bottom from post creation button row on mobile */
+body.dashboard-page
+  .post-create-component
+  .d-flex.align-items-center.justify-content-between.mb-3,
+body.dashboard-page
+  .post-create-component
+  .d-flex.align-items-center.justify-content-end.mb-3 {
+  margin-bottom: 0 !important;
+}
+
 /* Fix create post form layout across all screen sizes */
 body.dashboard-page .post-create-component .d-flex.justify-content-between {
   flex-direction: row !important;
@@ -818,7 +753,7 @@ body.dashboard-page .post-item {
   flex: none !important;
   border: 1px solid #e9ecef !important;
   border-radius: 8px !important;
-  margin-bottom: 1rem !important;
+  margin-bottom: 0 !important;
   background-color: white !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
@@ -1334,251 +1269,16 @@ body.dashboard-page .post-item .post-actions .btn.me-3 {
    MOBILE DROPDOWN - EXACT COPY FROM PROFILE PAGE
    ======================================== */
 
-/* Edit button - minimal, right-aligned */
-body.dashboard-page .post-item .dropdown {
-  margin-left: auto !important;
-  flex-shrink: 0 !important;
-}
-
-body.dashboard-page .post-item .dropdown .btn {
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: transparent !important;
-  color: #65676b !important;
-  font-size: 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-}
-
-body.dashboard-page .post-item .dropdown .btn:hover {
-  background-color: #f2f3f5 !important;
-}
+/* Remove duplicate mobile dropdown overrides - use Bootstrap default */
 
 /* ========================================
    STANDARD BOOTSTRAP DROPDOWN - MOBILE OPTIMIZED
    ======================================== */
 
-/* Dropdown container - match profile page exactly */
-html body.dashboard-page .post-item .card-header .dropdown,
-body.dashboard-page .post-item .card-header .dropdown {
-  margin-left: auto !important;
-  flex-shrink: 0 !important;
-  position: relative !important;
-  z-index: 1000 !important;
-}
+/* Remove all mobile dropdown overrides - use Bootstrap default behavior */
 
-/* Dropdown button styling - match profile page exactly */
-html body.dashboard-page .post-item .card-header .dropdown .btn,
-body.dashboard-page .post-item .card-header .dropdown .btn {
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 50% !important;
-  border: none !important;
-  background: transparent !important;
-  color: #65676b !important;
-  font-size: 16px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-}
+/* Remove mobile dropdown overrides - use Bootstrap default */
 
-/* Dropdown button hover state - match profile page exactly */
-html body.dashboard-page .post-item .card-header .dropdown .btn:hover,
-body.dashboard-page .post-item .card-header .dropdown .btn:hover {
-  background-color: #f2f3f5 !important;
-}
+/* Remove all mobile dropdown overrides - use Bootstrap default behavior */
 
-/* Dropdown button focus state */
-html body.dashboard-page .post-item .card-header .dropdown .btn:focus,
-body.dashboard-page .post-item .card-header .dropdown .btn:focus {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
-}
-
-/* Dropdown button active state */
-html body.dashboard-page .post-item .card-header .dropdown .btn:active,
-body.dashboard-page .post-item .card-header .dropdown .btn:active {
-  background-color: #e4e6eb !important;
-}
-
-/* Dropdown icon styling */
-html body.dashboard-page .post-item .card-header .dropdown .btn i,
-html body.dashboard-page .post-item .card-header .dropdown .btn .fas,
-body.dashboard-page .post-item .card-header .dropdown .btn i,
-body.dashboard-page .post-item .card-header .dropdown .btn .fas {
-  font-size: 1rem !important;
-  color: inherit !important;
-}
-
-/* Dropdown menu styling - ensure it's visible */
-html body.dashboard-page .post-item .card-header .dropdown .dropdown-menu,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-menu {
-  position: absolute !important;
-  top: 100% !important;
-  right: 0 !important;
-  left: auto !important;
-  min-width: 160px !important;
-  background: white !important;
-  border: 1px solid #e5e7eb !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-  padding: 0.5rem 0 !important;
-  margin-top: 0.5rem !important;
-  z-index: 1001 !important;
-}
-
-/* Dropdown item styling */
-html body.dashboard-page .post-item .card-header .dropdown .dropdown-item,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-item {
-  display: flex !important;
-  align-items: center !important;
-  padding: 0.75rem 1rem !important;
-  color: #374151 !important;
-  text-decoration: none !important;
-  background: transparent !important;
-  border: none !important;
-  width: 100% !important;
-  text-align: left !important;
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
-  cursor: pointer !important;
-  gap: 0.75rem !important;
-}
-
-/* Dropdown item hover state */
-html body.dashboard-page .post-item .card-header .dropdown .dropdown-item:hover,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-item:hover {
-  background: #f9fafb !important;
-  color: #111827 !important;
-}
-
-/* Dropdown item active state */
-html
-  body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:active,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-item:active {
-  background: #f3f4f6 !important;
-  color: #111827 !important;
-}
-
-/* Edit button specific styling */
-html
-  body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:first-child,
-body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:first-child {
-  color: #059669 !important;
-}
-
-html
-  body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:first-child:hover,
-body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:first-child:hover {
-  background: #ecfdf5 !important;
-  color: #047857 !important;
-}
-
-/* Delete button specific styling */
-html
-  body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:last-child,
-body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:last-child {
-  color: #dc2626 !important;
-}
-
-html
-  body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:last-child:hover,
-body.dashboard-page
-  .post-item
-  .card-header
-  .dropdown
-  .dropdown-item:last-child:hover {
-  background: #fef2f2 !important;
-  color: #b91c1c !important;
-}
-
-/* Dropdown item icons */
-html body.dashboard-page .post-item .card-header .dropdown .dropdown-item i,
-html body.dashboard-page .post-item .card-header .dropdown .dropdown-item .fas,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-item i,
-body.dashboard-page .post-item .card-header .dropdown .dropdown-item .fas {
-  font-size: 0.875rem !important;
-  width: 16px !important;
-  text-align: center !important;
-}
-
-/* Touch-friendly dropdown sizing */
-@media (pointer: coarse) {
-  html body.dashboard-page .post-item .card-header .dropdown .btn,
-  body.dashboard-page .post-item .card-header .dropdown .btn {
-    min-height: 44px !important;
-    min-width: 44px !important;
-    width: 44px !important;
-    height: 44px !important;
-  }
-
-  html body.dashboard-page .post-item .card-header .dropdown .dropdown-item,
-  body.dashboard-page .post-item .card-header .dropdown .dropdown-item {
-    padding: 1rem 1.25rem !important;
-    font-size: 1rem !important;
-    min-height: 48px !important;
-  }
-}
-
-/* Mobile-specific dropdown styling */
-@media (max-width: 768px) {
-  html body.dashboard-page .post-item .card-header .dropdown .dropdown-menu,
-  body.dashboard-page .post-item .card-header .dropdown .dropdown-menu {
-    position: fixed !important;
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    border-radius: 16px 16px 0 0 !important;
-    margin-top: 0 !important;
-    max-height: 50vh !important;
-    overflow-y: auto !important;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15) !important;
-  }
-}
+/* Remove mobile-specific dropdown overrides - use desktop version */

@@ -1,0 +1,123 @@
+<%# Post Create Component V2 - Enhanced Mobile-First Design Usage:
+include('layouts/components/post-create-v2', { user: user, formId:
+'createPostFormV2', textareaId: 'postContentV2', photoId: 'postPhotoV2',
+buttonId: 'createPostBtnV2', charCountId: 'charCountV2', placeholder: 'What\'s
+on your mind, ' + (user && user.firstName ? user.firstName : 'Guest') + '?',
+maxLength: 250, showPhotoUpload: true, showCharCount: true, onSubmit:
+'createPostV2()' }) %>
+
+<div class="post-create-v2-component">
+  <!-- Header Section -->
+  <div class="post-create-header">
+    <h4 class="welcome-text">
+      Welcome back, <%= user && user.firstName ? user.firstName : 'Guest' %>!
+    </h4>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="post-create-content">
+    <!-- User Avatar and Input Row -->
+    <div class="post-input-row">
+      <!-- User Avatar -->
+      <div class="user-avatar-container">
+        <%- include('../../partials/user-avatar', { user: user, size: 'large' })
+        %>
+      </div>
+
+      <!-- Text Input Area -->
+      <div class="text-input-container">
+        <form
+          id="<%= formId %>"
+          enctype="multipart/form-data"
+          class="post-form"
+        >
+          <div class="textarea-wrapper">
+            <textarea
+              id="<%= textareaId %>"
+              class="post-textarea"
+              rows="3"
+              placeholder="<%= placeholder %>"
+              maxlength="<%= maxLength %>"
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <div class="textarea-resize-handle"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Action Buttons Row -->
+    <div class="post-actions-row">
+      <!-- Left Side: Photo Upload -->
+      <div class="photo-upload-section">
+        <% if (typeof showPhotoUpload !== 'undefined' && showPhotoUpload) { %>
+        <input
+          type="file"
+          id="<%= photoId %>"
+          name="photo"
+          accept="image/*"
+          class="photo-input-hidden"
+        />
+        <button
+          type="button"
+          class="photo-upload-btn"
+          onclick="triggerPhotoUpload('<%= photoId %>')"
+        >
+          <i class="fas fa-camera"></i>
+          <span class="btn-text">Add Photo</span>
+        </button>
+
+        <!-- Photo Preview and Remove -->
+        <div
+          class="photo-preview-container"
+          id="photoPreviewContainer"
+          style="display: none"
+        >
+          <div class="photo-preview">
+            <img id="photoPreview" src="" alt="Preview" />
+            <button
+              type="button"
+              class="remove-photo-btn"
+              onclick="removePhotoV2('<%= photoId %>')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <span class="photo-filename" id="photoFileName"></span>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Center: Character Counter -->
+      <div class="char-counter-section">
+        <% if (typeof showCharCount !== 'undefined' && showCharCount) { %>
+        <div class="char-counter">
+          <span id="<%= charCountId %>">0</span>/<%= maxLength %>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Right Side: Post Button -->
+      <div class="post-button-section">
+        <button
+          type="button"
+          class="post-submit-btn"
+          onclick="<%= onSubmit %>"
+          id="<%= buttonId %>"
+        >
+          <i class="fas fa-paper-plane"></i>
+          <span class="btn-text">Post</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="post-loading-overlay" id="postLoadingOverlay" style="display: none">
+  <div class="loading-spinner">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Posting...</span>
+  </div>
+</div>

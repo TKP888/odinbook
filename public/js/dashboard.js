@@ -16,38 +16,8 @@ let hasNextPage = true;
 let isLoading = false;
 
 // ========================================
-// MOBILE DROPDOWN ENHANCEMENTS
+// REMOVED CUSTOM DROPDOWN HANDLERS - USE BOOTSTRAP DEFAULT
 // ========================================
-
-// Function to close all dropdowns
-function closeAllDropdowns() {
-  document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
-    menu.classList.remove("show");
-  });
-}
-
-// Simple function to toggle dropdown manually
-function toggleDropdown(button) {
-  const dropdown = button.nextElementSibling;
-  if (dropdown && dropdown.classList.contains("dropdown-menu")) {
-    const isOpen = dropdown.classList.contains("show");
-
-    // Close all other dropdowns first
-    closeAllDropdowns();
-
-    // Toggle current dropdown
-    if (!isOpen) {
-      dropdown.classList.add("show");
-    }
-  }
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener("click", function (e) {
-  if (!e.target.closest(".dropdown")) {
-    closeAllDropdowns();
-  }
-});
 
 // ========================================
 // MOBILE DETECTION & RESPONSIVE POST GENERATION
@@ -260,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeModals();
   initializeInlinePost();
   handlePhotoSelection(); // Add this line
-  // initializeMobileDropdowns(); // Initialize mobile dropdown enhancements - REMOVED
+  // Mobile dropdown enhancements removed - using Bootstrap default
 });
 
 // Function to refresh posts (force reload)
@@ -770,12 +740,12 @@ function displayPosts(posts) {
             </button>
             <ul class="dropdown-menu dropdown-menu-end" role="menu">
               <li role="none">
-                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}'); closeAllDropdowns();">
+                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
                   <i class="fas fa-edit me-2"></i>Edit
                 </button>
               </li>
               <li role="none">
-                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}'); closeAllDropdowns();">
+                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
                   <i class="fas fa-trash me-2"></i>Delete
                 </button>
               </li>
@@ -946,12 +916,12 @@ function appendPosts(posts) {
             </button>
             <ul class="dropdown-menu dropdown-menu-end" role="menu">
               <li role="none">
-                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}'); closeAllDropdowns();">
+                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
                   <i class="fas fa-edit me-2"></i>Edit
                 </button>
               </li>
               <li role="none">
-                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}'); closeAllDropdowns();">
+                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
                   <i class="fas fa-trash me-2"></i>Delete
                 </button>
               </li>
