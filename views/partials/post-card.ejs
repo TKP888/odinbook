@@ -74,36 +74,7 @@ true, showComments: true, currentUser: user }) %> <%# Default values %>
   <%# Post Actions %> <% if (typeof showActions !== 'undefined' && showActions)
   { %>
   <div class="card-footer">
-    <div class="post-actions d-flex align-items-center justify-content-between">
-      <div class="d-flex align-items-center">
-        <!-- Like Button -->
-        <button
-          class="btn btn-link text-muted me-3"
-          onclick="toggleLike('<%= post.id %>')"
-          data-post-id="<%= post.id %>"
-        >
-          <i class="fas fa-heart <%= post.isLiked ? 'text-danger' : '' %>"></i>
-          <span class="like-count ms-1"><%= post.likesCount || 0 %></span>
-        </button>
-
-        <!-- Comment Button -->
-        <button
-          class="btn btn-link text-muted me-3"
-          onclick="focusCommentInput('<%= post.id %>')"
-        >
-          <i class="fas fa-comment"></i>
-          <span class="comment-count ms-1"><%= post.commentsCount || 0 %></span>
-        </button>
-      </div>
-
-      <!-- Share Button -->
-      <button
-        class="btn btn-link text-muted"
-        onclick="sharePost('<%= post.id %>')"
-      >
-        <i class="fas fa-share"></i>
-      </button>
-    </div>
+    <%- include('post-actions', { post: post, currentUser: currentUser }) %>
   </div>
   <% } %> <%# Comments Section %> <% if ((typeof showComments !== 'undefined' &&
   showComments) && post.comments && post.comments.length > 0) { %>

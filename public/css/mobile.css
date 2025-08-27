@@ -1031,3 +1031,106 @@
     font-size: 16px !important; /* Prevent zoom on iOS */
   }
 }
+
+/* ========================================
+   MOBILE COMMENT BUTTON OPTIMIZATION
+   ======================================== */
+@media (max-width: 767px) {
+  /* Comment action buttons - reduce width for mobile */
+  .comment-actions {
+    display: flex !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .comment-actions .btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    min-width: auto !important;
+    width: auto !important;
+    max-width: 60px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Specific button styling */
+  .comment-actions .btn[onclick*="editComment"] {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border: none !important;
+    max-width: 50px !important;
+  }
+
+  .comment-actions .btn[onclick*="deleteComment"] {
+    background-color: white !important;
+    color: var(--danger-color) !important;
+    border: 1px solid var(--danger-color) !important;
+    max-width: 50px !important;
+  }
+
+  /* Like button in comment actions */
+  .comment-actions .btn[onclick*="likeComment"] {
+    background-color: transparent !important;
+    color: var(--dark-gray) !important;
+    border: none !important;
+    max-width: 40px !important;
+    padding: 0.25rem !important;
+  }
+
+  /* Ensure buttons don't stretch */
+  .comment-actions .btn:not(.btn-link) {
+    flex-shrink: 0 !important;
+  }
+
+  /* Touch optimization for comment buttons */
+  .comment-actions .btn {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Force button container to not expand */
+  .comment-content {
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  /* Ensure comment actions stay compact */
+  .comment-actions {
+    flex-shrink: 0 !important;
+    max-width: 200px !important;
+  }
+}
+
+/* ========================================
+   VERY SMALL SCREEN COMMENT BUTTONS
+   ======================================== */
+@media (max-width: 375px) {
+  .comment-actions .btn {
+    max-width: 45px !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .comment-actions .btn[onclick*="editComment"],
+  .comment-actions .btn[onclick*="deleteComment"] {
+    max-width: 40px !important;
+  }
+
+  .comment-actions .btn[onclick*="likeComment"] {
+    max-width: 35px !important;
+  }
+
+  /* Even more compact on very small screens */
+  .comment-actions {
+    gap: 0.25rem !important;
+    max-width: 150px !important;
+  }
+}

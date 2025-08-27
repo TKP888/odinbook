@@ -1,0 +1,35 @@
+<%# Post Actions Component - Usage: include('post-actions', { post: post, currentUser: user }) %>
+
+<div class="post-actions d-flex align-items-center justify-content-between">
+  <div class="d-flex align-items-center">
+    <!-- Like Button -->
+    <button
+      class="btn btn-link text-muted me-3 post-action-btn"
+      onclick="toggleLike('<%= post.id %>')"
+      data-post-id="<%= post.id %>"
+      title="<%= post.isLiked ? 'Unlike' : 'Like' %>"
+    >
+      <i class="fas fa-heart <%= post.isLiked ? 'text-danger' : '' %>"></i>
+      <span class="like-count ms-1"><%= post.likesCount || 0 %></span>
+    </button>
+
+    <!-- Comment Button -->
+    <button
+      class="btn btn-link text-muted me-3 post-action-btn"
+      onclick="focusCommentInput('<%= post.id %>')"
+      title="Comment"
+    >
+      <i class="fas fa-comment"></i>
+      <span class="comment-count ms-1"><%= post.commentsCount || 0 %></span>
+    </button>
+  </div>
+
+  <!-- Share Button -->
+  <button
+    class="btn btn-link text-muted post-action-btn"
+    onclick="sharePost('<%= post.id %>')"
+    title="Share"
+  >
+    <i class="fas fa-share"></i>
+  </button>
+</div>

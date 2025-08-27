@@ -580,9 +580,16 @@ function toggleLike(postId) {
           // Like the post
           likeButton.classList.remove("btn-outline-primary");
           likeButton.classList.add("liked");
-          icon.style.color = "white";
+          icon.style.color = "red";
 
-          // Update likes count - find the likes count element directly
+          // Update the like count in the button
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 0;
+            likeCount.textContent = currentCount + 1;
+          }
+
+          // Update hidden likes count for modal
           const likesElement = document.getElementById(`likes-${postId}`);
           if (likesElement) {
             const currentLikes = parseInt(likesElement.textContent) || 0;
@@ -596,7 +603,14 @@ function toggleLike(postId) {
           likeButton.classList.add("btn-outline-primary");
           icon.style.color = "";
 
-          // Update likes count - find the likes count element directly
+          // Update the like count in the button
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 1;
+            likeCount.textContent = currentCount - 1;
+          }
+
+          // Update hidden likes count for modal
           const likesElement = document.getElementById(`likes-${postId}`);
           if (likesElement) {
             const currentLikes = parseInt(likesElement.textContent) || 1;
@@ -957,28 +971,37 @@ function displayPosts(posts) {
           post.likes.some((like) => like.user.id === currentUserId)
             ? "liked"
             : "btn-outline-primary"
-        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        } like-btn post-action-btn" id="like-btn-${
         post.id
-      }')" data-post-id="${post.id}">
+      }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Unlike"
+          : "Like"
+      }">
           <i class="fas fa-heart" style="color: ${
             post.likes &&
             post.likes.some((like) => like.user.id === currentUserId)
               ? "red"
               : "inherit"
-          };"></i> ${
-        post.likes && post.likes.some((like) => like.user.id === currentUserId)
-          ? "Liked"
-          : "Like"
-      }
+          };"></i>
+          <span class="like-count">${
+            (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+          }</span>
         </button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+        <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
           post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment
+        }')" title="Comment">
+          <i class="fas fa-comment"></i>
+          <span class="comment-count">${
+            (post.comments &&
+              Array.isArray(post.comments) &&
+              post.comments.length) ||
+            0
+          }</span>
         </button>
       </div>
-      <!-- Counters -->
-      <div class="text-muted small">
+      <!-- Counters - Hidden since they are in buttons -->
+      <div class="text-muted small d-none">
         <span class="likes-count" id="likes-${
           post.id
         }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
@@ -1178,28 +1201,37 @@ function appendPosts(posts) {
           post.likes.some((like) => like.user.id === currentUserId)
             ? "liked"
             : "btn-outline-primary"
-        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        } like-btn post-action-btn" id="like-btn-${
         post.id
-      }')" data-post-id="${post.id}">
+      }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Unlike"
+          : "Like"
+      }">
           <i class="fas fa-heart" style="color: ${
             post.likes &&
             post.likes.some((like) => like.user.id === currentUserId)
               ? "red"
               : "inherit"
-          };"></i> ${
-        post.likes && post.likes.some((like) => like.user.id === currentUserId)
-          ? "Liked"
-          : "Like"
-      }
+          };"></i>
+          <span class="like-count">${
+            (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+          }</span>
         </button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+        <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
           post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment
-          </button>
+        }')" title="Comment">
+          <i class="fas fa-comment"></i>
+          <span class="comment-count">${
+            (post.comments &&
+              Array.isArray(post.comments) &&
+              post.comments.length) ||
+            0
+          }</span>
+        </button>
       </div>
-      <!-- Counters -->
-      <div class="text-muted small">
+      <!-- Counters - Hidden since they are in buttons -->
+      <div class="text-muted small d-none">
         <span class="likes-count" id="likes-${
           post.id
         }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
@@ -1402,28 +1434,37 @@ function appendPosts(posts) {
           post.likes.some((like) => like.user.id === currentUserId)
             ? "liked"
             : "btn-outline-primary"
-        } like-btn" id="like-btn-${post.id}" onclick="likePost('${
+        } like-btn post-action-btn" id="like-btn-${
         post.id
-      }')" data-post-id="${post.id}">
+      }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+        post.likes && post.likes.some((like) => like.user.id === currentUserId)
+          ? "Unlike"
+          : "Like"
+      }">
           <i class="fas fa-heart" style="color: ${
             post.likes &&
             post.likes.some((like) => like.user.id === currentUserId)
               ? "red"
               : ""
-          };"></i> ${
-        post.likes && post.likes.some((like) => like.user.id === currentUserId)
-          ? "Liked"
-          : "Like"
-      }
+          };"></i>
+          <span class="like-count">${
+            (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
+          }</span>
         </button>
-        <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+        <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
           post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment
+        }')" title="Comment">
+          <i class="fas fa-comment"></i>
+          <span class="comment-count">${
+            (post.comments &&
+              Array.isArray(post.comments) &&
+              post.comments.length) ||
+            0
+          }</span>
         </button>
       </div>
-      <!-- Counters -->
-      <div class="text-muted small">
+      <!-- Counters - Hidden since they are in buttons -->
+      <div class="text-muted small d-none">
         <span class="likes-count" id="likes-${
           post.id
         }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
@@ -1625,14 +1666,25 @@ function likePost(postId) {
         const likeText = likeBtn.textContent.trim();
 
         if (data.liked) {
-          likeBtn.className = "btn btn-sm liked";
+          likeBtn.className = "btn btn-sm liked post-action-btn";
           likeIcon.style.color = "red";
-          likeBtn.innerHTML =
-            '<i class="fas fa-heart" style="color: red;"></i> Liked';
+
+          // Update the like count in the button
+          const likeCount = likeBtn.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 0;
+            likeCount.textContent = currentCount + 1;
+          }
         } else {
-          likeBtn.className = "btn btn-sm btn-outline-primary";
+          likeBtn.className = "btn btn-sm btn-outline-primary post-action-btn";
           likeIcon.style.color = "inherit";
-          likeBtn.innerHTML = '<i class="fas fa-heart"></i> Like';
+
+          // Update the like count in the button
+          const likeCount = likeBtn.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 1;
+            likeCount.textContent = currentCount - 1;
+          }
         }
 
         // Update like count
@@ -1678,7 +1730,7 @@ function showLikesModal(postId) {
             ${like.user.firstName || ""} ${like.user.lastName || ""}
           </a>
         </div>
-        <div class="text-muted small">
+        <div class="text-muted small d-none">
           <a href="/profile/${
             like.user.id
           }" class="text-decoration-none text-muted">@${like.user.username}</a>
@@ -1816,6 +1868,18 @@ function submitComment(postId) {
 
         commentsList.appendChild(newComment);
 
+        // Update comment count in button
+        const commentButton = document.querySelector(
+          `[onclick="toggleComments('${postId}')"]`
+        );
+        if (commentButton) {
+          const commentCount = commentButton.querySelector(".comment-count");
+          if (commentCount) {
+            const currentCount = parseInt(commentCount.textContent) || 0;
+            commentCount.textContent = currentCount + 1;
+          }
+        }
+
         // Update comment count in real-time
         const commentsCountElement = document.getElementById(
           `comments-${postId}`
@@ -1917,6 +1981,19 @@ async function deleteComment(commentId, postId) {
 
           // Also refresh the comments list to ensure consistency (dashboard approach)
           loadCommentsForPost(postId);
+
+          // Update comment count in button
+          const commentButton = document.querySelector(
+            `[onclick="toggleComments('${postId}')"]`
+          );
+          if (commentButton) {
+            const commentCount = commentButton.querySelector(".comment-count");
+            if (commentCount) {
+              const currentCount = parseInt(commentCount.textContent) || 1;
+              const newCount = Math.max(0, currentCount - 1);
+              commentCount.textContent = newCount;
+            }
+          }
 
           // Update comment count in real-time
           const commentsCountElement = document.getElementById(
@@ -2089,7 +2166,9 @@ function showLikes(postId) {
                     <div class="fw-bold">${like.user.firstName || ""} ${
                 like.user.lastName || ""
               }</div>
-                    <div class="text-muted small">@${like.user.username}</div>
+                    <div class="text-muted small d-none">@${
+                      like.user.username
+                    }</div>
                   </div>
                 </div>
               `

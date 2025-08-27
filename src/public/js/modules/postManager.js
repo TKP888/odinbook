@@ -176,15 +176,17 @@ class PostManager {
         }
       </div>
       <div class="post-actions-bar">
-        <button class="${likeButtonClass} like-btn" onclick="postManager.toggleLike('${
+        <button class="${likeButtonClass} like-btn post-action-btn" onclick="postManager.toggleLike('${
       post.id
-    }')">
-          <i class="fas fa-heart"></i> ${likeButtonText} (${post.likes.length})
+    }')" title="${likeButtonText}">
+          <i class="fas fa-heart"></i>
+          <span class="like-count">${post.likes.length}</span>
         </button>
-        <button class="btn btn-outline-secondary btn-sm comment-btn" onclick="postManager.toggleComments('${
+        <button class="btn btn-outline-secondary btn-sm comment-btn post-action-btn" onclick="postManager.toggleComments('${
           post.id
-        }')">
-          <i class="fas fa-comment"></i> Comment (${post.comments.length})
+        }')" title="Comment">
+          <i class="fas fa-comment"></i>
+          <span class="comment-count">${post.comments.length}</span>
         </button>
       </div>
       <div class="comments-section" id="comments-${

@@ -56,77 +56,73 @@ function generateMobilePostActions(post, currentUserId) {
   );
   const isLiked = post.likes.some((like) => like.user.id === currentUserId);
   const likeButtonClass = isLiked ? "liked" : "btn-outline-primary";
-  const likeIconColor = isLiked ? "red" : "inherit";
+  const likeIconColor = isLiked ? "#dc3545" : "white"; // Use hex colors instead of "inherit"
 
   return `
     <div class="post-actions ${
       post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
     } border-top">
       <div class="d-flex justify-content-between align-items-center">
-        <!-- Action Buttons - Mobile: Icon Only -->
+        <!-- Action Buttons - Mobile: Icon Only with Purple Theme -->
         <div class="d-flex gap-2">
-          <button class="btn btn-sm ${likeButtonClass} like-btn" id="like-btn-${
+          <button class="btn btn-sm ${likeButtonClass} like-btn post-action-btn" id="like-btn-${
     post.id
-  }" onclick="likePost('${post.id}')" data-post-id="${post.id}">
+  }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+    isLiked ? "Unlike" : "Like"
+  }" style="touch-action: manipulation; background-color: #5a32a3 !important; border-color: #5a32a3 !important; color: white !important; border-radius: 50%; min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
             <i class="fas fa-heart" style="color: ${likeIconColor};"></i>
-            <span class="like-count">${post.likes.length}</span>
+            <span class="like-count" style="color: white !important; background: none !important; padding: 0 !important; margin-left: 0.25rem;">${
+              post.likes.length
+            }</span>
           </button>
-          <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
             post.id
-          }')">
-            <i class="fas fa-comment"></i>
-            <span class="comment-count">${post.comments.length}</span>
+          }')" title="Comment" style="touch-action: manipulation; background-color: #5a32a3 !important; border-color: #5a32a3 !important; color: white !important; border-radius: 50%; min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-comment" style="color: white !important;"></i>
+            <span class="comment-count" style="color: white !important; background: none !important; padding: 0 !important; margin-left: 0.25rem;">${
+              post.comments.length
+            }</span>
           </button>
         </div>
-        <!-- Counters - Mobile: Hidden since they're in buttons -->
-        <div class="text-muted small d-none">
-          <span class="likes-count" id="likes-${
-            post.id
-          }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
-    post.likes.length
-  } like${post.likes.length !== 1 ? "s" : ""}</span>
-          <span class="comments-count ms-2" id="comments-${
-            post.id
-          }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
-    post.comments.length
-  } comment${post.comments.length !== 1 ? "s" : ""}</span>
-        </div>
+        <!-- Mobile: No hidden counters needed -->
       </div>
     </div>
   `;
 }
 
-// Function to generate desktop post actions (original)
+// Function to generate desktop post actions (icon only)
 function generateDesktopPostActions(post, currentUserId) {
   console.log(
     `[DASHBOARD] generateDesktopPostActions called for post ${post.id}`
   );
   const isLiked = post.likes.some((like) => like.user.id === currentUserId);
   const likeButtonClass = isLiked ? "liked" : "btn-outline-primary";
-  const likeIconColor = isLiked ? "red" : "inherit";
+  const likeIconColor = isLiked ? "#dc3545" : "white"; // Use hex colors instead of "inherit"
 
   return `
     <div class="post-actions ${
       post.content || post.photoUrl ? "mt-1 pt-1" : "mt-1 pt-1"
     } border-top">
       <div class="d-flex justify-content-between align-items-center">
-        <!-- Action Buttons - Desktop: Full Text -->
+        <!-- Action Buttons - Desktop: Icon Only -->
         <div class="d-flex gap-2">
-          <button class="btn btn-sm ${likeButtonClass} like-btn" id="like-btn-${
+          <button class="btn btn-sm ${likeButtonClass} like-btn post-action-btn" id="like-btn-${
     post.id
-  }" onclick="likePost('${post.id}')" data-post-id="${post.id}">
-            <i class="fas fa-heart" style="color: ${likeIconColor};"></i> ${
-    isLiked ? "Liked" : "Like"
-  }
+  }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+    isLiked ? "Unlike" : "Like"
+  }">
+            <i class="fas fa-heart" style="color: ${likeIconColor};"></i>
+            <span class="like-count">${post.likes.length}</span>
           </button>
-          <button class="btn btn-sm btn-outline-secondary" onclick="toggleComments('${
+          <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
             post.id
-          }')">
-            <i class="fas fa-comment"></i> Comment
+          }')" title="Comment">
+            <i class="fas fa-comment"></i>
+            <span class="comment-count">${post.comments.length}</span>
           </button>
         </div>
-        <!-- Counters - Desktop: Visible -->
-        <div class="text-muted small">
+        <!-- Counters - Desktop: Hidden since they're in buttons -->
+        <div class="text-muted small d-none">
           <span class="likes-count" id="likes-${
             post.id
           }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
@@ -190,10 +186,14 @@ function generateLikeButton(post) {
   const isLiked = post.likes.some((like) => like.user.id === currentUserId);
   const buttonClass = isLiked ? "liked" : "btn-outline-primary";
   const iconColor = isLiked ? "red" : "inherit";
-  const buttonText = isLiked ? "Liked" : "Like";
 
-  return `<button class="btn btn-sm ${buttonClass} like-btn" id="like-btn-${post.id}" onclick="likePost('${post.id}')" data-post-id="${post.id}">
-    <i class="fas fa-heart" style="color: ${iconColor};"></i> ${buttonText}
+  return `<button class="btn btn-sm ${buttonClass} like-btn post-action-btn" id="like-btn-${
+    post.id
+  }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
+    isLiked ? "Unlike" : "Like"
+  }">
+    <i class="fas fa-heart" style="color: ${iconColor};"></i>
+    <span class="like-count">${post.likes.length}</span>
   </button>`;
 }
 
@@ -1392,6 +1392,62 @@ function showUserSearch() {
 }
 
 // Post Action Functions
+function toggleLike(postId) {
+  const likeButton = document.querySelector(
+    `[data-post-id="${postId}"][onclick*="toggleLike"]`
+  );
+  if (!likeButton) {
+    console.error(`Like button not found for post ${postId}`);
+    return;
+  }
+
+  const icon = likeButton.querySelector("i");
+  const isCurrentlyLiked = likeButton
+    .querySelector("i")
+    .classList.contains("text-danger");
+
+  fetch(`/posts/${postId}/like`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        if (data.liked) {
+          // Like the post
+          icon.classList.add("text-danger");
+          icon.style.color = "#dc3545";
+
+          // Update the like count
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 0;
+            likeCount.textContent = currentCount + 1;
+          }
+        } else {
+          // Unlike the post
+          icon.classList.remove("text-danger");
+          icon.style.color = "";
+
+          // Update the like count
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 1;
+            likeCount.textContent = currentCount - 1;
+          }
+        }
+      } else {
+        alert(data.error || "Failed to toggle like");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Failed to toggle like. Please try again.");
+    });
+}
+
 function likePost(postId) {
   const likeButton = document.getElementById(`like-btn-${postId}`);
   const icon = likeButton.querySelector("i");
@@ -1409,30 +1465,48 @@ function likePost(postId) {
           // Like the post
           likeButton.classList.remove("btn-outline-primary");
           likeButton.classList.add("liked");
-          // Keep the heart icon and add "Liked" text, then make it red
-          likeButton.innerHTML =
-            '<i class="fas fa-heart" style="color: red;"></i> Liked';
+          // Keep the heart icon red and update counter
+          const heartIcon = likeButton.querySelector("i");
+          heartIcon.style.color = "#dc3545";
 
-          // Update likes count
+          // Update the like count in the button
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 0;
+            likeCount.textContent = currentCount + 1;
+          }
+
+          // Update hidden likes count for modal
           const likesElement = document.getElementById(`likes-${postId}`);
-          const currentLikes = parseInt(likesElement.textContent) || 0;
-          likesElement.textContent = `${currentLikes + 1} like${
-            currentLikes + 1 !== 1 ? "s" : ""
-          }`;
+          if (likesElement) {
+            const currentLikes = parseInt(likesElement.textContent) || 0;
+            likesElement.textContent = `${currentLikes + 1} like${
+              currentLikes + 1 !== 1 ? "s" : ""
+            }`;
+          }
         } else {
           // Unlike the post
           likeButton.classList.remove("liked");
           likeButton.classList.add("btn-outline-primary");
-          icon.style.color = "";
-          // Keep the heart icon and revert to "Like" text
-          likeButton.innerHTML = '<i class="fas fa-heart"></i> Like';
+          // Keep the heart icon white and update counter
+          const heartIcon = likeButton.querySelector("i");
+          heartIcon.style.color = "white";
 
-          // Update likes count
+          // Update the like count in the button
+          const likeCount = likeButton.querySelector(".like-count");
+          if (likeCount) {
+            const currentCount = parseInt(likeCount.textContent) || 1;
+            likeCount.textContent = currentCount - 1;
+          }
+
+          // Update hidden likes count for modal
           const likesElement = document.getElementById(`likes-${postId}`);
-          const currentLikes = parseInt(likesElement.textContent) || 1;
-          likesElement.textContent = `${currentLikes - 1} like${
-            currentLikes - 1 !== 1 ? "s" : ""
-          }`;
+          if (likesElement) {
+            const currentLikes = parseInt(likesElement.textContent) || 1;
+            likesElement.textContent = `${currentLikes - 1} like${
+              currentLikes - 1 !== 1 ? "s" : ""
+            }`;
+          }
         }
       } else {
         alert(data.error || "Failed to toggle like");
@@ -1632,6 +1706,18 @@ function submitComment(postId) {
         // Clear input
         commentInput.value = "";
 
+        // Update the comment count in the button
+        const commentButton = document.querySelector(
+          `[onclick="toggleComments('${postId}')"]`
+        );
+        if (commentButton) {
+          const commentCount = commentButton.querySelector(".comment-count");
+          if (commentCount) {
+            const currentCount = parseInt(commentCount.textContent) || 0;
+            commentCount.textContent = currentCount + 1;
+          }
+        }
+
         // Refresh the comments list to show the new comment
         loadCommentsForPost(postId);
 
@@ -1673,7 +1759,20 @@ async function deleteComment(commentId, postId) {
             commentElement.remove();
           }
 
-          // Update comment count
+          // Update comment count in button
+          const commentButton = document.querySelector(
+            `[onclick="toggleComments('${postId}')"]`
+          );
+          if (commentButton) {
+            const commentCount = commentButton.querySelector(".comment-count");
+            if (commentCount) {
+              const currentCount = parseInt(commentCount.textContent) || 1;
+              const newCount = Math.max(0, currentCount - 1);
+              commentCount.textContent = newCount;
+            }
+          }
+
+          // Update hidden comment count for modal
           const commentCountElement = document.getElementById(
             `comments-${postId}`
           );
