@@ -3172,11 +3172,83 @@ a:hover {
 
   /* Specific button styling for mobile */
   .comment-actions .btn[onclick*="editComment"] {
-    max-width: 50px !important;
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
   }
 
   .comment-actions .btn[onclick*="deleteComment"] {
-    max-width: 50px !important;
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  /* Target the actual classes used by JavaScript */
+  .comment-actions .btn.btn-outline-primary {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Override global btn-sm styles for comment buttons */
+  .comment-actions .btn.btn-sm {
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  /* Target btn-group buttons specifically */
+  .btn-group.btn-group-sm .btn.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity */
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Target any Bootstrap button in comment actions */
+  .comment-actions .btn,
+  .comment-actions .btn.btn-sm,
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
   }
 
   .comment-actions .btn[onclick*="likeComment"] {
@@ -3188,12 +3260,44 @@ a:hover {
   .comment-content {
     min-width: 0 !important;
     flex: 1 !important;
+    flex-grow: 1 !important;
+    margin-right: 0.5rem !important;
   }
 
   /* Touch optimization for comment buttons */
   .comment-actions .btn {
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Ensure comment actions stay compact */
+  .comment-actions {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 80px !important;
+    width: auto !important;
+  }
+
+  /* Override Bootstrap's justify-content-between for comment layout */
+  .d-flex.justify-content-between.align-items-start {
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Force comment content to take most of the space */
+  .d-flex.justify-content-between.align-items-start > *:first-child {
+    flex: 1 !important;
+    flex-grow: 1 !important;
+    min-width: 0 !important;
+    margin-right: 0.5rem !important;
+  }
+
+  /* Force buttons to take minimal space */
+  .d-flex.justify-content-between.align-items-start > *:last-child {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 80px !important;
+    width: auto !important;
   }
 }
 
@@ -3209,7 +3313,69 @@ a:hover {
 
   .comment-actions .btn[onclick*="editComment"],
   .comment-actions .btn[onclick*="deleteComment"] {
-    max-width: 40px !important;
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+  }
+
+  /* Target the actual classes used by JavaScript for very small screens */
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Override global btn-sm styles for comment buttons on very small screens */
+  .comment-actions .btn.btn-sm {
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+  }
+
+  /* Target btn-group buttons specifically for very small screens */
+  .btn-group.btn-group-sm .btn.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+  }
+
+  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity for very small screens */
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Target any Bootstrap button in comment actions for very small screens */
+  .comment-actions .btn,
+  .comment-actions .btn.btn-sm,
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    box-sizing: border-box !important;
   }
 
   .comment-actions .btn[onclick*="likeComment"] {
@@ -3219,7 +3385,36 @@ a:hover {
   /* Even more compact on very small screens */
   .comment-actions {
     gap: 0.25rem !important;
-    max-width: 150px !important;
+    max-width: 70px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+  }
+
+  /* Give more space to comment content on very small screens */
+  .comment-content {
+    margin-right: 0.4rem !important;
+    flex-grow: 1 !important;
+  }
+
+  /* Override Bootstrap's justify-content-between for very small screens */
+  .d-flex.justify-content-between.align-items-start {
+    justify-content: flex-start !important;
+    gap: 0.4rem !important;
+  }
+
+  /* Force comment content to take most of the space on very small screens */
+  .d-flex.justify-content-between.align-items-start > *:first-child {
+    flex: 1 !important;
+    flex-grow: 1 !important;
+    margin-right: 0.4rem !important;
+  }
+
+  /* Force buttons to take minimal space on very small screens */
+  .d-flex.justify-content-between.align-items-start > *:last-child {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 70px !important;
+    width: auto !important;
   }
 }
 

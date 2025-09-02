@@ -734,23 +734,23 @@ function displayPosts(posts) {
         ${
           post.user.id === currentUserId
             ? `
-          <div class="dropdown">
-            <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
-              <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" role="menu">
-              <li role="none">
-                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
-                  <i class="fas fa-edit me-2"></i>Edit
-                </button>
-              </li>
-              <li role="none">
-                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
-                  <i class="fas fa-trash me-2"></i>Delete
-                </button>
-              </li>
-            </ul>
-          </div>
+        <div class="dropdown">
+          <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" role="menu">
+            <li role="none">
+              <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
+                <i class="fas fa-edit me-2"></i>Edit
+              </button>
+            </li>
+            <li role="none">
+              <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
+                <i class="fas fa-trash me-2"></i>Delete
+              </button>
+            </li>
+          </ul>
+        </div>
         `
             : ""
         }
@@ -906,27 +906,27 @@ function appendPosts(posts) {
             <small class="text-muted">•</small>
             <small class="text-muted">${formatDateTime(post.createdAt)}</small>
           </div>
-        </div>
+                </div>
         ${
           post.user.id === currentUserId
             ? `
-          <div class="dropdown">
-            <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
-              <i class="fas fa-ellipsis-h"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" role="menu">
-              <li role="none">
-                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
-                  <i class="fas fa-edit me-2"></i>Edit
-                </button>
-              </li>
-              <li role="none">
-                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
-                  <i class="fas fa-trash me-2"></i>Delete
-                </button>
-              </li>
-            </ul>
-          </div>
+        <div class="dropdown">
+          <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" role="menu">
+            <li role="none">
+              <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
+                <i class="fas fa-edit me-2"></i>Edit
+              </button>
+            </li>
+            <li role="none">
+              <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
+                <i class="fas fa-trash me-2"></i>Delete
+              </button>
+            </li>
+          </ul>
+        </div>
         `
             : ""
         }
