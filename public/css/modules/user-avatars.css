@@ -1,0 +1,155 @@
+/* ========================================
+   ODINBOOK USER AVATAR STYLES
+   All avatar-related styles and components
+   ======================================== */
+
+/* ========================================
+   USER AVATAR STYLES
+   ======================================== */
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--blue);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  overflow: hidden;
+  position: relative;
+}
+
+.user-avatar-large {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--blue);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+}
+
+/* Profile page specific override for larger avatar */
+.profile-avatar .user-avatar-large {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: var(--font-size-3xl);
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--blue);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.avatar-initials {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.profile-picture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.user-avatar:hover .profile-picture-overlay {
+  opacity: 1;
+}
+
+.profile-picture-upload-btn {
+  color: var(--white);
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+}
+
+.profile-picture-upload-btn i {
+  display: block;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.user-avatar-small .profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Comment avatar styling to match dashboard */
+.comment-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.comment-avatar .user-avatar-small {
+  width: 100%;
+  height: 100%;
+  font-size: 0.7rem;
+}
+
+/* Fix for user menu avatar dropdown alignment */
+.user-menu .user-avatar {
+  position: relative;
+}
+
+.user-menu .user-avatar.dropdown-toggle::after {
+  display: none; /* Remove Bootstrap's default dropdown arrow */
+}
+
+.user-menu .user-avatar .profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Ensure proper sizing for medium avatar in user menu */
+.user-menu .user-avatar {
+  width: 50px;
+  height: 50px;
+}

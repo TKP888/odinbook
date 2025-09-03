@@ -29,14 +29,14 @@ function initializeMobileMenu() {
       // Close mobile menu
       mobileMenuPanel.classList.remove("active");
       mobileMenuOverlay.classList.remove("active");
-      
+
       // If navigating to users page with tab, ensure proper tab switching
       const href = this.getAttribute("href");
       if (href && href.includes("/friends/users") && href.includes("tab=")) {
         // Extract tab parameter
         const url = new URL(href, window.location.origin);
         const tab = url.searchParams.get("tab");
-        
+
         // Store tab preference for when page loads
         if (tab) {
           sessionStorage.setItem("preferredTab", tab);
@@ -381,11 +381,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Mobile Search Functions
 function initializeMobileSearch() {
-  const mobileSearchInput = document.getElementById('mobileSearchInput');
+  const mobileSearchInput = document.getElementById("mobileSearchInput");
   if (!mobileSearchInput) return;
 
   // Add event listeners for mobile search
-  mobileSearchInput.addEventListener('input', function() {
+  mobileSearchInput.addEventListener("input", function () {
     clearTimeout(mobileHeaderSearchTimeout);
     const searchTerm = this.value.trim();
 
@@ -400,15 +400,15 @@ function initializeMobileSearch() {
   });
 
   // Close search results when clicking outside
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.mobile-menu-search')) {
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".mobile-menu-search")) {
       hideMobileSearchResults();
     }
   });
 }
 
 function mobileSearchUsers() {
-  const searchTerm = document.getElementById('mobileSearchInput').value.trim();
+  const searchTerm = document.getElementById("mobileSearchInput").value.trim();
 
   if (searchTerm.length === 0) {
     hideMobileSearchResults();
@@ -426,41 +426,41 @@ function mobileSearchUsers() {
       displayMobileSearchResults(data.users);
     })
     .catch((error) => {
-      console.error('Mobile search error:', error);
+      console.error("Mobile search error:", error);
       hideMobileSearchLoading();
       hideMobileSearchResults();
     });
 }
 
 function showMobileSearchLoading() {
-  const resultsDiv = document.getElementById('mobileSearchResults');
-  const loadingDiv = document.getElementById('mobileSearchLoading');
-  const noResultsDiv = document.getElementById('mobileNoResults');
-  
-  resultsDiv.classList.remove('d-none');
-  loadingDiv.classList.remove('d-none');
-  noResultsDiv.classList.add('d-none');
+  const resultsDiv = document.getElementById("mobileSearchResults");
+  const loadingDiv = document.getElementById("mobileSearchLoading");
+  const noResultsDiv = document.getElementById("mobileNoResults");
+
+  resultsDiv.classList.remove("d-none");
+  loadingDiv.classList.remove("d-none");
+  noResultsDiv.classList.add("d-none");
 }
 
 function hideMobileSearchLoading() {
-  const loadingDiv = document.getElementById('mobileSearchLoading');
-  loadingDiv.classList.add('d-none');
+  const loadingDiv = document.getElementById("mobileSearchLoading");
+  loadingDiv.classList.add("d-none");
 }
 
 function displayMobileSearchResults(users) {
-  const resultsDiv = document.getElementById('mobileSearchResults');
-  const usersListDiv = document.getElementById('mobileUsersList');
-  const noResultsDiv = document.getElementById('mobileNoResults');
+  const resultsDiv = document.getElementById("mobileSearchResults");
+  const usersListDiv = document.getElementById("mobileUsersList");
+  const noResultsDiv = document.getElementById("mobileNoResults");
 
   if (users.length === 0) {
-    noResultsDiv.classList.remove('d-none');
-    usersListDiv.innerHTML = '';
-    resultsDiv.classList.remove('d-none');
+    noResultsDiv.classList.remove("d-none");
+    usersListDiv.innerHTML = "";
+    resultsDiv.classList.remove("d-none");
     return;
   }
 
-  noResultsDiv.classList.add('d-none');
-  resultsDiv.classList.remove('d-none');
+  noResultsDiv.classList.add("d-none");
+  resultsDiv.classList.remove("d-none");
 
   usersListDiv.innerHTML = users
     .map(
@@ -472,8 +472,10 @@ function displayMobileSearchResults(users) {
             </div>
             <div class="flex-grow-1">
               <div class="fw-bold">
-                <a href="/profile/${user.id}" class="text-decoration-none text-dark user-profile-link">
-                  ${user.firstName || ''} ${user.lastName || ''}
+                <a href="/profile/${
+                  user.id
+                }" class="text-decoration-none text-dark user-profile-link">
+                  ${user.firstName || ""} ${user.lastName || ""}
                 </a>
               </div>
               <div class="text-muted small">@${user.username}</div>
@@ -483,12 +485,12 @@ function displayMobileSearchResults(users) {
         </div>
       `
     )
-    .join('');
+    .join("");
 }
 
 function hideMobileSearchResults() {
-  const resultsDiv = document.getElementById('mobileSearchResults');
-  resultsDiv.classList.add('d-none');
+  const resultsDiv = document.getElementById("mobileSearchResults");
+  resultsDiv.classList.add("d-none");
 }
 
 // Update header friend request count badge and dropdown content
@@ -928,13 +930,13 @@ function getUserAvatar(user) {
       user.profilePicture.includes("cloudinary.com"))
   ) {
     console.log("Using profile picture:", user.profilePicture);
-    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image avatar-cover" />`;
   } else if (user.useGravatar && user.email && user.gravatarUrl) {
     console.log("Using Gravatar:", user.gravatarUrl);
-    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover" />`;
   } else {
     console.log("Using initials fallback");
-    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; font-size: 0.9rem; font-weight: bold;">${(
+    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center avatar-initials">${(
       user.firstName || ""
     ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
   }

@@ -64,8 +64,7 @@ true, showComments: true, currentUser: user }) %> <%# Default values %>
       <img
         src="<%= post.photoUrl %>"
         alt="Post photo"
-        class="img-fluid rounded"
-        style="max-height: 400px; width: 100%; object-fit: cover"
+        class="img-fluid rounded post-photo-modal"
       />
     </div>
     <% } %>
@@ -89,7 +88,7 @@ true, showComments: true, currentUser: user }) %> <%# Default values %>
         class="comment-item p-3 border-bottom"
         data-comment-id="<%= comment.id %>"
       >
-        <div class="d-flex">
+        <div class="d-flex justify-content-between align-items-start">
           <div class="user-avatar me-2">
             <%- include('user-avatar', { user: comment.user, size: 'small' }) %>
           </div>

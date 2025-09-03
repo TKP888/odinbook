@@ -32,8 +32,7 @@ showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
               id="<%= photoId %>"
               name="photo"
               accept="image/*"
-              class="form-control form-control-sm"
-              style="display: none"
+              class="form-control form-control-sm hidden"
             />
             <button
               type="button"
@@ -46,8 +45,7 @@ showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
             <button
               type="button"
               id="removePhotoBtn"
-              class="btn btn-outline-danger btn-sm"
-              style="display: none"
+              class="btn btn-outline-danger btn-sm hidden"
               onclick="removePhoto()"
             >
               <i class="fas fa-times me-1"></i> Remove

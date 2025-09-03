@@ -1,0 +1,27 @@
+/* ========================================
+   ODINBOOK MAIN STYLESHEET
+   Main entry point that imports all separated CSS files
+   ======================================== */
+
+/* Import order is important - base first, then components, then specific styles */
+
+/* Base styles - CSS variables, typography, and basic layout */
+@import url("./modules/base.css");
+
+/* Component styles - buttons, forms, cards, modals */
+@import url("./modules/components.css");
+
+/* User avatar styles */
+@import url("./modules/user-avatars.css");
+
+/* Post styles - posts, comments, post creation */
+@import url("./modules/posts.css");
+
+/* Page-specific styles - auth, dashboard, profile, friends, messages */
+@import url("./modules/pages.css");
+
+/* Utility classes - text, background, display, spacing, etc. */
+@import url("./modules/utilities.css");
+
+/* Mobile responsive styles - must be last to override desktop styles */
+@import url("./modules/mobile.css");

@@ -15,6 +15,27 @@ let currentPage = 1;
 let hasNextPage = true;
 let isLoading = false;
 
+// Helper function to update character counter colors
+function updateCharCounterColor(
+  element,
+  charCount,
+  dangerLimit = 900,
+  warningLimit = 800
+) {
+  element.classList.remove(
+    "char-counter-danger",
+    "char-counter-warning",
+    "char-counter-normal"
+  );
+  if (charCount > dangerLimit) {
+    element.classList.add("char-counter-danger");
+  } else if (charCount > warningLimit) {
+    element.classList.add("char-counter-warning");
+  } else {
+    element.classList.add("char-counter-normal");
+  }
+}
+
 // ========================================
 // REMOVED CUSTOM DROPDOWN HANDLERS - USE BOOTSTRAP DEFAULT
 // ========================================
@@ -69,19 +90,15 @@ function generateMobilePostActions(post, currentUserId) {
     post.id
   }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
     isLiked ? "Unlike" : "Like"
-  }" style="touch-action: manipulation; background-color: #5a32a3 !important; border-color: #5a32a3 !important; color: white !important; border-radius: 50%; min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-heart" style="color: ${likeIconColor};"></i>
-            <span class="like-count" style="color: white !important; background: none !important; padding: 0 !important; margin-left: 0.25rem;">${
-              post.likes.length
-            }</span>
+  }">
+            <i class="fas fa-heart ${isLiked ? "liked" : ""}"></i>
+            <span class="like-count">${post.likes.length}</span>
           </button>
           <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
             post.id
-          }')" title="Comment" style="touch-action: manipulation; background-color: #5a32a3 !important; border-color: #5a32a3 !important; color: white !important; border-radius: 50%; min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-comment" style="color: white !important;"></i>
-            <span class="comment-count" style="color: white !important; background: none !important; padding: 0 !important; margin-left: 0.25rem;">${
-              post.comments.length
-            }</span>
+          }')" title="Comment">
+            <i class="fas fa-comment"></i>
+            <span class="comment-count">${post.comments.length}</span>
           </button>
         </div>
         <!-- Mobile: No hidden counters needed -->
@@ -111,7 +128,7 @@ function generateDesktopPostActions(post, currentUserId) {
   }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
     isLiked ? "Unlike" : "Like"
   }">
-            <i class="fas fa-heart" style="color: ${likeIconColor};"></i>
+            <i class="fas fa-heart ${isLiked ? "liked" : ""}"></i>
             <span class="like-count">${post.likes.length}</span>
           </button>
           <button class="btn btn-sm btn-outline-secondary post-action-btn" onclick="toggleComments('${
@@ -123,14 +140,14 @@ function generateDesktopPostActions(post, currentUserId) {
         </div>
         <!-- Counters - Desktop: Hidden since they're in buttons -->
         <div class="text-muted small d-none">
-          <span class="likes-count" id="likes-${
+          <span class="likes-count cursor-pointer" id="likes-${
             post.id
-          }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
-    post.likes.length
-  } like${post.likes.length !== 1 ? "s" : ""}</span>
-          <span class="comments-count ms-2" id="comments-${
+          }" onclick="showLikesModal('${post.id}')">${post.likes.length} like${
+    post.likes.length !== 1 ? "s" : ""
+  }</span>
+          <span class="comments-count ms-2 cursor-pointer" id="comments-${
             post.id
-          }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+          }" onclick="toggleComments('${post.id}')">${
     post.comments.length
   } comment${post.comments.length !== 1 ? "s" : ""}</span>
         </div>
@@ -192,7 +209,7 @@ function generateLikeButton(post) {
   }" onclick="likePost('${post.id}')" data-post-id="${post.id}" title="${
     isLiked ? "Unlike" : "Like"
   }">
-    <i class="fas fa-heart" style="color: ${iconColor};"></i>
+                <i class="fas fa-heart ${isLiked ? "liked" : ""}"></i>
     <span class="like-count">${post.likes.length}</span>
   </button>`;
 }
@@ -205,7 +222,7 @@ function getUserAvatar(user) {
     const email = user.email.toLowerCase().trim();
     const hash = CryptoJS.MD5(email).toString();
     const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=200&d=identicon&r=pg`;
-    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover">`;
   }
   // If user has a profile picture (including Gravatar URLs), use it
   else if (
@@ -215,7 +232,7 @@ function getUserAvatar(user) {
       user.profilePicture.includes("cloudinary.com") ||
       user.profilePicture.includes("gravatar.com"))
   ) {
-    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image avatar-cover">`;
   } else {
     // Fallback to initials
     return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
@@ -265,13 +282,7 @@ function initializeModals() {
 
       // Update character count color
       const charCountElement = document.getElementById("charCount");
-      if (charCount > 900) {
-        charCountElement.style.color = "#dc3545";
-      } else if (charCount > 800) {
-        charCountElement.style.color = "#ffc107";
-      } else {
-        charCountElement.style.color = "#6c757d";
-      }
+      updateCharCounterColor(charCountElement, charCount);
     });
   }
 
@@ -285,13 +296,7 @@ function initializeModals() {
 
       // Update character count color
       const charCountElement = document.getElementById("editCharCount");
-      if (charCount > 900) {
-        charCountElement.style.color = "#dc3545";
-      } else if (charCount > 800) {
-        charCountElement.style.color = "#ffc107";
-      } else {
-        charCountElement.style.color = "#6c757d";
-      }
+      updateCharCounterColor(charCountElement, charCount);
     });
   }
 
@@ -305,13 +310,7 @@ function initializeModals() {
 
       // Update character count color
       const charCountElement = document.getElementById("editCommentCharCount");
-      if (charCount > 200) {
-        charCountElement.style.color = "#dc3545";
-      } else if (charCount > 150) {
-        charCountElement.style.color = "#ffc107";
-      } else {
-        charCountElement.style.color = "#6c757d";
-      }
+      updateCharCounterColor(charCountElement, charCount, 200, 150);
     });
   }
 }
@@ -327,13 +326,7 @@ function initializeInlinePost() {
 
       // Update character count color
       const charCountElement = document.getElementById("inlineCharCount");
-      if (charCount > 200) {
-        charCountElement.style.color = "#dc3545";
-      } else if (charCount > 150) {
-        charCountElement.style.color = "#ffc107";
-      } else {
-        charCountElement.style.color = "#6c757d";
-      }
+      updateCharCounterColor(charCountElement, charCount, 200, 150);
     });
 
     // Handle Enter key to submit
@@ -349,7 +342,7 @@ function initializeInlinePost() {
 function openCreatePostModal() {
   document.getElementById("postContent").value = "";
   document.getElementById("charCount").textContent = "0";
-  document.getElementById("charCount").style.color = "#6c757d";
+  updateCharCounterColor(document.getElementById("charCount"), 0);
   createPostModal.show();
 }
 
@@ -401,7 +394,12 @@ function createInlinePost() {
         // Clear the form
         document.getElementById("inlinePostContent").value = "";
         document.getElementById("inlineCharCount").textContent = "0";
-        document.getElementById("inlineCharCount").style.color = "#6c757d";
+        updateCharCounterColor(
+          document.getElementById("inlineCharCount"),
+          0,
+          200,
+          150
+        );
 
         // Clear photo
         removePhoto();
@@ -699,7 +697,7 @@ function displayPosts(posts) {
       (post) => `
 <div class="post-item mb-4 p-3 border rounded">
   <div class="d-flex align-items-start mb-3">
-    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+    <div class="user-avatar-small me-3 avatar-medium">
       ${getUserAvatar(post.user)}
     </div>
     <div class="flex-grow-1">
@@ -800,7 +798,7 @@ function displayPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2 avatar-small">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -878,7 +876,7 @@ function appendPosts(posts) {
       (post) => `
 <div class="post-item mb-4 p-3 border rounded">
   <div class="d-flex align-items-start mb-3">
-    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+    <div class="user-avatar-small me-3 avatar-medium">
       ${getUserAvatar(post.user)}
     </div>
     <div class="flex-grow-1">
@@ -976,7 +974,7 @@ function appendPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2 avatar-small">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -1303,13 +1301,7 @@ function editPost(postId) {
 
           // Reset character count color
           const charCountElement = document.getElementById("editCharCount");
-          if (data.post.content.length > 900) {
-            charCountElement.style.color = "#dc3545";
-          } else if (data.post.content.length > 800) {
-            charCountElement.style.color = "#ffc107";
-          } else {
-            charCountElement.style.color = "#6c757d";
-          }
+          updateCharCounterColor(charCountElement, data.post.content.length);
 
           // Show the edit modal
           editPostModal.show();
@@ -1619,7 +1611,7 @@ function showLikesModal(postId) {
           .map(
             (like) => `
     <div class="d-flex align-items-center mb-2">
-      <div class="user-avatar-small me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+              <div class="user-avatar-small me-2 avatar-small-medium">
         ${getUserAvatar(like.user)}
       </div>
       <div class="flex-grow-1">
@@ -1823,13 +1815,7 @@ function editComment(commentId, postId, currentContent) {
 
   // Reset character count color
   const charCountElement = document.getElementById("editCommentCharCount");
-  if (currentContent.length > 200) {
-    charCountElement.style.color = "#dc3545";
-  } else if (currentContent.length > 150) {
-    charCountElement.style.color = "#ffc107";
-  } else {
-    charCountElement.style.color = "#6c757d";
-  }
+  updateCharCounterColor(charCountElement, currentContent.length, 200, 150);
 
   editCommentModal.show();
 }
@@ -2123,7 +2109,7 @@ function openPhotoModal(photoUrl) {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
-            <img src="${photoUrl}" alt="Post photo" class="img-fluid" style="max-width: 100%;">
+            <img src="${photoUrl}" alt="Post photo" class="img-fluid post-photo-modal">
           </div>
         </div>
       </div>

@@ -187,213 +187,18 @@
 }
 
 /* ========================================
-   USER CARDS
+   USER CARDS GRID LAYOUT
    ======================================== */
 
-/* User cards grid */
-.users-page .row {
+/* User cards grid - now using user-card-grid class */
+.users-page .user-card-grid .row {
   margin: 0 -0.75rem;
 }
 
-.users-page .col-md-6,
-.users-page .col-lg-4 {
+.users-page .user-card-grid .col-md-6,
+.users-page .user-card-grid .col-lg-4 {
   padding: 0 0.75rem;
   margin-bottom: 1.5rem;
-}
-
-/* User card styling */
-.users-page .user-card {
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-
-  transition: all 0.2s ease;
-  position: relative;
-  min-height: 120px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.users-page .user-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-  border-color: #311555;
-}
-
-.users-page .user-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #311555, #764ba2);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.users-page .user-card:hover::before {
-  opacity: 1;
-}
-
-/* Add a subtle "View Profile" indicator - hidden on mobile */
-.users-page .user-card::after {
-  content: "View Profile";
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  font-size: 0.7rem;
-  color: #6c757d;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.users-page .user-card:hover::after {
-  opacity: 0.7;
-}
-
-/* Hide "View Profile" indicator on mobile */
-@media (max-width: 767px) {
-  .users-page .user-card::after {
-    display: none !important;
-  }
-}
-
-/* User card layout */
-.users-page .user-card .d-flex {
-  align-items: center;
-  width: 100%;
-  gap: 1rem;
-}
-
-/* ========================================
-   USER AVATARS (ONLY FOR USER CARDS, NOT HEADER)
-   ======================================== */
-
-/* User avatar - ONLY for user cards, not header */
-.users-page .user-card .user-avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #311555, #764ba2);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-right: 0;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.users-page .user-card .user-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  transition: transform 0.2s ease;
-}
-
-.users-page .user-card:hover .user-avatar img {
-  transform: scale(1.05);
-}
-
-.users-page .user-card .user-avatar .avatar-initials {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Avatar fallback colors - ONLY for user cards */
-.users-page .user-card .user-avatar[data-initials*="A"] {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-}
-.users-page .user-card .user-avatar[data-initials*="B"] {
-  background: linear-gradient(135deg, #f093fb, #f5576c);
-}
-.users-page .user-card .user-avatar[data-initials*="C"] {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-}
-.users-page .user-card .user-avatar[data-initials*="D"] {
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
-}
-.users-page .user-card .user-avatar[data-initials*="E"] {
-  background: linear-gradient(135deg, #fa709a, #fee140);
-}
-.users-page .user-card .user-avatar[data-initials*="F"] {
-  background: linear-gradient(135deg, #a8edea, #fed6e3);
-}
-.users-page .user-card .user-avatar[data-initials*="G"] {
-  background: linear-gradient(135deg, #ffecd2, #fcb69f);
-}
-.users-page .user-card .user-avatar[data-initials*="H"] {
-  background: linear-gradient(135deg, #ff9a9e, #fecfef);
-}
-.users-page .user-card .user-avatar[data-initials*="I"] {
-  background: linear-gradient(135deg, #a8caba, #5d4e75);
-}
-.users-page .user-card .user-avatar[data-initials*="J"] {
-  background: linear-gradient(135deg, #d299c2, #fef9d7);
-}
-.users-page .user-card .user-avatar[data-initials*="K"] {
-  background: linear-gradient(135deg, #89f7fe, #66a6ff);
-}
-.users-page .user-card .user-avatar[data-initials*="L"] {
-  background: linear-gradient(135deg, #f093fb, #f5576c);
-}
-.users-page .user-card .user-avatar[data-initials*="M"] {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-}
-.users-page .user-card .user-avatar[data-initials*="N"] {
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
-}
-.users-page .user-card .user-avatar[data-initials*="O"] {
-  background: linear-gradient(135deg, #fa709a, #fee140);
-}
-.users-page .user-card .user-avatar[data-initials*="P"] {
-  background: linear-gradient(135deg, #a8edea, #fed6e3);
-}
-.users-page .user-card .user-avatar[data-initials*="Q"] {
-  background: linear-gradient(135deg, #ffecd2, #fcb69f);
-}
-.users-page .user-card .user-avatar[data-initials*="R"] {
-  background: linear-gradient(135deg, #ff9a9e, #fecfef);
-}
-.users-page .user-card .user-avatar[data-initials*="S"] {
-  background: linear-gradient(135deg, #a8caba, #5d4e75);
-}
-.users-page .user-card .user-avatar[data-initials*="T"] {
-  background: linear-gradient(135deg, #d299c2, #fef9d7);
-}
-.users-page .user-card .user-avatar[data-initials*="U"] {
-  background: linear-gradient(135deg, #89f7fe, #66a6ff);
-}
-.users-page .user-card .user-avatar[data-initials*="V"] {
-  background: linear-gradient(135deg, #f093fb, #f5576c);
-}
-.users-page .user-card .user-avatar[data-initials*="W"] {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-}
-.users-page .user-card .user-avatar[data-initials*="X"] {
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
-}
-.users-page .user-card .user-avatar[data-initials*="Y"] {
-  background: linear-gradient(135deg, #fa709a, #fee140);
-}
-.users-page .user-card .user-avatar[data-initials*="Z"] {
-  background: linear-gradient(135deg, #a8edea, #fed6e3);
 }
 
 /* ========================================
@@ -435,143 +240,41 @@
 }
 
 /* ========================================
-   ACTION BUTTONS
+   USER INFORMATION
    ======================================== */
 
-/* Button container */
-.users-page .ms-auto {
-  flex-shrink: 0;
+/* User info section */
+.users-page .user-info {
+  flex: 1;
+  min-width: 0;
+  margin-right: 0;
 }
 
-/* Action buttons */
-.users-page .user-card .btn {
-  border-radius: 8px;
+.users-page .user-info h6 {
+  color: #212529;
+  font-size: 1.1rem;
   font-weight: 600;
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  transition: all 0.2s ease;
-  border: none;
-  min-width: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  position: relative;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.users-page .user-card .btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
+.users-page .user-info p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.users-page .user-card .btn:hover::before {
-  left: 100%;
-}
-
-/* Add friend button */
-.users-page .btn-add-friend {
-  background: #007bff;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
-}
-
-.users-page .btn-add-friend:hover {
-  background: #0056b3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
-}
-
-.users-page .btn-add-friend:active {
-  transform: translateY(0);
-}
-
-/* Remove friend button */
-.users-page .btn-remove-friend {
-  background: #dc3545;
-  color: white;
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
-}
-
-.users-page .btn-remove-friend:hover {
-  background: #c82333;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
-}
-
-.users-page .btn-remove-friend:active {
-  transform: translateY(0);
-}
-
-/* Cancel request button */
-.users-page .btn-cancel-request {
-  background: #6c757d;
-  color: white;
-  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
-}
-
-.users-page .btn-cancel-request:hover {
-  background: #5a6268;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4);
-}
-
-.users-page .btn-cancel-request:active {
-  transform: translateY(0);
-}
-
-/* Accept/Decline button group */
-.users-page .d-flex.gap-2 {
-  gap: 0.5rem !important;
-}
-
-.users-page .d-flex.gap-2 .btn {
-  min-width: 80px;
+.users-page .user-info small {
+  color: #868e96;
   font-size: 0.8rem;
-  padding: 0.4rem 0.8rem;
-}
-
-.users-page .d-flex.gap-2 .btn-success {
-  background: #28a745;
-  border-color: #28a745;
-}
-
-.users-page .d-flex.gap-2 .btn-danger {
-  background: #dc3545;
-  border-color: #dc3545;
-}
-
-/* Button icons */
-.users-page .user-card .btn i {
-  font-size: 0.875rem;
-  transition: transform 0.2s ease;
-}
-
-.users-page .user-card .btn:hover i {
-  transform: scale(1.1);
-}
-
-/* Loading state */
-.users-page .user-card .btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.users-page .user-card .btn:disabled::before {
-  display: none;
+  font-style: italic;
 }
 
 /* ========================================
@@ -602,59 +305,30 @@
 }
 
 /* ========================================
-   ANIMATIONS & TRANSITIONS
+   EMPTY STATES & LOADING
    ======================================== */
 
-/* Card entrance animation */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Empty state styling */
+.users-page .text-muted {
+  color: #6c757d;
+  text-align: center;
+  padding: 3rem 0;
 }
 
-.users-page .user-card {
-  animation: slideInUp 0.3s ease forwards;
+.users-page .text-muted i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
-.users-page .user-card:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.users-page .user-card:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.users-page .user-card:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.users-page .user-card:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.users-page .user-card:nth-child(5) {
-  animation-delay: 0.5s;
-}
-.users-page .user-card:nth-child(6) {
-  animation-delay: 0.6s;
+/* Loading states */
+.users-page .spinner-border {
+  color: #311555;
 }
 
-/* Button click animation */
-@keyframes buttonClick {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.95);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.users-page .user-card .btn:active {
-  animation: buttonClick 0.1s ease;
+.users-page .loading-text {
+  color: #6c757d;
+  margin-top: 0.5rem;
 }
 
 /* ========================================
@@ -662,11 +336,6 @@
    ======================================== */
 
 /* Focus states */
-.users-page .user-card .btn:focus {
-  outline: 2px solid #311555;
-  outline-offset: 2px;
-}
-
 .users-page .nav-tabs .nav-link:focus {
   outline: 2px solid #311555;
   outline-offset: 2px;
@@ -674,10 +343,6 @@
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .users-page .user-card {
-    border: 2px solid #000;
-  }
-
   .users-page .nav-tabs .nav-link.active {
     border: 2px solid #000;
   }
@@ -685,18 +350,12 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .users-page .user-card,
-  .users-page .user-card .btn,
   .users-page .nav-tabs .nav-link {
     transition: none;
     animation: none;
   }
 
-  .users-page .user-card:hover {
-    transform: none;
-  }
-
-  .users-page .user-card .btn:hover {
+  .users-page .nav-tabs .nav-link:hover {
     transform: none;
   }
 }
@@ -764,113 +423,15 @@
   }
 
   /* Mobile user cards grid */
-  .users-page .row {
+  .users-page .user-card-grid .row {
     margin: 0 -0.25rem !important;
   }
 
-  .users-page .col-md-6,
-  .users-page .col-lg-4 {
+  .users-page .user-card-grid .col-md-6,
+  .users-page .user-card-grid .col-lg-4 {
     padding: 0 0.25rem !important;
     margin-bottom: 0.5rem !important;
     width: 100% !important;
-  }
-
-  /* Mobile user cards - reduced size */
-  .users-page .user-card {
-    padding: 0.75rem !important;
-    min-height: auto !important;
-    margin: 0 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
-  }
-
-  /* Mobile user card layout - stack vertically */
-  .users-page .user-card .d-flex {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-    text-align: center !important;
-    align-items: center !important;
-  }
-
-  /* Mobile user avatar - reduced size */
-  .users-page .user-card .user-avatar {
-    width: 50px !important;
-    height: 50px !important;
-    font-size: 1.25rem !important;
-    margin: 0 auto !important;
-    flex-shrink: 0 !important;
-  }
-
-  .users-page .user-card .user-avatar img {
-    width: 50px !important;
-    height: 50px !important;
-  }
-
-  .users-page .user-card .user-avatar .avatar-initials {
-    width: 50px !important;
-    height: 50px !important;
-    font-size: 1.25rem !important;
-  }
-
-  /* Mobile user info */
-  .users-page .user-card .user-info {
-    margin-right: 0 !important;
-    text-align: center !important;
-    flex: 1 !important;
-    min-width: 0 !important;
-  }
-
-  .users-page .user-card .user-info h6 {
-    font-size: 1rem !important;
-    margin-bottom: 0.25rem !important;
-    line-height: 1.2 !important;
-  }
-
-  .users-page .user-card .user-info p {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.25rem !important;
-    line-height: 1.3 !important;
-  }
-
-  .users-page .user-card .user-info small {
-    font-size: 0.7rem !important;
-    line-height: 1.2 !important;
-  }
-
-  /* Mobile action buttons */
-  .users-page .user-card .ms-auto {
-    width: 100% !important;
-    flex-shrink: 0 !important;
-  }
-
-  .users-page .user-card .btn {
-    width: 100% !important;
-    min-width: auto !important;
-    margin-bottom: 0.25rem !important;
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.8rem !important;
-    min-height: 36px !important;
-    border-radius: 6px !important;
-  }
-
-  .users-page .user-card .btn:last-child {
-    margin-bottom: 0 !important;
-  }
-
-  /* Mobile button groups */
-  .users-page .user-card .d-flex.gap-2 {
-    flex-direction: column !important;
-    gap: 0.25rem !important;
-    width: 100% !important;
-  }
-
-  .users-page .user-card .d-flex.gap-2 .btn {
-    width: 100% !important;
-    min-width: auto !important;
-    margin-bottom: 0 !important;
-    padding: 0.4rem 0.6rem !important;
-    font-size: 0.75rem !important;
-    min-height: 32px !important;
   }
 
   /* Mobile badge adjustments */
@@ -914,45 +475,12 @@
     min-width: 40px !important;
   }
 
-  .users-page .user-card .btn {
-    min-height: 36px !important;
-    min-width: 36px !important;
-  }
-
-  .users-page .user-card .user-avatar {
-    min-height: 50px !important;
-    min-width: 50px !important;
-  }
-
   /* Mobile hover effects disabled */
-  .users-page .user-card:hover {
-    transform: none !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
-  }
-
-  .users-page .user-card:hover::before {
-    opacity: 0 !important;
-  }
-
-  .users-page .user-card:hover .user-avatar img {
-    transform: none !important;
-  }
-
-  .users-page .user-card .btn:hover {
-    transform: none !important;
-  }
-
-  .users-page .user-card .btn:hover i {
-    transform: none !important;
-  }
-
   .users-page .nav-tabs .nav-link:hover {
     transform: none !important;
   }
 
   /* Mobile performance optimizations */
-  .users-page .user-card,
-  .users-page .user-card .btn,
   .users-page .nav-tabs .nav-link {
     transition: all 0.15s ease !important;
   }
@@ -967,21 +495,8 @@
     outline-offset: 2px !important;
   }
 
-  .users-page .user-card .btn:focus {
-    outline: 2px solid #311555 !important;
-    outline-offset: 2px !important;
-  }
-
   /* Mobile contrast improvements */
   .users-page .text-muted {
     color: #495057 !important;
-  }
-
-  .users-page .user-info p {
-    color: #495057 !important;
-  }
-
-  .users-page .user-info small {
-    color: #6c757d !important;
   }
 }

@@ -554,7 +554,7 @@ function addRequestCardToRequestsTab(userId, userName, requestId) {
       <div class="card h-100">
         <div class="card-body">
           <div class="d-flex align-items-center mb-3">
-            <div class="user-avatar-large me-3" style="width: 50px; height: 50px; font-size: 1.2rem">
+            <div class="user-avatar-large me-3 avatar-large">
               ${userName
                 .split(" ")
                 .map((n) => n.charAt(0))
@@ -829,7 +829,7 @@ function displayRequests(requests) {
   <div class="card-body">
     <div class="row align-items-center">
       <div class="col-auto">
-        <div class="user-avatar-large" style="width: 50px; height: 50px; font-size: 1.2rem;">
+        <div class="user-avatar-large avatar-large">
           ${(request.sender.firstName || "").charAt(0)}${(
         request.sender.lastName || ""
       ).charAt(0)}
@@ -965,7 +965,7 @@ function displayResults(users) {
   <div class="card-body">
     <div class="row align-items-center">
       <div class="col-auto">
-        <div class="user-avatar-large" style="width: 50px; height: 50px; font-size: 1.2rem;">
+        <div class="user-avatar-large avatar-large">
           ${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(0)}
         </div>
       </div>

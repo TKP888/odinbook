@@ -30,14 +30,7 @@ router.get("/", ensureAuthenticated, (req, res) => {
   });
 });
 
-// Test route for Post Create V2 component
-router.get("/test-post-create-v2", ensureAuthenticated, (req, res) => {
-  res.render("test-post-create-v2", {
-    title: "Post Create V2 Test",
-    user: req.user,
-    layout: false, // No layout for test page
-  });
-});
+// ... existing code ...
 
 // Get posts for dashboard
 router.get("/posts", ensureAuthenticated, async (req, res) => {

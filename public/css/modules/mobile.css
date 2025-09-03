@@ -1,0 +1,1213 @@
+/* ========================================
+   ODINBOOK MOBILE RESPONSIVE STYLES
+   Mobile-specific styles and responsive design
+   ======================================== */
+
+/* ========================================
+   AUTH MOBILE RESPONSIVE STYLES
+   ======================================== */
+@media (max-width: 767px) {
+  /* Mobile auth page layout */
+  .auth-page {
+    padding: var(--spacing-sm) !important;
+    min-height: 100vh !important;
+    align-items: flex-start !important;
+    padding-top: calc(var(--header-height) + var(--spacing-md)) !important;
+  }
+
+  /* Mobile auth container */
+  .auth-page .auth-container {
+    max-width: 100% !important;
+    padding: 0 var(--spacing-sm) !important;
+    padding-top: var(--spacing-md) !important;
+  }
+
+  /* Mobile auth card */
+  .auth-page .auth-card {
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    margin: 0 !important;
+  }
+
+  /* Mobile auth header */
+  .auth-page .auth-header {
+    padding: var(--spacing-lg) var(--spacing-md) !important;
+  }
+
+  .auth-page .auth-header h1 {
+    font-size: var(--font-size-2xl) !important;
+    margin-bottom: var(--spacing-sm) !important;
+  }
+
+  .auth-page .auth-header p {
+    font-size: var(--font-size-sm) !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Mobile auth body */
+  .auth-page .auth-body {
+    padding: var(--spacing-lg) var(--spacing-md) !important;
+  }
+
+  /* Mobile form controls */
+  .auth-page .form-control {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    padding: 0.75rem !important;
+    border-radius: var(--border-radius-md) !important;
+    border: 1px solid var(--medium-gray) !important;
+  }
+
+  .auth-page .form-control:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(49, 21, 85, 0.25) !important;
+  }
+
+  /* Mobile form labels */
+  .auth-page .form-label {
+    font-size: var(--font-size-sm) !important;
+    font-weight: 600 !important;
+    color: var(--dark-gray) !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Mobile form spacing */
+  .auth-page .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+
+  .auth-page .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Mobile buttons */
+  .auth-page .btn {
+    padding: 0.875rem 1.5rem !important;
+    font-size: var(--font-size-base) !important;
+    font-weight: 600 !important;
+    border-radius: var(--border-radius-md) !important;
+    min-height: 48px !important; /* Touch target size */
+  }
+
+  .auth-page .btn-lg {
+    padding: 1rem 2rem !important;
+    font-size: var(--font-size-lg) !important;
+    min-height: 52px !important;
+  }
+
+  .auth-page .btn-primary {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 2px 8px rgba(49, 21, 85, 0.3) !important;
+  }
+
+  .auth-page .btn-primary:hover {
+    background: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(49, 21, 85, 0.4) !important;
+  }
+
+  .auth-page .btn-outline-secondary {
+    border-color: var(--medium-gray) !important;
+    color: var(--dark-gray) !important;
+    background: transparent !important;
+  }
+
+  .auth-page .btn-outline-secondary:hover {
+    background: var(--light-gray) !important;
+    border-color: var(--dark-gray) !important;
+    color: var(--dark-gray) !important;
+  }
+
+  /* Mobile form rows */
+  .auth-page .row {
+    margin: 0 -0.5rem !important;
+  }
+
+  .auth-page .col-md-6 {
+    padding: 0 0.5rem !important;
+  }
+
+  /* Mobile auth footer */
+  .auth-page .auth-footer {
+    margin-top: var(--spacing-lg) !important;
+    padding-top: var(--spacing-md) !important;
+    border-top: 1px solid var(--light-gray) !important;
+    text-align: center !important;
+  }
+
+  .auth-page .auth-footer p {
+    font-size: var(--font-size-sm) !important;
+    color: var(--medium-gray) !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .auth-page .auth-footer a {
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+
+  .auth-page .auth-footer a:hover {
+    color: var(--secondary-color) !important;
+    text-decoration: underline !important;
+  }
+
+  /* Mobile header bar adjustments */
+  .auth-page .auth-header-bar {
+    height: 60px !important;
+  }
+
+  .auth-page .auth-header-bar .header-container {
+    padding: 0 var(--spacing-sm) !important;
+  }
+
+  .auth-page .auth-header-bar .header-left .logo {
+    font-size: var(--font-size-lg) !important;
+  }
+
+  .auth-page .auth-header-bar .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: var(--font-size-sm) !important;
+  }
+
+  /* Mobile touch optimizations */
+  .auth-page .form-control,
+  .auth-page .btn {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Mobile focus states */
+  .auth-page .form-control:focus,
+  .auth-page .btn:focus {
+    outline: 2px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Mobile animations */
+  .auth-page .auth-card {
+    animation: slideInUp 0.3s ease-out !important;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ========================================
+   MOBILE POST ACTIONS - COMPLETE REDESIGN
+   ======================================== */
+
+@media (max-width: 767px) {
+  /* ========================================
+     POST ACTIONS CONTAINER - CLEAN MOBILE LAYOUT
+     ======================================== */
+
+  .post-actions {
+    padding: 0.75rem 1rem !important;
+    border-top: 1px solid #e9ecef !important;
+    background: white !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ========================================
+     MAIN ACTIONS ROW - HORIZONTAL BUTTON LAYOUT
+     ======================================== */
+
+  /* Force horizontal layout for all post types */
+  .post-actions .d-flex.justify-content-between.align-items-center,
+  .post-actions .d-flex.align-items-center {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* ========================================
+     ACTION BUTTONS - ICON-ONLY DESIGN
+     ======================================== */
+
+  /* Base button styling for all post types */
+  .post-actions .btn,
+  .post-actions .d-flex.gap-2 .btn,
+  .post-actions-bar .like-btn,
+  .post-actions-bar .comment-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    border: 1px solid #dee2e6 !important;
+    background: white !important;
+    color: #6c757d !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    min-height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  /* Button hover states */
+  .post-actions .btn:hover,
+  .post-actions .d-flex.gap-2 .btn:hover,
+  .post-actions-bar .like-btn:hover,
+  .post-actions-bar .comment-btn:hover {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+    border-color: #adb5bd !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* Button active states */
+  .post-actions .btn:active,
+  .post-actions .d-flex.gap-2 .btn:active,
+  .post-actions-bar .like-btn:active,
+  .post-actions-bar .comment-btn:active {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+    transform: translateY(0) scale(0.98) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* ========================================
+     ICONS - PROPER SIZING AND POSITIONING
+     ======================================== */
+
+  /* Icon styling for all buttons */
+  .post-actions .btn i,
+  .post-actions .btn .fas,
+  .post-actions .d-flex.gap-2 .btn i,
+  .post-actions .d-flex.gap-2 .btn .fas,
+  .post-actions-bar .like-btn i,
+  .post-actions-bar .comment-btn i {
+    font-size: 1rem !important;
+    color: #6c757d !important;
+    display: block !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* ========================================
+     AGGRESSIVE TEXT HIDING - ELIMINATE ALL TEXT
+     ======================================== */
+
+  /* Hide ALL button text content on mobile - keep only icons and counts */
+  .post-actions .btn span:not(.like-count):not(.comment-count),
+  .post-actions .btn .btn-text,
+  .post-actions .btn .comment-text,
+  .post-actions .d-flex.gap-2 .btn span:not(.like-count):not(.comment-count),
+  .post-actions .d-flex.gap-2 .btn .btn-text,
+  .post-actions .d-flex.gap-2 .btn .comment-text,
+  .post-actions-bar .like-btn span:not(.like-count),
+  .post-actions-bar .comment-btn span:not(.comment-count) {
+    display: none !important;
+  }
+
+  /* AGGRESSIVE TEXT HIDING - Hide all text that's not a count */
+  .post-actions
+    .btn
+    *:not(.like-count):not(.comment-count):not(i):not(.fas):not(.fa),
+  .post-actions
+    .d-flex.gap-2
+    .btn
+    *:not(.like-count):not(.comment-count):not(i):not(.fas):not(.fa),
+  .post-actions-bar .like-btn *:not(.like-count):not(i):not(.fas):not(.fa),
+  .post-actions-bar
+    .comment-btn
+    *:not(.comment-count):not(i):not(.fas):not(.fa) {
+    display: none !important;
+  }
+
+  /* Hide specific text content by targeting common patterns */
+  .post-actions .btn:contains("Like"),
+  .post-actions .btn:contains("Liked"),
+  .post-actions .btn:contains("Comment"),
+  .post-actions .d-flex.gap-2 .btn:contains("Like"),
+  .post-actions .d-flex.gap-2 .btn:contains("Liked"),
+  .post-actions .d-flex.gap-2 .btn:contains("Comment") {
+    font-size: 0 !important;
+    color: transparent !important;
+  }
+
+  /* Force hide any remaining text content */
+  .post-actions .btn,
+  .post-actions .d-flex.gap-2 .btn,
+  .post-actions-bar .like-btn,
+  .post-actions-bar .comment-btn {
+    font-size: 0 !important;
+  }
+
+  /* Restore font size only for counts and icons */
+  .post-actions .btn .like-count,
+  .post-actions .btn .comment-count,
+  .post-actions .d-flex.gap-2 .btn .like-count,
+  .post-actions .d-flex.gap-2 .btn .comment-count,
+  .post-actions .btn i,
+  .post-actions .btn .fas,
+  .post-actions .d-flex.gap-2 .btn i,
+  .post-actions .d-flex.gap-2 .btn .fas,
+  .post-actions-bar .like-btn i,
+  .post-actions-bar .comment-btn i {
+    font-size: inherit !important;
+  }
+
+  /* Force hide any remaining visible text */
+  .post-actions
+    .btn
+    > *:not(.like-count):not(.comment-count):not(i):not(.fas):not(.fa),
+  .post-actions
+    .d-flex.gap-2
+    .btn
+    > *:not(.like-count):not(.comment-count):not(i):not(.fas):not(.fa) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* ========================================
+     COUNTER INTEGRATION - INSIDE BUTTONS
+     ======================================== */
+
+  /* Counter styling inside buttons */
+  .post-actions .btn .like-count,
+  .post-actions .btn .comment-count {
+    display: inline-block !important;
+    font-size: 0.75rem !important;
+    color: #6c757d !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    padding: 0.125rem 0.375rem !important;
+    border-radius: 4px !important;
+    min-width: 20px !important;
+    text-align: center !important;
+  }
+
+  /* Counter hover states */
+  .post-actions .btn:hover .like-count,
+  .post-actions .btn:hover .comment-count {
+    color: #495057 !important;
+    background: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* ========================================
+     SEPARATE COUNTERS - FOR JS-GENERATED POSTS
+     ======================================== */
+
+  /* Handle posts with separate counter divs */
+  .post-actions .text-muted.small {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 0.75rem !important;
+    color: #6c757d !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Individual counter spans */
+  .post-actions .text-muted.small .likes-count,
+  .post-actions .text-muted.small .comments-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    padding: 0.25rem 0.5rem !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s ease !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 60px !important;
+    flex-shrink: 0 !important;
+    border: 1px solid transparent !important;
+  }
+
+  /* Counter hover states */
+  .post-actions .text-muted.small .likes-count:hover,
+  .post-actions .text-muted.small .comments-count:hover {
+    background: rgba(0, 0, 0, 0.08) !important;
+    border-color: #dee2e6 !important;
+  }
+
+  /* ========================================
+     LAYOUT ENFORCEMENT - FORCE PROPER STRUCTURE
+     ======================================== */
+
+  /* Ensure proper layout for justify-content-between posts */
+  .post-actions .d-flex.justify-content-between {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1rem !important;
+  }
+
+  /* Action buttons container */
+  .post-actions .d-flex.justify-content-between > .d-flex.gap-2 {
+    order: 1 !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Counters container */
+  .post-actions .d-flex.justify-content-between > .text-muted.small {
+    order: 2 !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ========================================
+     BUTTON SIZING - ACCOMMODATE ICON + COUNT
+     ======================================== */
+
+  /* Adjust button sizing to fit icon + count */
+  .post-actions .btn,
+  .post-actions .d-flex.gap-2 .btn,
+  .post-actions-bar .like-btn,
+  .post-actions-bar .comment-btn {
+    min-width: 60px !important;
+    padding: 0.5rem 0.75rem !important;
+    justify-content: center !important;
+  }
+
+  /* Ensure buttons don't get too wide */
+  .post-actions .btn,
+  .post-actions .d-flex.gap-2 .btn,
+  .post-actions-bar .like-btn,
+  .post-actions-bar .comment-btn {
+    max-width: 80px !important;
+  }
+
+  /* ========================================
+     SPECIAL STATES - LIKED BUTTONS
+     ======================================== */
+
+  /* Liked button styling */
+  .post-actions .btn.liked,
+  .post-actions .d-flex.gap-2 .btn.liked,
+  .post-actions-bar .like-btn.liked {
+    background-color: #fff5f5 !important;
+    border-color: #fecaca !important;
+    color: #dc2626 !important;
+  }
+
+  .post-actions .btn.liked i,
+  .post-actions .d-flex.gap-2 .btn.liked i,
+  .post-actions-bar .like-btn.liked i {
+    color: #dc2626 !important;
+  }
+
+  /* ========================================
+     RESPONSIVE ADJUSTMENTS
+     ======================================== */
+
+  /* Very small screens */
+  @media (max-width: 480px) {
+    .post-actions .d-flex.justify-content-between.align-items-center {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+    }
+
+    .post-actions .d-flex.justify-content-between > .d-flex.gap-2,
+    .post-actions .d-flex.justify-content-between > .text-muted.small {
+      width: 100% !important;
+    }
+
+    .post-actions .btn,
+    .post-actions .d-flex.gap-2 .btn,
+    .post-actions-bar .like-btn,
+    .post-actions-bar .comment-btn {
+      min-width: 36px !important;
+      min-height: 36px !important;
+    }
+  }
+
+  /* ========================================
+     ACCESSIBILITY & FOCUS STATES
+     ======================================== */
+
+  .post-actions .btn:focus,
+  .post-actions .d-flex.gap-2 .btn:focus,
+  .post-actions-bar .like-btn:focus,
+  .post-actions-bar .comment-btn:focus {
+    outline: 2px solid #311555 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Touch optimization */
+  .post-actions .btn,
+  .post-actions .d-flex.gap-2 .btn,
+  .post-actions-bar .like-btn,
+  .post-actions-bar .comment-btn {
+    touch-action: manipulation !important;
+  }
+
+  /* ========================================
+     ICON INTERACTIVE STATES
+     ======================================== */
+
+  /* Icon hover states */
+  .post-actions .btn:hover i,
+  .post-actions .d-flex.gap-2 .btn:hover i,
+  .post-actions-bar .like-btn:hover i,
+  .post-actions-bar .comment-btn:hover i {
+    color: #495057 !important;
+  }
+
+  /* Icon active states */
+  .post-actions .btn:active i,
+  .post-actions .d-flex.gap-2 .btn:active i,
+  .post-actions-bar .like-btn:active i,
+  .post-actions-bar .comment-btn:active i {
+    color: #212529 !important;
+  }
+}
+
+/* ========================================
+   MOBILE COMMENT SECTION OPTIMIZATION
+   ======================================== */
+
+@media (max-width: 767px) {
+  /* Comment section container */
+  .comments-section {
+    margin-top: 1rem !important;
+    padding: 0 !important;
+  }
+
+  /* Comment form optimization */
+  .comment-form {
+    margin-top: 0.75rem !important;
+    padding: 0 !important;
+  }
+
+  /* Input group for comment form */
+  .comment-form .input-group {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  /* Comment input field */
+  .comment-form .form-control {
+    flex: 1 !important;
+    min-height: 40px !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 20px !important;
+    background: white !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Comment input focus state */
+  .comment-form .form-control:focus {
+    border-color: #311555 !important;
+    box-shadow: 0 0 0 0.2rem rgba(49, 21, 85, 0.25) !important;
+    outline: none !important;
+  }
+
+  /* Send button optimization */
+  .comment-form .btn {
+    min-height: 40px !important;
+    min-width: 40px !important;
+    padding: 0.5rem !important;
+    border-radius: 50% !important;
+    background: #311555 !important;
+    border: 1px solid #311555 !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 4px rgba(49, 21, 85, 0.3) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  /* Send button hover state */
+  .comment-form .btn:hover {
+    background: #4a1f7a !important;
+    border-color: #4a1f7a !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(49, 21, 85, 0.4) !important;
+  }
+
+  /* Send button active state */
+  .comment-form .btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(49, 21, 85, 0.3) !important;
+  }
+
+  /* Send button icon */
+  .comment-form .btn i {
+    font-size: 0.875rem !important;
+    color: white !important;
+  }
+
+  /* Comments list optimization */
+  .comments-list {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Individual comment items */
+  .comment-item {
+    padding: 0.75rem 0 !important;
+    border-bottom: 1px solid #f1f3f4 !important;
+  }
+
+  .comment-item:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Comment user info */
+  .comment-item .user-avatar-small {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+    margin-right: 0.5rem !important;
+  }
+
+  /* Comment content */
+  .comment-content {
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    margin: 0.25rem 0 !important;
+    word-wrap: break-word !important;
+  }
+
+  /* Comment metadata */
+  .comment-item small {
+    font-size: 0.75rem !important;
+    color: #6c757d !important;
+  }
+
+  /* Comment actions (edit/delete) */
+  .comment-item .btn-group {
+    margin-top: 0.25rem !important;
+  }
+
+  .comment-item .btn-group .btn {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    min-height: 28px !important;
+  }
+
+  /* ========================================
+     MOBILE COMMENT ADDITIONAL OPTIMIZATIONS
+     ======================================== */
+
+  /* Better touch targets for mobile */
+  .comment-form .form-control,
+  .comment-form .btn {
+    touch-action: manipulation !important;
+  }
+
+  /* Improved spacing for mobile */
+  .comments-section .mt-3 {
+    margin-top: 0.75rem !important;
+  }
+
+  .comments-section .mb-3 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Comment form placeholder text */
+  .comment-form .form-control::placeholder {
+    color: #adb5bd !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Comment input autofill styling */
+  .comment-form .form-control:-webkit-autofill,
+  .comment-form .form-control:-webkit-autofill:hover,
+  .comment-form .form-control:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #495057 !important;
+  }
+
+  /* Comment section animations */
+  .comments-section {
+    animation: slideIn 0.3s ease-out !important;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0 !important;
+      transform: translateY(-10px) !important;
+    }
+    to {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+  }
+
+  /* ========================================
+     VERY SMALL SCREEN COMMENT OPTIMIZATION
+     ======================================== */
+
+  /* Comment form on very small screens */
+  .comment-form .input-group {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Comment input on very small screens */
+  .comment-form .form-control {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+
+  /* Send button on very small screens */
+  .comment-form .btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    border-radius: 8px !important;
+    justify-content: center !important;
+  }
+
+  /* Comment items on very small screens */
+  .comment-item {
+    padding: 0.5rem 0 !important;
+  }
+
+  .comment-item .user-avatar-small {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Comment actions on very small screens */
+  .comment-item .btn-group {
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+    width: 100% !important;
+  }
+
+  .comment-item .btn-group .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ========================================
+   MOBILE COMMENT BUTTON OPTIMIZATION
+   ======================================== */
+@media (max-width: 767px) {
+  /* Comment action buttons - reduce width for mobile */
+  .comment-actions {
+    flex-wrap: nowrap !important;
+    flex-shrink: 0 !important;
+    max-width: 200px !important;
+  }
+
+  .comment-actions .btn {
+    min-width: auto !important;
+    width: auto !important;
+    max-width: 60px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* Specific button styling for mobile */
+  .comment-actions .btn[onclick*="editComment"] {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  .comment-actions .btn[onclick*="deleteComment"] {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  /* Target the actual classes used by JavaScript */
+  .comment-actions .btn.btn-outline-primary {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Override global btn-sm styles for comment buttons */
+  .comment-actions .btn.btn-sm {
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+  }
+
+  /* Target btn-group buttons specifically */
+  .btn-group.btn-group-sm .btn.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+  }
+
+  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity */
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Target any Bootstrap button in comment actions */
+  .comment-actions .btn,
+  .comment-actions .btn.btn-sm,
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 36px !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    padding: 0.25rem !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
+  }
+
+  .comment-actions .btn[onclick*="likeComment"] {
+    max-width: 40px !important;
+    padding: 0.25rem !important;
+  }
+
+  /* Force button container to not expand */
+  .comment-content {
+    min-width: 0 !important;
+    flex: 1 !important;
+    flex-grow: 1 !important;
+    margin-right: 0.5rem !important;
+  }
+
+  /* Touch optimization for comment buttons */
+  .comment-actions .btn {
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Ensure comment actions stay compact */
+  .comment-actions {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 80px !important;
+    width: auto !important;
+  }
+
+  /* Override Bootstrap's justify-content-between for comment layout */
+  .d-flex.justify-content-between.align-items-start {
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Force comment content to take most of the space */
+  .d-flex.justify-content-between.align-items-start > *:first-child {
+    flex: 1 !important;
+    flex-grow: 1 !important;
+    min-width: 0 !important;
+    margin-right: 0.5rem !important;
+  }
+
+  /* Force buttons to take minimal space */
+  .d-flex.justify-content-between.align-items-start > *:last-child {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 80px !important;
+    width: auto !important;
+  }
+}
+
+/* ========================================
+   TABLET POST ACTIONS OPTIMIZATION
+   ======================================== */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .post-actions .btn {
+    min-height: 40px !important;
+    padding: 0.5rem 1rem !important;
+  }
+}
+
+/* ========================================
+   VERY SMALL SCREEN COMMENT BUTTONS
+   ======================================== */
+@media (max-width: 375px) {
+  .comment-actions .btn {
+    max-width: 45px !important;
+    padding: 0.2rem 0.4rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  .comment-actions .btn[onclick*="editComment"],
+  .comment-actions .btn[onclick*="deleteComment"] {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+  }
+
+  /* Target the actual classes used by JavaScript for very small screens */
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Override global btn-sm styles for comment buttons on very small screens */
+  .comment-actions .btn.btn-sm {
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+  }
+
+  /* Target btn-group buttons specifically for very small screens */
+  .btn-group.btn-group-sm .btn.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+  }
+
+  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity for very small screens */
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
+  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Target any Bootstrap button in comment actions for very small screens */
+  .comment-actions .btn,
+  .comment-actions .btn.btn-sm,
+  .comment-actions .btn.btn-outline-primary,
+  .comment-actions .btn.btn-outline-danger {
+    max-width: 32px !important;
+    min-width: 32px !important;
+    width: 32px !important;
+    padding: 0.2rem !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    box-sizing: border-box !important;
+  }
+
+  .comment-actions .btn[onclick*="likeComment"] {
+    max-width: 35px !important;
+  }
+
+  /* Even more compact on very small screens */
+  .comment-actions {
+    gap: 0.25rem !important;
+    max-width: 70px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+  }
+
+  /* Give more space to comment content on very small screens */
+  .comment-content {
+    margin-right: 0.4rem !important;
+    flex-grow: 1 !important;
+  }
+
+  /* Override Bootstrap's justify-content-between for very small screens */
+  .d-flex.justify-content-between.align-items-start {
+    justify-content: flex-start !important;
+    gap: 0.4rem !important;
+  }
+
+  /* Force comment content to take most of the space on very small screens */
+  .d-flex.justify-content-between.align-items-start > *:first-child {
+    flex: 1 !important;
+    flex-grow: 1 !important;
+    margin-right: 0.4rem !important;
+  }
+
+  /* Force buttons to take minimal space on very small screens */
+  .d-flex.justify-content-between.align-items-start > *:last-child {
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    max-width: 70px !important;
+    width: auto !important;
+  }
+}
+
+/* ========================================
+   COMMENT LAYOUT OPTIMIZATION
+   ======================================== */
+.comment-item {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0; /* Allow content to shrink */
+}
+
+.comment-header {
+  margin-bottom: 0.25rem;
+}
+
+.comment-text {
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+/* Ensure comment actions don't expand beyond content */
+.comment-actions {
+  flex-shrink: 0;
+  max-width: 250px; /* Base max width for larger screens */
+}
+
+/* Mobile-specific comment layout */
+@media (max-width: 767px) {
+  .comment-item {
+    padding: 0.5rem 0;
+  }
+
+  .comment-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .comment-actions {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 375px) {
+  .comment-actions {
+    max-width: 150px;
+  }
+}
+
+/* ========================================
+   ADDITIONAL MOBILE OPTIMIZATIONS
+   ======================================== */
+@media (max-width: 767px) {
+  /* Ensure buttons don't overflow on mobile */
+  .comment-actions .btn {
+    box-sizing: border-box !important;
+    max-width: 60px !important;
+    min-width: 32px !important;
+  }
+
+  /* Prevent text overflow in buttons */
+  .comment-actions .btn i {
+    font-size: 0.875rem !important;
+  }
+
+  /* Optimize touch targets */
+  .comment-actions .btn {
+    min-height: 44px !important; /* iOS recommended touch target */
+    padding: 0.5rem !important;
+  }
+
+  /* Ensure proper spacing between buttons */
+  .comment-actions {
+    gap: 0.375rem !important;
+  }
+}
+
+/* ========================================
+   EXTRA SMALL SCREEN OPTIMIZATIONS
+   ======================================== */
+@media (max-width: 320px) {
+  .comment-actions .btn {
+    max-width: 40px !important;
+    min-width: 28px !important;
+    padding: 0.375rem !important;
+  }
+
+  .comment-actions {
+    gap: 0.25rem !important;
+    max-width: 120px !important;
+  }
+
+  .comment-actions .btn i {
+    font-size: 0.75rem !important;
+  }
+}

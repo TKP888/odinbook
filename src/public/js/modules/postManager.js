@@ -73,11 +73,23 @@ class PostManager {
 
       // Update character count color
       if (charCount > 900) {
-        charCountElement.style.color = "#dc3545";
+        charCountElement.classList.remove(
+          "char-counter-warning",
+          "char-counter-normal"
+        );
+        charCountElement.classList.add("char-counter-danger");
       } else if (charCount > 800) {
-        charCountElement.style.color = "#ffc107";
+        charCountElement.classList.remove(
+          "char-counter-danger",
+          "char-counter-normal"
+        );
+        charCountElement.classList.add("char-counter-warning");
       } else {
-        charCountElement.style.color = "#6c757d";
+        charCountElement.classList.remove(
+          "char-counter-danger",
+          "char-counter-warning"
+        );
+        charCountElement.classList.add("char-counter-normal");
       }
     }
   }
@@ -189,9 +201,7 @@ class PostManager {
           <span class="comment-count">${post.comments.length}</span>
         </button>
       </div>
-      <div class="comments-section" id="comments-${
-        post.id
-      }" style="display: none;">
+      <div class="comments-section" id="comments-${post.id}" class="hidden">
         <div class="comments-list" id="commentsList-${post.id}">
           ${this.renderComments(post.comments)}
         </div>
@@ -248,7 +258,8 @@ class PostManager {
 
   updateLoadMoreButton() {
     if (this.loadMoreBtn) {
-      this.loadMoreBtn.style.display = this.hasNextPage ? "block" : "none";
+      this.loadMoreBtn.classList.toggle("display-block", this.hasNextPage);
+      this.loadMoreBtn.classList.toggle("display-none", !this.hasNextPage);
     }
   }
 
@@ -413,8 +424,10 @@ class PostManager {
   toggleComments(postId) {
     const commentsSection = document.getElementById(`comments-${postId}`);
     if (commentsSection) {
-      commentsSection.style.display =
-        commentsSection.style.display === "none" ? "block" : "none";
+      commentsSection.classList.toggle(
+        "display-block",
+        commentsSection.classList.contains("display-none")
+      );
     }
   }
 

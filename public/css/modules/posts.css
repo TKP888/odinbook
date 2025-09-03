@@ -1,0 +1,229 @@
+/* ========================================
+   ODINBOOK POST STYLES
+   Post components, actions, and interactions
+   ======================================== */
+
+/* ========================================
+   POST STYLES
+   ======================================== */
+.post {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--medium-gray);
+}
+
+.post-header {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--light-gray);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.post-author {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.post-time {
+  color: var(--medium-gray);
+  font-size: var(--font-size-sm);
+}
+
+.post-content {
+  padding: var(--spacing-md);
+}
+
+.post-text {
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.6;
+}
+
+.post-image {
+  width: 100%;
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.post-actions {
+  /* padding: var(--spacing-md) var(--spacing-lg); */
+  border-top: 1px solid var(--light-gray);
+  gap: var(--spacing-lg);
+}
+
+.post-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--medium-gray);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.post-action:hover {
+  color: var(--primary-color);
+}
+
+.post-action.active {
+  color: var(--primary-color);
+}
+
+/* ========================================
+   POST CREATION FORM STYLES
+   ======================================== */
+
+/* Remove margin-bottom from post creation button row */
+.post-create-component .d-flex.align-items-center.justify-content-between.mb-3,
+.post-create-component .d-flex.align-items-center.justify-content-end.mb-3,
+.d-flex.align-items-center.justify-content-between.mb-3 {
+  margin-bottom: 0 !important;
+}
+
+#inlineCreatePostForm .form-control {
+  border: 1px solid var(--medium-gray);
+  border-radius: var(--border-radius-md);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#inlineCreatePostForm .form-control:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#inlineCreatePostForm .btn {
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+}
+
+#inlineCreatePostForm .btn-outline-secondary:hover {
+  background: var(--secondary-color);
+  color: var(--white);
+  text-decoration: none;
+}
+
+#inlineCreatePostForm .btn-outline-danger:hover {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+/* ========================================
+   COMMENT STYLES
+   ======================================== */
+.comment-item {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0; /* Allow content to shrink */
+}
+
+.comment-header {
+  margin-bottom: 0.25rem;
+}
+
+.comment-text {
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+/* Ensure comment actions don't expand beyond content */
+.comment-actions {
+  flex-shrink: 0;
+  max-width: 250px; /* Base max width for larger screens */
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.comment-actions .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.comment-actions .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit comment button */
+.comment-actions .btn[onclick*="editComment"] {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.comment-actions .btn[onclick*="editComment"]:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Delete comment button */
+.comment-actions .btn[onclick*="deleteComment"] {
+  background-color: white;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+}
+
+.comment-actions .btn[onclick*="deleteComment"]:hover {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Like comment button */
+.comment-actions .btn[onclick*="likeComment"] {
+  background-color: transparent;
+  color: var(--dark-gray);
+  border: none;
+}
+
+.comment-actions .btn[onclick*="likeComment"]:hover {
+  color: var(--primary-color);
+}
+
+/* ========================================
+   FRIEND ACTION STYLES
+   ======================================== */
+.friend-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.friend-actions .btn {
+  flex-shrink: 0;
+}
+
+/* ========================================
+   CLICKABLE USER CARD STYLES
+   ======================================== */
+.clickable-user-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.clickable-user-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--blue);
+}
+
+.clickable-user-card:active {
+  transform: translateY(0);
+}

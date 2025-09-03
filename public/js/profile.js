@@ -31,6 +31,27 @@ let currentPage = 1;
 let hasNextPage = true;
 let isLoading = false;
 
+// Helper function to update character counter colors
+function updateCharCounterColor(
+  element,
+  charCount,
+  dangerLimit = 900,
+  warningLimit = 800
+) {
+  element.classList.remove(
+    "char-counter-danger",
+    "char-counter-warning",
+    "char-counter-normal"
+  );
+  if (charCount > dangerLimit) {
+    element.classList.add("char-counter-danger");
+  } else if (charCount > warningLimit) {
+    element.classList.add("char-counter-warning");
+  } else {
+    element.classList.add("char-counter-normal");
+  }
+}
+
 // Function to send friend request from profile page
 function sendFriendRequest(userId, userName = "") {
   console.log(
@@ -131,7 +152,7 @@ function getUserAvatar(user) {
     const email = user.email.toLowerCase().trim();
     const hash = CryptoJS.MD5(email).toString();
     const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=200&d=identicon&r=pg`;
-    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover">`;
   }
   // If user has a profile picture (including Gravatar URLs), use it
   else if (
@@ -141,7 +162,7 @@ function getUserAvatar(user) {
       user.profilePicture.includes("cloudinary.com") ||
       user.profilePicture.includes("gravatar.com"))
   ) {
-    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image avatar-cover">`;
   } else {
     // Fallback to initials
     return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
@@ -395,13 +416,12 @@ function editPost(postId) {
 
           // Reset character count color
           const charCountElement = document.getElementById("editCharCount");
-          if (data.post.content.length > 250) {
-            charCountElement.style.color = "#dc3545";
-          } else if (data.post.content.length > 200) {
-            charCountElement.style.color = "#ffc107";
-          } else {
-            charCountElement.style.color = "#6c757d";
-          }
+          updateCharCounterColor(
+            charCountElement,
+            data.post.content.length,
+            250,
+            200
+          );
 
           // Show the edit modal
           editPostModal.show();
@@ -891,7 +911,7 @@ function displayPosts(posts) {
       (post) => `
 <div class="post-item mb-4 p-3 border rounded" data-post-id="${post.id}">
   <div class="d-flex align-items-start mb-3">
-    <div class="user-avatar-small me-3" style="width: 40px; height: 40px; font-size: 1rem;">
+    <div class="user-avatar-small me-3 avatar-medium">
       ${getUserAvatar(post.user)}
     </div>
     <div class="flex-grow-1">
@@ -1002,9 +1022,9 @@ function displayPosts(posts) {
       </div>
       <!-- Counters - Hidden since they are in buttons -->
       <div class="text-muted small d-none">
-        <span class="likes-count" id="likes-${
+        <span class="likes-count cursor-pointer" id="likes-${
           post.id
-        }" onclick="showLikesModal('${post.id}')" style="cursor: pointer;">${
+        }" onclick="showLikesModal('${post.id}')">${
         (post.likes && Array.isArray(post.likes) && post.likes.length) || 0
       } like${
         ((post.likes && Array.isArray(post.likes) && post.likes.length) ||
@@ -1012,9 +1032,9 @@ function displayPosts(posts) {
           ? "s"
           : ""
       }</span>
-        <span class="comments-count ms-2" id="comments-${
+        <span class="comments-count ms-2 cursor-pointer" id="comments-${
           post.id
-        }" onclick="toggleComments('${post.id}')" style="cursor: pointer;">${
+        }" onclick="toggleComments('${post.id}')">${
         (post.comments &&
           Array.isArray(post.comments) &&
           post.comments.length) ||
@@ -1043,7 +1063,7 @@ function displayPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2 avatar-small">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -2055,13 +2075,7 @@ function editComment(commentId, postId, currentContent) {
 
   // Reset character count color
   const charCountElement = document.getElementById("editCommentCharCount");
-  if (currentContent.length > 200) {
-    charCountElement.style.color = "#dc3545";
-  } else if (currentContent.length > 150) {
-    charCountElement.style.color = "#ffc107";
-  } else {
-    charCountElement.style.color = "#6c757d";
-  }
+  updateCharCounterColor(charCountElement, currentContent.length, 200, 150);
 
   editCommentModal.show();
 }
@@ -2970,7 +2984,7 @@ function handleProfilePictureUpload(event) {
   const profilePicture = document.getElementById("profilePicture");
   const originalContent = profilePicture.innerHTML;
   profilePicture.innerHTML =
-    '<i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>';
+    '<i class="fas fa-spinner fa-spin loading-spinner-large"></i>';
 
   // Upload the image
   fetch("/profile/upload-picture", {

@@ -53,21 +53,21 @@
       <div class="tab-content" id="userTabsContent">
         <!-- All Users Tab -->
         <div class="tab-pane fade show active" id="all" role="tabpanel">
-          <div id="allUsersList" class="row">
+          <div id="allUsersList" class="user-card-grid row">
             <!-- Users will be loaded here -->
           </div>
         </div>
 
         <!-- Friends Tab -->
         <div class="tab-pane fade" id="friends" role="tabpanel">
-          <div id="friendsList" class="row">
+          <div id="friendsList" class="user-card-grid row">
             <!-- Friends will be loaded here -->
           </div>
         </div>
 
         <!-- Sent Requests Tab -->
         <div class="tab-pane fade" id="requests" role="tabpanel">
-          <div id="requestsList" class="row">
+          <div id="requestsList" class="user-card-grid row">
             <!-- Sent requests will be loaded here -->
           </div>
           <div id="noRequests" class="text-center text-muted d-none">
@@ -199,9 +199,9 @@
           .map(
             (user) => `
         <div class="col-md-6 col-lg-4 mb-4">
-          <div class="user-card" onclick="viewUserProfile('${
+          <div class="user-card cursor-pointer" onclick="viewUserProfile('${
             user.id
-          }')" style="cursor: pointer;">
+          }')">
             <div class="d-flex align-items-center">
               <div class="user-avatar" data-initials="${getUserInitials(user)}">
                 ${getUserAvatar(user)}
@@ -593,14 +593,13 @@
 
   <!-- Cancel Friend Request Confirmation Modal -->
   <div
-    class="modal fade"
+    class="modal fade modal-high-priority"
     id="cancelRequestModal"
     tabindex="-1"
     aria-labelledby="cancelRequestModalLabel"
     aria-hidden="true"
-    style="z-index: 9999"
   >
-    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+    <div class="modal-dialog modal-dialog-centered modal-centered-top">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="cancelRequestModalLabel">
@@ -645,14 +644,13 @@
 
   <!-- Remove Friend Confirmation Modal -->
   <div
-    class="modal fade"
+    class="modal fade modal-high-priority"
     id="removeFriendModal"
     tabindex="-1"
     aria-labelledby="removeFriendModalLabel"
     aria-hidden="true"
-    style="z-index: 9999"
   >
-    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+    <div class="modal-dialog modal-dialog-centered modal-centered-top">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="removeFriendModalLabel">
@@ -698,14 +696,13 @@
 
   <!-- Accept Friend Request Confirmation Modal -->
   <div
-    class="modal fade"
+    class="modal fade modal-high-priority"
     id="acceptRequestModal"
     tabindex="-1"
     aria-labelledby="acceptRequestModalLabel"
     aria-hidden="true"
-    style="z-index: 9999"
   >
-    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+    <div class="modal-dialog modal-dialog-centered modal-centered-top">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="acceptRequestModalLabel">
@@ -751,14 +748,13 @@
 
   <!-- Decline Friend Request Confirmation Modal -->
   <div
-    class="modal fade"
+    class="modal fade modal-high-priority"
     id="declineRequestModal"
     tabindex="-1"
     aria-labelledby="declineRequestModalLabel"
     aria-hidden="true"
-    style="z-index: 9999"
   >
-    <div class="modal-dialog modal-dialog-centered" style="margin-top: 10vh">
+    <div class="modal-dialog modal-dialog-centered modal-centered-top">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="declineRequestModalLabel">

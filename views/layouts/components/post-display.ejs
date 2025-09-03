@@ -72,8 +72,7 @@ compact: false }) %>
       <img
         src="<%= post.photoUrl %>"
         alt="Post photo"
-        class="img-fluid rounded"
-        style="max-height: 400px; width: 100%; object-fit: cover"
+        class="img-fluid rounded post-photo-modal"
       />
     </div>
     <% } %>
@@ -120,7 +119,7 @@ compact: false }) %>
         class="comment-item p-3 border-bottom"
         data-comment-id="<%= comment.id %>"
       >
-        <div class="d-flex">
+        <div class="d-flex justify-content-between align-items-start">
           <div class="user-avatar me-2">
             <%- include('../../partials/user-avatar', { user: comment.user,
             size: 'small' }) %>

@@ -69,11 +69,7 @@ maxLength: 250, showPhotoUpload: true, showCharCount: true, onSubmit:
         </button>
 
         <!-- Photo Preview and Remove -->
-        <div
-          class="photo-preview-container"
-          id="photoPreviewContainer"
-          style="display: none"
-        >
+        <div class="photo-preview-container hidden" id="photoPreviewContainer">
           <div class="photo-preview">
             <img id="photoPreview" src="" alt="Preview" />
             <button
@@ -115,7 +111,7 @@ maxLength: 250, showPhotoUpload: true, showCharCount: true, onSubmit:
 </div>
 
 <!-- Loading Overlay -->
-<div class="post-loading-overlay" id="postLoadingOverlay" style="display: none">
+<div class="post-loading-overlay hidden" id="postLoadingOverlay">
   <div class="loading-spinner">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Posting...</span>

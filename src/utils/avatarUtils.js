@@ -37,13 +37,10 @@ class AvatarUtils {
     const avatarUrl = this.getUserAvatar(user, size);
 
     if (avatarUrl) {
-      return `<img src="${avatarUrl}" alt="Profile Picture" class="${className}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+      return `<img src="${avatarUrl}" alt="Profile Picture" class="${className} avatar-cover">`;
     } else {
       const initials = this.getUserInitials(user);
-      return `<div class="${className} initials-avatar" style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: ${Math.max(
-        12,
-        size * 0.3
-      )}px;">${initials}</div>`;
+      return `<div class="${className} initials-avatar avatar-initials">${initials}</div>`;
     }
   }
 
