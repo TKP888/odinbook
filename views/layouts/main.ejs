@@ -17,14 +17,11 @@
       rel="stylesheet"
     />
     <link href="/css/main.css" rel="stylesheet" />
-    <link href="/css/header.css" rel="stylesheet" />
-    <% if (typeof activePage !== 'undefined' && activePage === 'users') { %>
-    <link href="/css/users-page.css" rel="stylesheet" />
-    <% } %>
     <link href="/css/components.css" rel="stylesheet" />
     <% if (typeof activePage !== 'undefined' && activePage === 'profile') { %>
     <link href="/css/profile-header-override.css" rel="stylesheet" />
     <% } %>
+    <link href="/css/header.css" rel="stylesheet" />
   </head>
   <body
     class="<%= typeof activePage !== 'undefined' && activePage === 'users' ? 'users-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? ' dashboard-page' : '' %><%= typeof activePage !== 'undefined' && activePage === 'profile' ? ' profile-page' : '' %>"

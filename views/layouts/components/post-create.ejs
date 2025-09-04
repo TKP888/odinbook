@@ -1,6 +1,6 @@
 <%# Post Create Component - Usage: include('layouts/components/post-create', {
 user: user, formId: 'inlineCreatePostForm', textareaId: 'inlinePostContent',
-photoId: 'postPhoto', buttonId: 'inlineCreatePostBtn', charCountId:
+photoId: 'inlinePostPhoto', buttonId: 'inlineCreatePostBtn', charCountId:
 'inlineCharCount', placeholder: 'What\'s on your mind, ' + (user &&
 user.firstName ? user.firstName : 'Guest') + '?', maxLength: 250,
 showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
@@ -32,7 +32,7 @@ showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
               id="<%= photoId %>"
               name="photo"
               accept="image/*"
-              class="form-control form-control-sm hidden"
+              class="form-control form-control-sm hidden-input"
             />
             <button
               type="button"
@@ -45,7 +45,7 @@ showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
             <button
               type="button"
               id="removePhotoBtn"
-              class="btn btn-outline-danger btn-sm hidden"
+              class="btn btn-outline-danger btn-sm hidden-button"
               onclick="removePhoto()"
             >
               <i class="fas fa-times me-1"></i> Remove

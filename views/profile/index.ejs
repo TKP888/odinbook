@@ -8,74 +8,88 @@
     <!-- Profile Header -->
     <div class="col-12 mb-4">
       <div class="card profile-header-main">
-        <div class="card-body text-center py-5">
-          <div class="profile-avatar mb-4">
-            <div class="profile-picture-container">
-              <%- include('../partials/user-avatar', { 
-                user: (typeof profileUser !== 'undefined') ? profileUser : user, 
-                size: 'large',
-                id: 'profilePicture',
-                showOverlay: (typeof profileUser === 'undefined')
-              }) %>
+        <div class="card-body">
+          <div class="profile-header-flex">
+            <!-- Avatar Container -->
+            <div class="profile-avatar-container">
+              <div class="profile-avatar">
+                <div class="profile-picture-container">
+                  <%- include('../partials/user-avatar', { 
+                    user: (typeof profileUser !== 'undefined') ? profileUser : user, 
+                    size: 'large',
+                    id: 'profilePicture',
+                    showOverlay: (typeof profileUser === 'undefined')
+                  }) %>
+                  <% if (typeof profileUser === 'undefined') { %>
+                    <input type="file" id="profilePictureInput" accept="image/*" class="hidden-input">
+                  <% } %>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Name and Username Container -->
+            <div class="profile-info-container">
+              <h1 class="profile-name">
+                <% if (typeof profileUser !== 'undefined') { %>
+                  <%= profileUser.firstName %> <%= profileUser.lastName %>
+                <% } else { %>
+                  <%= user.firstName %> <%= user.lastName %>
+                <% } %>
+              </h1>
+              <p class="profile-username">
+                @<% if (typeof profileUser !== 'undefined') { %><%= profileUser.username %><% } else { %><%= user.username %><% } %>
+              </p>
+            </div>
+            
+            <!-- Button Container -->
+            <div class="profile-actions-container">
               <% if (typeof profileUser === 'undefined') { %>
-                <input type="file" id="profilePictureInput" accept="image/*" class="hidden-input">
+                <!-- Current user's profile - show edit button -->
+                <button class="btn btn-primary btn-lg" onclick="openEditProfileModal()">
+                  <i class="fas fa-edit me-2"></i>Edit Profile
+                </button>
+              <% } else { %>
+                <!-- Other user's profile - show friend actions -->
+                <% if (isFriend) { %>
+                  <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-success btn-lg" disabled>
+                      <i class="fas fa-user-check me-2"></i> Friends
+                    </button>
+                    <button
+                      class="btn btn-outline-danger btn-lg"
+                      onclick="removeFriend('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')"
+                    >
+                      <i class="fas fa-user-minus me-2"></i> Unfriend
+                    </button>
+                  </div>
+                <% } else if (pendingRequest) { %>
+                  <% if (pendingRequest.senderId === user.id) { %>
+                    <div class="d-flex flex-column gap-2">
+                      <button class="btn btn-secondary btn-lg" disabled>
+                        <i class="fas fa-clock me-2"></i> Request Sent
+                      </button>
+                      <button class="btn btn-outline-danger btn-lg" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                        <i class="fas fa-times me-2"></i> Cancel Request
+                      </button>
+                    </div>
+                  <% } else { %>
+                    <div class="btn-group-vertical btn-group-lg" role="group">
+                      <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
+                        <i class="fas fa-check me-2"></i> Accept
+                      </button>
+                      <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
+                        <i class="fas fa-times me-2"></i> Decline
+                      </button>
+                    </div>
+                  <% } %>
+                <% } else { %>
+                  <button class="btn btn-primary btn-lg" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                    <i class="fas fa-user-plus me-2"></i> Add Friend
+                  </button>
+                <% } %>
               <% } %>
             </div>
           </div>
-          <h1 class="profile-name mb-2">
-            <% if (typeof profileUser !== 'undefined') { %>
-              <%= profileUser.firstName %> <%= profileUser.lastName %>
-            <% } else { %>
-              <%= user.firstName %> <%= user.lastName %>
-            <% } %>
-          </h1>
-          <p class="profile-username mb-4">
-            @<% if (typeof profileUser !== 'undefined') { %><%= profileUser.username %><% } else { %><%= user.username %><% } %>
-          </p>
-          
-          <% if (typeof profileUser === 'undefined') { %>
-            <!-- Current user's profile - show edit button -->
-            <button class="btn btn-primary btn-lg" onclick="openEditProfileModal()">
-              <i class="fas fa-edit me-2"></i>Edit Profile
-            </button>
-          <% } else { %>
-            <!-- Other user's profile - show friend actions -->
-            <% if (isFriend) { %>
-              <button class="btn btn-success btn-lg me-2" disabled>
-                <i class="fas fa-user-check me-2"></i> Friends
-              </button>
-              <button
-                class="btn btn-outline-danger btn-lg"
-                onclick="removeFriend('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')"
-              >
-                <i class="fas fa-user-minus me-2"></i> Unfriend
-              </button>
-            <% } else if (pendingRequest) { %>
-              <% if (pendingRequest.senderId === user.id) { %>
-                <div class="d-flex gap-3 justify-content-center">
-                  <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="fas fa-clock me-2"></i> Request Sent
-                  </button>
-                  <button class="btn btn-outline-danger btn-lg" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
-                    <i class="fas fa-times me-2"></i> Cancel Request
-                  </button>
-                </div>
-              <% } else { %>
-                <div class="btn-group btn-group-lg" role="group">
-                  <button class="btn btn-success" onclick="acceptRequest('<%= pendingRequest.id %>')">
-                    <i class="fas fa-check me-2"></i> Accept
-                  </button>
-                  <button class="btn btn-outline-secondary" onclick="declineRequest('<%= pendingRequest.id %>')">
-                    <i class="fas fa-times me-2"></i> Decline
-                  </button>
-                </div>
-              <% } %>
-            <% } else { %>
-              <button class="btn btn-primary btn-lg" onclick="sendFriendRequest('<%= profileUser.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
-                <i class="fas fa-user-plus me-2"></i> Add Friend
-              </button>
-            <% } %>
-          <% } %>
         </div>
       </div>
     </div>
@@ -262,7 +276,7 @@
               <% } else { %>
               <div class="friends-list">
                 <% friends.slice(0, 5).forEach(friend => { %>
-                <div class="friend-item d-flex align-items-center mb-3 p-3 border rounded">
+                <div class="profile-friend-item d-flex align-items-center mb-3 p-3 border rounded">
                   <div class="user-avatar-small me-3">
                     <% if (friend.useGravatar && friend.email) { %>
                       <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
@@ -325,7 +339,7 @@
               </div>
               <div class="card-body">
         <div class="d-flex align-items-start">
-          <div class="user-avatar-small me-3 flex-shrink-0">
+          <div class="user-avatar-large me-3 flex-shrink-0">
             <% if (user.useGravatar && user.email) { %>
               <img src="<%= getGravatarUrl(user.email, 200) %>" alt="Profile Picture" class="profile-image">
             <% } else if (user.profilePicture && (user.profilePicture.startsWith('http') || user.profilePicture.startsWith('/uploads/') || user.profilePicture.includes('cloudinary.com'))) { %>
@@ -660,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
   aria-labelledby="createPostModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="createPostModalLabel">
@@ -747,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
   aria-labelledby="editPostModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
@@ -834,7 +848,7 @@ document.addEventListener('DOMContentLoaded', function() {
   aria-labelledby="editProfileModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
@@ -951,7 +965,7 @@ document.addEventListener('DOMContentLoaded', function() {
   aria-labelledby="viewAllFriendsModalLabel"
   aria-hidden="true"
 >
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="viewAllFriendsModalLabel">
@@ -975,40 +989,34 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
           </div>
         <% } else { %>
-          <div class="row">
+          <div class="friends-list-modal">
             <% friends.forEach(friend => { %>
-              <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                  <div class="card-body">
-                    <div class="d-flex align-items-center">
-                      <div class="user-avatar-small me-3">
-                        <% if (friend.useGravatar && friend.email) { %>
-                          <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
-                        <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
-                          <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
-                        <% } else { %>
-                          <%= (friend.firstName || '').charAt(0) %><%= (friend.lastName || '').charAt(0) %>
-                        <% } %>
-                      </div>
-                      <div class="flex-grow-1">
-                        <h6 class="mb-1">
-                          <a href="/profile/<%= friend.id %>" class="text-decoration-none">
-                            <%= friend.firstName || '' %> <%= friend.lastName || '' %>
-                          </a>
-                        </h6>
-                        <p class="text-muted mb-0 small">@<%= friend.username %></p>
-                      </div>
-                      <button
-                        class="btn btn-outline-danger btn-sm remove-friend-btn"
-                        data-friend-id="<%= friend.id %>"
-                        data-friend-name="<%= friend.firstName || 'No First Name' %> <%= friend.lastName || 'No Last Name' %>"
-                        title="Unfriend"
-                      >
-                        <i class="fas fa-user-minus"></i>
-                      </button>
-                    </div>
-                  </div>
+              <div class="friend-item-modal">
+                <div class="friend-avatar-modal">
+                  <% if (friend.useGravatar && friend.email) { %>
+                    <img src="<%= getGravatarUrl(friend.email, 200) %>" alt="Profile Picture" class="profile-image">
+                  <% } else if (friend.profilePicture && (friend.profilePicture.startsWith('http') || friend.profilePicture.startsWith('/uploads/') || friend.profilePicture.includes('cloudinary.com'))) { %>
+                    <img src="<%= friend.profilePicture %>" alt="Profile Picture" class="profile-image">
+                  <% } else { %>
+                    <%= (friend.firstName || '').charAt(0) %><%= (friend.lastName || '').charAt(0) %>
+                  <% } %>
                 </div>
+                <div class="friend-info-modal">
+                  <h6 class="friend-name-modal">
+                    <a href="/profile/<%= friend.id %>" class="text-decoration-none">
+                      <%= friend.firstName || '' %> <%= friend.lastName || '' %>
+                    </a>
+                  </h6>
+                  <p class="friend-username-modal">@<%= friend.username %></p>
+                </div>
+                <button
+                  class="btn btn-outline-danger btn-sm remove-friend-btn-modal"
+                  data-friend-id="<%= friend.id %>"
+                  data-friend-name="<%= friend.firstName || 'No First Name' %> <%= friend.lastName || 'No Last Name' %>"
+                  title="Unfriend"
+                >
+                  <i class="fas fa-user-minus"></i>
+                </button>
               </div>
             <% }); %>
           </div>

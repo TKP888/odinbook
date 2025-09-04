@@ -600,7 +600,7 @@ function toggleLike(postId) {
           // Like the post
           likeButton.classList.remove("btn-outline-primary");
           likeButton.classList.add("liked");
-          icon.style.color = "red";
+          icon.style.color = "#dc2626";
 
           // Update the like count in the button
           const likeCount = likeButton.querySelector(".like-count");
@@ -621,7 +621,7 @@ function toggleLike(postId) {
           // Unlike the post
           likeButton.classList.remove("liked");
           likeButton.classList.add("btn-outline-primary");
-          icon.style.color = "";
+          icon.style.color = "white";
 
           // Update the like count in the button
           const likeCount = likeButton.querySelector(".like-count");
@@ -944,16 +944,20 @@ function displayPosts(posts) {
           post.user.id === currentUserId
             ? `
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <button class="btn btn-link btn-sm text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Post options">
               <i class="fas fa-ellipsis-h"></i>
             </button>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#" onclick="editPost('${post.id}')">
-              Edit
-              </a></li>
-              <li><a class="dropdown-item text-danger" href="#" onclick="deletePost('${post.id}')">
-                Delete
-              </a></li>
+            <ul class="dropdown-menu dropdown-menu-end" role="menu">
+              <li role="none">
+                <button class="dropdown-item" role="menuitem" onclick="editPost('${post.id}')">
+                  <i class="fas fa-edit me-2"></i>Edit
+                </button>
+              </li>
+              <li role="none">
+                <button class="dropdown-item text-danger" role="menuitem" onclick="deletePost('${post.id}')">
+                  <i class="fas fa-trash me-2"></i>Delete
+                </button>
+              </li>
             </ul>
           </div>
         `

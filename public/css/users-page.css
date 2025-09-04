@@ -3,22 +3,110 @@
    ======================================== */
 
 /* ========================================
-   IMPORTANT: EXCLUDE HEADER SEARCH FROM USERS PAGE STYLES
+   HEADER SEARCH PROTECTION - Ensure header search is not affected
    ======================================== */
-/* Ensure header search functionality is not affected by users page styles */
-.main-header .search-container,
-.main-header .search-results-dropdown,
-.main-header .search-result-item,
-.main-header .search-result-item .user-avatar-small,
-.main-header .search-result-item .btn,
-.main-header .search-result-item .fw-bold,
-.main-header .search-result-item .text-muted.small {
-  /* These elements should use header/search.css styles, not users-page.css */
-  all: revert;
+/* Override any users page styles that might affect header search */
+.users-page .main-header .search-results-dropdown,
+.users-page .main-header .search-result-item,
+.users-page .main-header .search-result-item * {
+  all: revert !important;
+}
+
+/* Re-apply header search specific styles */
+.users-page .main-header .search-results-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 1000 !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  margin-top: 4px !important;
+  padding: 0.5rem !important;
+  display: block !important;
+}
+
+.users-page .main-header .search-result-item {
+  border-bottom: 1px solid #f0f0f0 !important;
+  transition: background-color 0.2s !important;
+  padding: 0.5rem !important;
+}
+
+.users-page .main-header .search-result-item:hover {
+  background-color: #f8f9fa !important;
+}
+
+.users-page .main-header .search-result-item:last-child {
+  border-bottom: none !important;
+}
+
+.users-page .main-header .search-result-item .user-avatar-small {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #311555, #764ba2) !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.9rem !important;
+  font-weight: bold !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+.users-page .main-header .search-result-item .user-avatar-small img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+.users-page .main-header .search-result-item .btn {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  min-height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.users-page .main-header .search-result-item .fw-bold {
+  font-weight: 600 !important;
+  color: #212529 !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.2 !important;
+}
+
+.users-page .main-header .search-result-item .text-muted.small {
+  color: #6c757d !important;
+  font-size: 0.875rem !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.users-page .main-header .search-result-item * {
+  box-sizing: border-box !important;
+}
+
+.users-page .main-header .search-result-item .d-flex {
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.users-page .main-header .search-result-item .flex-grow-1 {
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
 /* ========================================
-   PAGE LAYOUT & STRUCTURE
+   PAGE LAYOUT & STRUCTURE - Only affect page content, not header
    ======================================== */
 
 /* Body padding for fixed header - now handled by main layout */

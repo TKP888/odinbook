@@ -150,6 +150,112 @@
 }
 
 /* ========================================
+   SEARCH RESULTS DROPDOWN
+   ======================================== */
+.main-header .search-results-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 0.5rem !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 1000 !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  margin-top: 4px !important;
+  display: block !important; /* Force display when visible */
+}
+
+/* Override any conflicting dropdown display rules */
+.main-header .search-results-dropdown.d-none {
+  display: none !important;
+}
+
+.main-header .search-results-dropdown:not(.d-none) {
+  display: block !important;
+}
+
+/* Header search specific result item styling */
+.main-header .search-result-item {
+  border-bottom: 1px solid #f0f0f0 !important;
+  transition: background-color 0.2s !important;
+  padding: 0.5rem !important;
+}
+
+.main-header .search-result-item:hover {
+  background-color: #f8f9fa !important;
+}
+
+.main-header .search-result-item:last-child {
+  border-bottom: none !important;
+}
+
+.main-header .search-result-item .user-avatar-small {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #311555, #764ba2) !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.9rem !important;
+  font-weight: bold !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+.main-header .search-result-item .user-avatar-small img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+.main-header .search-result-item .btn {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+  min-height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.main-header .search-result-item .fw-bold {
+  font-weight: 600 !important;
+  color: #212529 !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.2 !important;
+}
+
+.main-header .search-result-item .text-muted.small {
+  color: #6c757d !important;
+  font-size: 0.875rem !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Ensure search result items don't inherit other styles */
+.main-header .search-result-item * {
+  box-sizing: border-box !important;
+}
+
+.main-header .search-result-item .d-flex {
+  align-items: center !important;
+  gap: 0.75rem !important;
+}
+
+.main-header .search-result-item .flex-grow-1 {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* ========================================
    HEADER RIGHT SECTION
    ======================================== */
 .main-header .header-right {
@@ -517,11 +623,12 @@
 /* ========================================
    BOOTSTRAP DROPDOWN SUPPORT
    ======================================== */
-.main-header .dropdown-menu {
+/* General dropdown styles - but NOT for search results */
+.main-header .dropdown-menu:not(.search-results-dropdown) {
   display: none !important;
 }
 
-.main-header .dropdown-menu.show {
+.main-header .dropdown-menu.show:not(.search-results-dropdown) {
   display: block !important;
 }
 

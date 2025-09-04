@@ -143,13 +143,18 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
       <div class="mobile-user-avatar me-3">
         <%- include('user-avatar', { user: user, size: 'medium' }) %>
       </div>
-            <div class="mobile-user-info">
-        <div class="mobile-user-name"><%= user.firstName %> <%= user.lastName %></div>
-        <div class="mobile-user-handle">@<%= user.username %></div>
+      <div class="mobile-user-info">
+        <div class="mobile-user-name">
+          <%= user ? user.firstName : 'Guest' %> <%= user ? user.lastName :
+          'User' %>
+        </div>
+        <div class="mobile-user-handle">
+          @<%= user ? user.username : 'guest' %>
+        </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Mobile Search Bar -->
   <div class="mobile-menu-search">
     <div class="input-group">
@@ -179,7 +184,7 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
       </div>
     </div>
   </div>
-  
+
   <a
     href="/dashboard"
     class="mobile-menu-item <%= activePage === 'dashboard' ? 'active' : '' %>"
@@ -205,13 +210,19 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
   </a>
 
   <% if (showFriendRequests) { %>
-  <a href="/friends/users?tab=requests" class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'requests' ? 'active' : '' %>">
+  <a
+    href="/friends/users?tab=requests"
+    class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'requests' ? 'active' : '' %>"
+  >
     <i class="fas fa-user-plus"></i>
     Friend Requests
   </a>
   <% } %>
 
-  <a href="/friends/users?tab=friends" class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'friends' ? 'active' : '' %>">
+  <a
+    href="/friends/users?tab=friends"
+    class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'friends' ? 'active' : '' %>"
+  >
     <i class="fas fa-user-friends"></i>
     My Friends
   </a>

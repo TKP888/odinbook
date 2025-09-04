@@ -348,7 +348,7 @@ function openCreatePostModal() {
 
 function createInlinePost() {
   const content = document.getElementById("inlinePostContent").value.trim();
-  const photoFile = document.getElementById("postPhoto").files[0];
+  const photoFile = document.getElementById("inlinePostPhoto").files[0];
 
   // Allow posts with just photos (no text required)
   if (!content && !photoFile) {
@@ -1394,9 +1394,7 @@ function toggleLike(postId) {
   }
 
   const icon = likeButton.querySelector("i");
-  const isCurrentlyLiked = likeButton
-    .querySelector("i")
-    .classList.contains("text-danger");
+  const isCurrentlyLiked = likeButton.classList.contains("liked");
 
   fetch(`/posts/${postId}/like`, {
     method: "POST",
@@ -1409,8 +1407,8 @@ function toggleLike(postId) {
       if (data.success) {
         if (data.liked) {
           // Like the post
-          icon.classList.add("text-danger");
-          icon.style.color = "#dc3545";
+          likeButton.classList.add("liked");
+          icon.style.color = "#dc2626";
 
           // Update the like count
           const likeCount = likeButton.querySelector(".like-count");
@@ -1420,8 +1418,8 @@ function toggleLike(postId) {
           }
         } else {
           // Unlike the post
-          icon.classList.remove("text-danger");
-          icon.style.color = "";
+          likeButton.classList.remove("liked");
+          icon.style.color = "white";
 
           // Update the like count
           const likeCount = likeButton.querySelector(".like-count");
@@ -2056,7 +2054,7 @@ function showNotification(message, type = "info") {
 
 // Photo handling functions
 function handlePhotoSelection() {
-  const fileInput = document.getElementById("postPhoto");
+  const fileInput = document.getElementById("inlinePostPhoto");
   const fileName = document.getElementById("photoFileName");
   const removeBtn = document.getElementById("removePhotoBtn");
 
@@ -2086,7 +2084,7 @@ function handlePhotoSelection() {
 }
 
 function removePhoto() {
-  const fileInput = document.getElementById("postPhoto");
+  const fileInput = document.getElementById("inlinePostPhoto");
   const fileName = document.getElementById("photoFileName");
   const removeBtn = document.getElementById("removePhotoBtn");
 

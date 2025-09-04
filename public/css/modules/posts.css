@@ -47,32 +47,126 @@
   margin-bottom: var(--spacing-md);
 }
 
-.post-actions {
-  /* padding: var(--spacing-md) var(--spacing-lg); */
+/* Post actions container - HIGH SPECIFICITY TO OVERRIDE BOOTSTRAP */
+.post-actions,
+.post-actions.d-flex,
+.post-actions.d-flex.align-items-center,
+.post-actions.d-flex.align-items-center.justify-content-between {
   border-top: 1px solid var(--light-gray);
   gap: var(--spacing-lg);
+  padding: 1rem 0 0 0 !important; /* Add padding-top for separation */
+  margin: 0 !important;
 }
 
-.post-action {
+/* ========================================
+   POST ACTION BUTTONS
+   ======================================== */
+
+/* Base post action button styling */
+.post-actions .btn,
+.post-actions .d-flex.gap-2 .btn,
+.post-actions-bar .like-btn,
+.post-actions-bar .comment-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  color: var(--medium-gray);
-  cursor: pointer;
-  transition: color var(--transition-fast);
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  border: 1px solid #dee2e6;
+  background: #311555;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  min-height: 40px;
+  min-width: 80px;
+  max-width: 120px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
-.post-action:hover {
-  color: var(--primary-color);
+/* Post action button hover states */
+.post-actions .btn:hover,
+.post-actions .d-flex.gap-2 .btn:hover,
+.post-actions-bar .like-btn:hover,
+.post-actions-bar .comment-btn:hover {
+  background-color: #4a1f7a;
+  color: white;
+  border-color: #adb5bd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
-.post-action.active {
-  color: var(--primary-color);
+/* Post action button active states */
+.post-actions .btn:active,
+.post-actions .d-flex.gap-2 .btn:active,
+.post-actions-bar .like-btn:active,
+.post-actions-bar .comment-btn:active {
+  background-color: #2a0f3d;
+  color: white;
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Post action button icons */
+.post-actions .btn i,
+.post-actions .btn .fas,
+.post-actions .d-flex.gap-2 .btn i,
+.post-actions .d-flex.gap-2 .btn .fas,
+.post-actions-bar .like-btn i,
+.post-actions-bar .comment-btn i {
+  font-size: 1rem;
+  color: white;
+  display: block;
+  margin: 0;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Liked button state */
+.post-actions .btn.liked,
+.post-actions .d-flex.gap-2 .btn.liked,
+.post-actions-bar .like-btn.liked {
+  background-color: #311555;
+  color: white;
+}
+
+.post-actions .btn.liked i,
+.post-actions .d-flex.gap-2 .btn.liked i,
+.post-actions-bar .like-btn.liked i {
+  color: #dc2626;
+}
+
+/* Hide button text on mobile - keep only icons and counts */
+@media (max-width: 768px) {
+  .post-actions .btn span:not(.like-count):not(.comment-count),
+  .post-actions .btn .btn-text,
+  .post-actions .btn .comment-text,
+  .post-actions .d-flex.gap-2 .btn span:not(.like-count):not(.comment-count),
+  .post-actions .d-flex.gap-2 .btn .btn-text,
+  .post-actions .d-flex.gap-2 .btn .comment-text,
+  .post-actions-bar .like-btn span:not(.like-count),
+  .post-actions-bar .comment-btn span:not(.comment-count) {
+    display: none;
+  }
 }
 
 /* ========================================
    POST CREATION FORM STYLES
    ======================================== */
+
+/* Hidden input and button classes for file uploader */
+.hidden-input {
+  display: none;
+}
+
+.hidden-button {
+  display: none;
+}
 
 /* Remove margin-bottom from post creation button row */
 .post-create-component .d-flex.align-items-center.justify-content-between.mb-3,

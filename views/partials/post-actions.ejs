@@ -5,12 +5,12 @@ currentUser: user }) %>
   <div class="d-flex align-items-center">
     <!-- Like Button -->
     <button
-      class="btn btn-link text-muted me-3 post-action-btn"
+      class="btn btn-link text-muted me-3 post-action-btn <%= post.isLiked ? 'liked' : '' %>"
       onclick="toggleLike('<%= post.id %>')"
       data-post-id="<%= post.id %>"
       title="<%= post.isLiked ? 'Unlike' : 'Like' %>"
     >
-      <i class="fas fa-heart <%= post.isLiked ? 'text-danger' : '' %>"></i>
+      <i class="fas fa-heart"></i>
       <span class="like-count ms-1"><%= post.likesCount || 0 %></span>
     </button>
 
