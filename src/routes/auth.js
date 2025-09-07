@@ -47,9 +47,14 @@ router.post(
     body("lastName", "Last name is required").notEmpty(),
     body("email", "Please include a valid email").isEmail(),
     body("username", "Username is required").notEmpty(),
-    body("password", "Password must be 6 or more characters").isLength({
-      min: 6,
-    }),
+    body("password", "Password must be 6 or more characters")
+      .isLength({ min: 6 })
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/
+      )
+      .withMessage(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      ),
     body("password2", "Passwords do not match").custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new Error("Password confirmation does not match password");
@@ -125,19 +130,42 @@ router.post(
         location,
       } = req.body;
 
-      // Check if user already exists
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          OR: [{ email: email }, { username: username }],
-        },
+      // Check if email already exists
+      const existingEmail = await prisma.user.findUnique({
+        where: { email: email },
       });
 
-      if (existingUser) {
-        req.flash("error_msg", "User already exists");
+      if (existingEmail) {
         return res.render("auth/register", {
           title: "Register",
           layout: "layouts/auth",
           activePage: "register",
+          errors: [{ msg: "An account with this email already exists" }],
+          firstName,
+          lastName,
+          email,
+          username,
+          birthday: birthday || "",
+          gender: gender || "",
+          location: location || "",
+        });
+      }
+
+      // Check if username already exists
+      const existingUsername = await prisma.user.findUnique({
+        where: { username: username },
+      });
+
+      if (existingUsername) {
+        return res.render("auth/register", {
+          title: "Register",
+          layout: "layouts/auth",
+          activePage: "register",
+          errors: [
+            {
+              msg: "This username is already taken. Please choose another one.",
+            },
+          ],
           firstName,
           lastName,
           email,
@@ -223,6 +251,52 @@ router.post("/auth/guest-login", (req, res, next) => {
       res.redirect("/dashboard");
     });
   })(req, res, next);
+});
+
+// Check username availability
+router.get("/auth/check-username/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Basic validation
+    if (!username || username.length < 3 || username.length > 30) {
+      return res.json({
+        available: false,
+        message: "Username must be 3-30 characters",
+      });
+    }
+
+    // Check for valid characters (alphanumeric and underscores only)
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return res.json({
+        available: false,
+        message: "Username can only contain letters, numbers, and underscores",
+      });
+    }
+
+    // Check if username exists in database
+    const existingUser = await prisma.user.findUnique({
+      where: { username: username },
+    });
+
+    if (existingUser) {
+      return res.json({
+        available: false,
+        message: "Username is not available",
+      });
+    }
+
+    return res.json({
+      available: true,
+      message: "Username is available",
+    });
+  } catch (error) {
+    console.error("Error checking username:", error);
+    return res.status(500).json({
+      available: false,
+      message: "Error checking username availability",
+    });
+  }
 });
 
 // Logout Handle

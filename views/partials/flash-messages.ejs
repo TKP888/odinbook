@@ -1,35 +1,48 @@
-<%# Flash Messages Component - Usage: include('flash-messages') - Handles success, error, and validation messages automatically %>
-
-<%# Success Messages %>
-<% if(typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
-  <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <%= success_msg %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-<% } %>
-
-<%# Error Messages %>
-<% if(typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <%= error_msg %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-<% } %>
-
-<%# General Errors %>
-<% if(typeof error !== 'undefined' && error && error.length > 0) { %>
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <%= error %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-<% } %>
-
-<%# Validation Errors Array %>
-<% if(typeof errors !== 'undefined' && Array.isArray(errors) && errors.length > 0) { %>
-  <% errors.forEach(function(error) { %>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      <%= error.msg %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  <% }); %>
-<% } %>
+<%# Flash Messages Component - Usage: include('flash-messages') - Handles
+success, error, and validation messages automatically %> <%# Success Messages %>
+<% if(typeof success_msg !== 'undefined' && success_msg && success_msg.length >
+0) { %>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <%= success_msg %>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
+</div>
+<% } %> <%# Error Messages %> <% if(typeof error_msg !== 'undefined' &&
+error_msg && error_msg.length > 0) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <%= error_msg %>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
+</div>
+<% } %> <%# General Errors %> <% if(typeof error !== 'undefined' && error &&
+error.length > 0) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <%= error %>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
+</div>
+<% } %> <%# Validation Errors Array %> <% if(typeof errors !== 'undefined' &&
+Array.isArray(errors) && errors.length > 0) { %> <%
+errors.forEach(function(error) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <%= error.msg %>
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
+</div>
+<% }); %> <% } %>

@@ -203,6 +203,28 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.style.overflow = "";
     });
 
+  // Add validation event listeners for edit profile modal
+  document
+    .getElementById("editProfileModal")
+    .addEventListener("show.bs.modal", function () {
+      // Store current username for comparison
+      const currentUsername = document.getElementById("editUsername").value;
+
+      // Add event listener for username input
+      const usernameInput = document.getElementById("editUsername");
+      usernameInput.addEventListener("input", function () {
+        const username = this.value.trim();
+        validateEditUsername(username, currentUsername);
+      });
+
+      // Add event listener for birthday input
+      const birthdayInput = document.getElementById("editBirthday");
+      birthdayInput.addEventListener("change", function () {
+        const birthday = this.value;
+        validateEditBirthday(birthday);
+      });
+    });
+
   // Initialize photo handling
   initializePhotoHandling();
 
@@ -2668,6 +2690,195 @@ function openPhotoModal(photoUrl) {
   window.open(photoUrl, "_blank");
 }
 
+// Profile validation functions
+function showEditUsernameStatus(message, type) {
+  let feedback = document.getElementById("edit-username-feedback");
+  if (!feedback) {
+    feedback = document.createElement("div");
+    feedback.id = "edit-username-feedback";
+    feedback.className = "form-text";
+    document.getElementById("editUsername").parentNode.appendChild(feedback);
+  }
+
+  feedback.textContent = message;
+  feedback.className = `form-text ${type}`;
+
+  // Update input styling
+  const usernameInput = document.getElementById("editUsername");
+  usernameInput.classList.remove("is-valid", "is-invalid");
+  if (type === "text-success") {
+    usernameInput.classList.add("is-valid");
+  } else if (type === "text-danger") {
+    usernameInput.classList.add("is-invalid");
+  }
+}
+
+function showEditBirthdayStatus(message, type) {
+  let feedback = document.getElementById("edit-birthday-feedback");
+  if (!feedback) {
+    feedback = document.createElement("div");
+    feedback.id = "edit-birthday-feedback";
+    feedback.className = "form-text";
+    document.getElementById("editBirthday").parentNode.appendChild(feedback);
+  }
+
+  feedback.textContent = message;
+  feedback.className = `form-text ${type}`;
+
+  // Update input styling
+  const birthdayInput = document.getElementById("editBirthday");
+  birthdayInput.classList.remove("is-valid", "is-invalid");
+  if (type === "text-success") {
+    birthdayInput.classList.add("is-valid");
+  } else if (type === "text-danger") {
+    birthdayInput.classList.add("is-invalid");
+  }
+}
+
+function validateEditBirthday(birthday) {
+  if (!birthday) {
+    showEditBirthdayStatus("", "");
+    document
+      .getElementById("editBirthday")
+      .classList.remove("is-valid", "is-invalid");
+    return true; // Birthday is optional
+  }
+
+  const birthDate = new Date(birthday);
+  const today = new Date();
+
+  // Check if it's a valid date
+  if (isNaN(birthDate.getTime())) {
+    showEditBirthdayStatus("Please enter a valid date", "text-danger");
+    return false;
+  }
+
+  // Check if date is in the future
+  if (birthDate > today) {
+    showEditBirthdayStatus("Birthday cannot be in the future", "text-danger");
+    return false;
+  }
+
+  // Calculate age
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  let actualAge = age;
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    actualAge = age - 1;
+  }
+
+  if (actualAge < 16) {
+    showEditBirthdayStatus("You must be at least 16 years old", "text-danger");
+    return false;
+  }
+
+  // Valid age
+  showEditBirthdayStatus("", "");
+  return true;
+}
+
+let editUsernameCheckTimeout;
+let isCheckingEditUsername = false;
+
+function checkEditUsernameAvailability(username, currentUsername) {
+  // Don't check if username hasn't changed
+  if (username === currentUsername) {
+    showEditUsernameStatus("", "");
+    document
+      .getElementById("editUsername")
+      .classList.remove("is-valid", "is-invalid");
+    return;
+  }
+
+  if (isCheckingEditUsername) return;
+
+  isCheckingEditUsername = true;
+  showEditUsernameStatus("Checking availability...", "text-muted");
+  document.getElementById("editUsername").classList.add("username-checking");
+
+  fetch(`/auth/check-username/${encodeURIComponent(username)}`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.available) {
+        showEditUsernameStatus(data.message, "text-success");
+      } else {
+        showEditUsernameStatus(data.message, "text-danger");
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking username:", error);
+      showEditUsernameStatus(
+        "Error checking username availability",
+        "text-danger"
+      );
+    })
+    .finally(() => {
+      isCheckingEditUsername = false;
+      document
+        .getElementById("editUsername")
+        .classList.remove("username-checking");
+    });
+}
+
+function validateEditUsername(username, currentUsername) {
+  if (!username) {
+    showEditUsernameStatus("", "");
+    document
+      .getElementById("editUsername")
+      .classList.remove("is-valid", "is-invalid");
+    return false;
+  }
+
+  // Basic validation
+  if (username.length < 3) {
+    showEditUsernameStatus(
+      "Username must be at least 3 characters",
+      "text-danger"
+    );
+    return false;
+  }
+
+  if (username.length > 30) {
+    showEditUsernameStatus(
+      "Username must be less than 30 characters",
+      "text-danger"
+    );
+    return false;
+  }
+
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    showEditUsernameStatus(
+      "Username can only contain letters, numbers, and underscores",
+      "text-danger"
+    );
+    return false;
+  }
+
+  // Check availability if username changed
+  if (username !== currentUsername) {
+    // Clear previous timeout
+    if (editUsernameCheckTimeout) {
+      clearTimeout(editUsernameCheckTimeout);
+    }
+
+    // Debounce the API call
+    editUsernameCheckTimeout = setTimeout(() => {
+      checkEditUsernameAvailability(username, currentUsername);
+    }, 500);
+  } else {
+    showEditUsernameStatus("", "");
+    document
+      .getElementById("editUsername")
+      .classList.remove("is-valid", "is-invalid");
+  }
+
+  return true;
+}
+
 // Profile editing functions
 function openEditProfileModal() {
   // Pre-fill the form with current user data
@@ -2834,6 +3045,12 @@ function saveProfileChanges() {
     location,
   });
 
+  // Get current username for comparison
+  const currentUsername = document
+    .querySelector(".profile-username")
+    .textContent.replace("@", "")
+    .trim();
+
   // Validate input
   if (!firstName || !lastName || !username) {
     const alertDiv = document.createElement("div");
@@ -2861,12 +3078,13 @@ function saveProfileChanges() {
     return;
   }
 
-  if (username.length < 3 || username.length > 30) {
+  // Validate username using new validation function
+  if (!validateEditUsername(username, currentUsername)) {
     const alertDiv = document.createElement("div");
     alertDiv.className =
       "alert alert-warning alert-dismissible fade show position-fixed";
     alertDiv.innerHTML = `
-          <div><i class="fas fa-exclamation-triangle"></i> Username must be between 3 and 30 characters.</div>
+          <div><i class="fas fa-exclamation-triangle"></i> Please enter a valid username.</div>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
     document.body.appendChild(alertDiv);
@@ -2874,47 +3092,48 @@ function saveProfileChanges() {
     return;
   }
 
-  // Validate birthday if provided
-  if (birthday) {
-    const today = new Date();
-    const birthDate = new Date(birthday);
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
+  // Check if username is invalid (has is-invalid class)
+  if (
+    document.getElementById("editUsername").classList.contains("is-invalid")
+  ) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-warning alert-dismissible fade show position-fixed";
+    alertDiv.innerHTML = `
+          <div><i class="fas fa-exclamation-triangle"></i> Please choose a different username.</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+    return;
+  }
 
-    // Check if birthday is in the future
-    if (birthDate > today) {
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-warning alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> Birthday cannot be in the future.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
-      return;
-    }
+  // If we're still checking username availability, prevent submission
+  if (isCheckingEditUsername) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-warning alert-dismissible fade show position-fixed";
+    alertDiv.innerHTML = `
+          <div><i class="fas fa-exclamation-triangle"></i> Please wait while we check username availability...</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+    return;
+  }
 
-    // Calculate exact age considering month and day
-    const exactAge =
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-        ? age - 1
-        : age;
-
-    // Check if user is at least 16 years old
-    if (exactAge < 16) {
-      const alertDiv = document.createElement("div");
-      alertDiv.className =
-        "alert alert-warning alert-dismissible fade show position-fixed";
-      alertDiv.innerHTML = `
-            <div><i class="fas fa-exclamation-triangle"></i> You must be at least 16 years old to use this platform.</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-      document.body.appendChild(alertDiv);
-      setTimeout(() => alertDiv.remove(), 5000);
-      return;
-    }
+  // Validate birthday using new validation function
+  if (!validateEditBirthday(birthday)) {
+    const alertDiv = document.createElement("div");
+    alertDiv.className =
+      "alert alert-warning alert-dismissible fade show position-fixed";
+    alertDiv.innerHTML = `
+          <div><i class="fas fa-exclamation-triangle"></i> Please enter a valid birthday.</div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+    document.body.appendChild(alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+    return;
   }
 
   const saveBtn = document.getElementById("saveProfileBtn");

@@ -1,4 +1,77 @@
-<form action="/auth/register" method="POST">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - OdinBook</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="/css/main.css" rel="stylesheet" />
+  </head>
+  <body class="auth-page">
+    <!-- Header -->
+    
+
+<header class="auth-header-bar">
+  <div class="header-container">
+    <div class="header-left">
+      <a href="/" class="logo">OdinBook</a>
+    </div>
+
+    <div class="header-right">
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a
+              href="/auth/login"
+              class="nav-link "
+            >
+              <span class="d-md-inline">Sign In</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="/auth/register"
+              class="nav-link active"
+            >
+              <span class="d-md-inline">Sign Up</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1 class="text-white">OdinBook</h1>
+          <p>Connect with friends and the world around you</p>
+        </div>
+
+        <div class="auth-body">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+ <form action="/auth/register" method="POST">
   <div class="row">
     <div class="col-md-6 mb-3">
       <label for="firstName" class="form-label"> First Name </label>
@@ -8,7 +81,7 @@
         id="firstName"
         name="firstName"
         placeholder="First name"
-        value="<%= typeof firstName != 'undefined' ? firstName : '' %>"
+        value="Test"
         required
       />
     </div>
@@ -21,7 +94,7 @@
         id="lastName"
         name="lastName"
         placeholder="Last name"
-        value="<%= typeof lastName != 'undefined' ? lastName : '' %>"
+        value="User"
         required
       />
     </div>
@@ -35,7 +108,7 @@
       id="email"
       name="email"
       placeholder="Enter your email"
-      value="<%= typeof email != 'undefined' ? email : '' %>"
+      value="newuser@example.com"
       required
     />
   </div>
@@ -48,7 +121,7 @@
       id="username"
       name="username"
       placeholder="Choose a username"
-      value="<%= typeof username != 'undefined' ? username : '' %>"
+      value="ant"
       required
     />
   </div>
@@ -61,20 +134,21 @@
         class="form-control"
         id="birthday"
         name="birthday"
-        value="<%= typeof birthday != 'undefined' ? birthday : '' %>"
-        max="<%= new Date().toISOString().split('T')[0] %>"
+        value="1990-01-01"
+        max="2025-09-07"
         required
       />
+      <div class="form-text">Must be at least 16 years old</div>
     </div>
 
     <div class="col-md-6 mb-3">
       <label for="gender" class="form-label"> Gender (Optional) </label>
       <select class="form-control" id="gender" name="gender">
         <option value="">Select gender</option>
-        <option value="Male" <%= typeof gender != 'undefined' && gender === 'Male' ? 'selected' : '' %>>Male</option>
-        <option value="Female" <%= typeof gender != 'undefined' && gender === 'Female' ? 'selected' : '' %>>Female</option>
-        <option value="Other" <%= typeof gender != 'undefined' && gender === 'Other' ? 'selected' : '' %>>Other</option>
-        <option value="Prefer not to say" <%= typeof gender != 'undefined' && gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
+        <option value="Male" >Male</option>
+        <option value="Female" >Female</option>
+        <option value="Other" >Other</option>
+        <option value="Prefer not to say" >Prefer not to say</option>
       </select>
     </div>
   </div>
@@ -87,7 +161,7 @@
       id="location"
       name="location"
       placeholder="City, Country (e.g., London, UK)"
-      value="<%= typeof location != 'undefined' ? location : '' %>"
+      value=""
       autocomplete="off"
     />
   </div>
@@ -99,7 +173,7 @@
       class="form-control"
       id="password"
       name="password"
-      placeholder="Create a password"
+      placeholder="Create a password (min 6 characters)"
       required
     />
   </div>
@@ -128,4 +202,11 @@
   </p>
 </div>
 
-<script src="/js/register.js"></script>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/location-search.js"></script>
+  </body>
+</html>

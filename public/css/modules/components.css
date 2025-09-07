@@ -354,6 +354,141 @@
 }
 
 /* ========================================
+   USERNAME VALIDATION FEEDBACK
+   ======================================== */
+#username-feedback {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+#username-feedback.text-success {
+  color: var(--success-color);
+}
+
+#username-feedback.text-danger {
+  color: var(--danger-color);
+}
+
+#username-feedback.text-muted {
+  color: var(--medium-gray);
+}
+
+/* ========================================
+   BIRTHDAY VALIDATION FEEDBACK
+   ======================================== */
+#birthday-feedback {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+#birthday-feedback.text-success {
+  color: var(--success-color);
+}
+
+#birthday-feedback.text-danger {
+  color: var(--danger-color);
+}
+
+#birthday-feedback.text-muted {
+  color: var(--medium-gray);
+}
+
+/* ========================================
+   PASSWORD VALIDATION FEEDBACK
+   ======================================== */
+#password-feedback,
+#password2-feedback {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+#password-feedback.text-success,
+#password2-feedback.text-success {
+  color: var(--success-color);
+}
+
+#password-feedback.text-danger,
+#password2-feedback.text-danger {
+  color: var(--danger-color);
+}
+
+#password-feedback.text-muted,
+#password2-feedback.text-muted {
+  color: var(--medium-gray);
+}
+
+/* ========================================
+   EDIT PROFILE VALIDATION FEEDBACK
+   ======================================== */
+#edit-username-feedback,
+#edit-birthday-feedback {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+#edit-username-feedback.text-success,
+#edit-birthday-feedback.text-success {
+  color: var(--success-color);
+}
+
+#edit-username-feedback.text-danger,
+#edit-birthday-feedback.text-danger {
+  color: var(--danger-color);
+}
+
+#edit-username-feedback.text-muted,
+#edit-birthday-feedback.text-muted {
+  color: var(--medium-gray);
+}
+
+/* Username input validation states */
+.form-control.is-valid {
+  border-color: var(--success-color);
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.form-control.is-invalid {
+  border-color: var(--danger-color);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Loading state for username checking */
+.username-checking {
+  position: relative;
+}
+
+.username-checking::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--medium-gray);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* ========================================
    MODAL STYLES
    ======================================== */
 .modal {
