@@ -350,7 +350,7 @@ function createInlinePost() {
   const content = document.getElementById("inlinePostContent").value.trim();
   const photoFile = document.getElementById("inlinePostPhoto").files[0];
 
-  // Allow posts with just photos (no text required)
+  // Require either content (min 1 char) OR an image
   if (!content && !photoFile) {
     showNotification(
       "Please add some content or a photo to your post.",
@@ -476,6 +476,7 @@ function createInlinePost() {
 function createPost() {
   const content = document.getElementById("postContent").value.trim();
 
+  // Require either content (min 1 char) OR an image
   if (!content) {
     showNotification("Please enter some content for your post.", "warning");
     return;
@@ -1325,11 +1326,7 @@ function saveEditedPost() {
   const postId = document.getElementById("editPostId").value;
   const content = document.getElementById("editPostContent").value.trim();
 
-  if (!content) {
-    showNotification("Please enter some content for your post.", "warning");
-    return;
-  }
-
+  // Allow empty content - no minimum character requirement
   if (content.length > 250) {
     showNotification("Post content cannot exceed 250 characters.", "warning");
     return;

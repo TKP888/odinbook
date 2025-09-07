@@ -936,7 +936,7 @@ function getUserAvatar(user) {
     return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover" />`;
   } else {
     console.log("Using initials fallback");
-    return `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center avatar-initials">${(
+    return `<div class="text-white rounded-circle d-flex align-items-center justify-content-center avatar-initials">${(
       user.firstName || ""
     ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
   }

@@ -88,24 +88,26 @@ true, showComments: true, currentUser: user }) %> <%# Default values %>
         class="comment-item p-3 border-bottom"
         data-comment-id="<%= comment.id %>"
       >
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex align-items-start">
           <div class="user-avatar me-2">
             <%- include('user-avatar', { user: comment.user, size: 'small' }) %>
           </div>
-          <div class="comment-content flex-grow-1">
-            <div class="comment-header mb-1">
-              <strong
-                ><%= comment.user.firstName %> <%= comment.user.lastName
-                %></strong
-              >
-              <small class="text-muted ms-2">
-                <%= new Date(comment.createdAt).toLocaleDateString() %>
-              </small>
+          <div class="comment-content">
+            <div class="comment-text-container">
+              <div class="comment-header mb-1">
+                <strong
+                  ><%= comment.user.firstName %> <%= comment.user.lastName
+                  %></strong
+                >
+                <small class="text-muted ms-2">
+                  <%= new Date(comment.createdAt).toLocaleDateString() %>
+                </small>
+              </div>
+              <p class="comment-text mb-1"><%= comment.content %></p>
             </div>
-            <p class="comment-text mb-1"><%= comment.content %></p>
 
-            <%# Comment Actions %>
-            <div class="comment-actions">
+            <%# Comment Actions - Like button %>
+            <div class="comment-actions mt-1">
               <button
                 class="btn btn-link btn-sm text-muted p-0 me-2"
                 onclick="likeComment('<%= comment.id %>')"
@@ -117,23 +119,28 @@ true, showComments: true, currentUser: user }) %> <%# Default values %>
                   ><%= comment.likesCount || 0 %></span
                 >
               </button>
-
-              <% if (currentUser && comment.userId === currentUser.id) { %>
-              <button
-                class="btn btn-link btn-sm text-muted p-0 me-2"
-                onclick="editComment('<%= comment.id %>', '<%= post.id %>', '<%= comment.content %>')"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-              <button
-                class="btn btn-link btn-sm text-danger p-0"
-                onclick="deleteComment('<%= comment.id %>', '<%= post.id %>')"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-              <% } %>
             </div>
           </div>
+
+          <%# Edit/Delete buttons - positioned absolutely %> <% if (currentUser
+          && comment.userId === currentUser.id) { %>
+          <div class="btn-group btn-group-sm">
+            <button
+              class="btn btn-sm btn-outline-primary"
+              onclick="editComment('<%= comment.id %>', '<%= post.id %>', '<%= comment.content %>')"
+              title="Edit comment"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-outline-danger"
+              onclick="deleteComment('<%= comment.id %>', '<%= post.id %>')"
+              title="Delete comment"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <% } %>
         </div>
       </div>
       <% }); %>

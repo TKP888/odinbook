@@ -370,6 +370,16 @@ router.put("/update", ensureAuthenticated, async (req, res) => {
     const { firstName, lastName, username, birthday, gender, location } =
       req.body;
 
+    console.log("Profile update request:", {
+      firstName,
+      lastName,
+      username,
+      birthday,
+      gender,
+      location,
+      userId: req.user.id,
+    });
+
     // Validate input
     if (!firstName || !lastName || !username) {
       return res.status(400).json({ error: "All fields are required" });
@@ -422,6 +432,7 @@ router.put("/update", ensureAuthenticated, async (req, res) => {
       },
     });
 
+    console.log("Profile updated successfully:", updatedUser);
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error("Error updating profile:", error);

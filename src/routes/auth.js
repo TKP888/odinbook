@@ -57,17 +57,40 @@ router.post(
       return true;
     }),
     body("birthday")
-      .optional()
+      .notEmpty()
+      .withMessage("Birthday is required")
       .custom((value) => {
-        // If no value is provided, it's valid
-        if (!value || value === "") {
-          return true;
-        }
-        // If a value is provided, validate it's a valid date
         const date = new Date(value);
-        return !isNaN(date.getTime());
-      })
-      .withMessage("Please enter a valid date"),
+        const today = new Date();
+
+        // Check if it's a valid date
+        if (isNaN(date.getTime())) {
+          throw new Error("Please enter a valid date");
+        }
+
+        // Check if date is in the future
+        if (date > today) {
+          throw new Error("Birthday cannot be in the future");
+        }
+
+        // Check if user is at least 16 years old
+        const age = today.getFullYear() - date.getFullYear();
+        const monthDiff = today.getMonth() - date.getMonth();
+
+        let actualAge = age;
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < date.getDate())
+        ) {
+          actualAge = age - 1;
+        }
+
+        if (actualAge < 16) {
+          throw new Error("You must be at least 16 years old to register");
+        }
+
+        return true;
+      }),
     body("gender").optional().isLength({ max: 50 }),
     body("location").optional().isLength({ max: 100 }),
   ],

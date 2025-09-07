@@ -210,6 +210,7 @@
   gap: 0.5rem;
   padding: 0.75rem 0;
   border-bottom: 1px solid #f1f3f4;
+  position: relative; /* Enable absolute positioning for buttons */
 }
 
 .comment-item:last-child {
@@ -219,6 +220,13 @@
 .comment-content {
   flex: 1;
   min-width: 0; /* Allow content to shrink */
+  padding-right: 100px; /* Reserve space for buttons */
+}
+
+.comment-text-container {
+  min-width: 0; /* Allow text container to shrink */
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .comment-header {
@@ -228,12 +236,15 @@
 .comment-text {
   margin-bottom: 0.5rem;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  white-space: pre-wrap;
 }
 
-/* Ensure comment actions don't expand beyond content */
+/* Comment actions container - positioned below content */
 .comment-actions {
   flex-shrink: 0;
-  max-width: 250px; /* Base max width for larger screens */
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -256,29 +267,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Edit comment button */
-.comment-actions .btn[onclick*="editComment"] {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-}
-
-.comment-actions .btn[onclick*="editComment"]:hover {
-  background-color: var(--secondary-color);
-}
-
-/* Delete comment button */
-.comment-actions .btn[onclick*="deleteComment"] {
-  background-color: white;
-  color: var(--danger-color);
-  border: 1px solid var(--danger-color);
-}
-
-.comment-actions .btn[onclick*="deleteComment"]:hover {
-  background-color: var(--danger-color);
-  color: white;
-}
-
 /* Like comment button */
 .comment-actions .btn[onclick*="likeComment"] {
   background-color: transparent;
@@ -288,6 +276,54 @@
 
 .comment-actions .btn[onclick*="likeComment"]:hover {
   color: var(--primary-color);
+}
+
+/* Edit and Delete buttons - ABSOLUTE POSITIONING */
+.comment-item .btn-group {
+  position: absolute;
+  top: 0.75rem; /* Match comment-item padding */
+  right: 0;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.comment-item .btn-group .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.comment-item .btn-group .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit comment button */
+.comment-item .btn-group .btn[onclick*="editComment"] {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.comment-item .btn-group .btn[onclick*="editComment"]:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Delete comment button */
+.comment-item .btn-group .btn[onclick*="deleteComment"] {
+  background-color: white;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+}
+
+.comment-item .btn-group .btn[onclick*="deleteComment"]:hover {
+  background-color: var(--danger-color);
+  color: white;
 }
 
 /* ========================================

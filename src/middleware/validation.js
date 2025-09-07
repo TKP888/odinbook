@@ -14,8 +14,51 @@ const handleValidationErrors = (req, res, next) => {
 const validatePost = [
   body("content")
     .trim()
-    .isLength({ min: 1, max: 1000 })
-    .withMessage("Post content must be between 1 and 1000 characters"),
+    .custom((value, { req }) => {
+      // Require either content (min 1 char) OR an image
+      if (!value && !req.file) {
+        throw new Error(
+          "Post content must be at least 1 character or include a photo"
+        );
+      }
+      if (value && value.length > 1000) {
+        throw new Error("Post content must be less than 1000 characters");
+      }
+      return true;
+    }),
+  handleValidationErrors,
+];
+
+// Special validation for updates that allows empty content if post has existing image
+const validatePostUpdate = [
+  body("content")
+    .trim()
+    .custom(async (value, { req }) => {
+      // For updates, allow empty content if:
+      // 1. New file is uploaded, OR
+      // 2. Existing post has an image
+      if (!value && !req.file) {
+        // Check if existing post has an image
+        try {
+          const postService = require("../services/postService");
+          const existingPost = await postService.getPostById(req.params.id);
+          if (!existingPost || !existingPost.photoUrl) {
+            throw new Error(
+              "Post content must be at least 1 character or include a photo"
+            );
+          }
+        } catch (error) {
+          console.error("Error checking existing post:", error);
+          throw new Error(
+            "Post content must be at least 1 character or include a photo"
+          );
+        }
+      }
+      if (value && value.length > 1000) {
+        throw new Error("Post content must be less than 1000 characters");
+      }
+      return true;
+    }),
   handleValidationErrors,
 ];
 
@@ -73,6 +116,7 @@ const validateRegistration = [
 module.exports = {
   handleValidationErrors,
   validatePost,
+  validatePostUpdate,
   validateComment,
   validateProfile,
   validateRegistration,

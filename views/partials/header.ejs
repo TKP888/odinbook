@@ -103,7 +103,11 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
             </a>
           </li>
           <li>
-            <a class="dropdown-item" href="/friends/users?tab=friends">
+            <a
+              class="dropdown-item"
+              href="/friends/users"
+              onclick="sessionStorage.setItem('preferredTab', 'friends')"
+            >
               <i class="fas fa-user-friends"></i>
               My Friends
             </a>
@@ -220,8 +224,9 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
   <% } %>
 
   <a
-    href="/friends/users?tab=friends"
+    href="/friends/users"
     class="mobile-menu-item <%= activePage === 'users' && typeof tab !== 'undefined' && tab === 'friends' ? 'active' : '' %>"
+    onclick="sessionStorage.setItem('preferredTab', 'friends')"
   >
     <i class="fas fa-user-friends"></i>
     My Friends

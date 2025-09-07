@@ -55,14 +55,17 @@
 
   <div class="row">
     <div class="col-md-6 mb-3">
-      <label for="birthday" class="form-label"> Birthday (Optional) </label>
+      <label for="birthday" class="form-label"> Birthday </label>
       <input
         type="date"
         class="form-control"
         id="birthday"
         name="birthday"
         value="<%= typeof birthday != 'undefined' ? birthday : '' %>"
+        max="<%= new Date().toISOString().split('T')[0] %>"
+        required
       />
+      <div class="form-text">Must be at least 16 years old</div>
     </div>
 
     <div class="col-md-6 mb-3">

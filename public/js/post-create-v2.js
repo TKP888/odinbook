@@ -225,7 +225,7 @@ class PostCreateV2 {
       document.getElementById("postContentV2")?.value.trim() || "";
     const photoFile = document.getElementById("postPhotoV2")?.files[0];
 
-    // Validation
+    // Validation - require either content (min 1 char) OR an image
     if (!content && !photoFile) {
       this.showNotification(
         "Please add some content or a photo to your post.",

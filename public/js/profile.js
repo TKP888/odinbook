@@ -304,6 +304,7 @@ function openCreatePostModal() {
 function createPost() {
   const content = document.getElementById("postContent").value.trim();
 
+  // Require either content (min 1 char) OR an image
   if (!content) {
     showNotification("Please enter some content for your post.", "warning");
     return;
@@ -444,11 +445,14 @@ function editPost(postId) {
 function saveEditedPost() {
   const content = document.getElementById("editPostContent").value.trim();
 
-  if (!content) {
-    showNotification("Please enter some content for your post.", "warning");
-    return;
-  }
+  console.log(
+    "Saving edited post with content:",
+    `"${content}"`,
+    "Length:",
+    content.length
+  );
 
+  // Allow empty content - no minimum character requirement
   if (content.length > 250) {
     showNotification("Post content cannot exceed 250 characters.", "warning");
     return;
@@ -2227,21 +2231,29 @@ function switchToAllUsers() {
 }
 
 function removeFriend(friendId, friendName) {
-  // Show the unfriend confirmation modal
-  const unfriendModal = new bootstrap.Modal(
-    document.getElementById("unfriendModal")
-  );
+  // Get modal elements
+  const unfriendModalElement = document.getElementById("unfriendModal");
   const unfriendUserName = document.getElementById("unfriendUserName");
   const confirmUnfriendBtn = document.getElementById("confirmUnfriendBtn");
 
   // Set the friend's name in the modal
   unfriendUserName.textContent = friendName;
 
-  // Remove any existing event listeners
+  // Remove any existing event listeners by cloning the button
   confirmUnfriendBtn.replaceWith(confirmUnfriendBtn.cloneNode(true));
 
   // Get the fresh reference after cloning
   const freshConfirmBtn = document.getElementById("confirmUnfriendBtn");
+
+  // Create or get existing modal instance
+  let unfriendModal = bootstrap.Modal.getInstance(unfriendModalElement);
+  if (!unfriendModal) {
+    unfriendModal = new bootstrap.Modal(unfriendModalElement, {
+      backdrop: true,
+      keyboard: true,
+      focus: true,
+    });
+  }
 
   // Add event listener for confirmation
   freshConfirmBtn.addEventListener("click", function () {
@@ -2274,7 +2286,7 @@ function removeFriend(friendId, friendName) {
           // Refresh the page after successful unfriending
           setTimeout(() => {
             window.location.reload();
-          }, 2000); // Wait 2 seconds to show the notification, then refresh
+          }, 500); // Wait 0.5 seconds to show the notification, then refresh
         } else {
           const alertDiv = document.createElement("div");
           alertDiv.className =
@@ -2303,6 +2315,18 @@ function removeFriend(friendId, friendName) {
       });
   });
 
+  // Add event listener for modal hidden event to clean up
+  unfriendModalElement.addEventListener(
+    "hidden.bs.modal",
+    function () {
+      // Reset button state
+      freshConfirmBtn.innerHTML =
+        '<i class="fas fa-user-minus me-1"></i>Remove Friend';
+      freshConfirmBtn.disabled = false;
+    },
+    { once: true }
+  );
+
   // Show the modal
   unfriendModal.show();
 }
@@ -2313,15 +2337,19 @@ function cancelFriendRequest(requestId, userName) {
     `[PROFILE] cancelFriendRequest called for request ${requestId} (${userName})`
   );
 
-  // Show loading state on the cancel button - use event.target to get the clicked button
-  let cancelBtn = event.target;
+  // Find the cancel button for this specific request
+  const cancelBtn = document.querySelector(`[data-request-id="${requestId}"]`);
 
-  // Verify it's the right button by checking if it has the cancel text
-  if (cancelBtn && cancelBtn.textContent.includes("Cancel Request")) {
-    cancelBtn.innerHTML =
-      '<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...';
-    cancelBtn.disabled = true;
+  if (!cancelBtn) {
+    console.error("Cancel button not found for request:", requestId);
+    return;
   }
+
+  // Show loading state on the cancel button
+  const originalContent = cancelBtn.innerHTML;
+  cancelBtn.innerHTML =
+    '<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...';
+  cancelBtn.disabled = true;
 
   fetch("/friends/cancel-request", {
     method: "POST",
@@ -2348,11 +2376,8 @@ function cancelFriendRequest(requestId, userName) {
         }, 1500);
       } else {
         // Reset button state on error
-        if (cancelBtn && cancelBtn.textContent.includes("Cancelling")) {
-          cancelBtn.innerHTML =
-            '<i class="fas fa-times me-1"></i> Cancel Request';
-          cancelBtn.disabled = false;
-        }
+        cancelBtn.innerHTML = originalContent;
+        cancelBtn.disabled = false;
 
         // Show error notification
         const alertDiv = document.createElement("div");
@@ -2372,11 +2397,8 @@ function cancelFriendRequest(requestId, userName) {
       console.error("Error cancelling friend request:", error);
 
       // Reset button state on error
-      if (cancelBtn && cancelBtn.textContent.includes("Cancelling")) {
-        cancelBtn.innerHTML =
-          '<i class="fas fa-times me-1"></i> Cancel Request';
-        cancelBtn.disabled = false;
-      }
+      cancelBtn.innerHTML = originalContent;
+      cancelBtn.disabled = false;
 
       // Show error notification
       const alertDiv = document.createElement("div");
@@ -2510,7 +2532,7 @@ function createInlinePost() {
   const photoFile = document.getElementById("inlinePostPhoto").files[0];
   console.log(`[PROFILE] Content: "${content}", Photo:`, photoFile);
 
-  // Allow posts with just photos (no text required)
+  // Require either content (min 1 char) OR an image
   if (!content && !photoFile) {
     const alertDiv = document.createElement("div");
     alertDiv.className =
@@ -2577,20 +2599,10 @@ function createInlinePost() {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Soft refresh posts instead of page reload
+        // Full page refresh after 3 seconds to ensure everything is fresh
         setTimeout(() => {
-          loadPosts(true);
-        }, 500);
-
-        // Double-check form is cleared after a delay
-        setTimeout(() => {
-          console.log(`[PROFILE] Double-checking form is cleared...`);
-          if (document.getElementById("inlinePostContent").value !== "") {
-            console.log(`[PROFILE] Form still has content, forcing clear...`);
-            document.getElementById("inlinePostContent").value = "";
-            document.getElementById("inlineCharCount").textContent = "0";
-          }
-        }, 1000);
+          window.location.reload();
+        }, 3000);
       } else {
         const alertDiv = document.createElement("div");
         alertDiv.className =
@@ -2617,10 +2629,10 @@ function createInlinePost() {
         console.log(
           "Detected HTML response instead of JSON, post may have been created successfully"
         );
-        // Force refresh posts since the post was likely created successfully
+        // Full page refresh since the post was likely created successfully
         setTimeout(() => {
-          console.log("Forcing posts refresh due to JSON parsing error...");
-          loadPosts(true);
+          console.log("Forcing full page refresh due to JSON parsing error...");
+          window.location.reload();
         }, 1000);
 
         // Also clear the form since we're assuming the post was created
@@ -2811,7 +2823,16 @@ function saveProfileChanges() {
   const birthday = document.getElementById("editBirthday").value;
   const gender = document.getElementById("editGender").value;
   const location = document.getElementById("editLocation").value.trim();
-  const useGravatar = document.getElementById("useGravatar").checked;
+
+  // Debug: Log the values being collected
+  console.log("Profile data being sent:", {
+    firstName,
+    lastName,
+    username,
+    birthday,
+    gender,
+    location,
+  });
 
   // Validate input
   if (!firstName || !lastName || !username) {
@@ -2853,55 +2874,81 @@ function saveProfileChanges() {
     return;
   }
 
+  // Validate birthday if provided
+  if (birthday) {
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Check if birthday is in the future
+    if (birthDate > today) {
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-warning alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> Birthday cannot be in the future.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+      return;
+    }
+
+    // Calculate exact age considering month and day
+    const exactAge =
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ? age - 1
+        : age;
+
+    // Check if user is at least 16 years old
+    if (exactAge < 16) {
+      const alertDiv = document.createElement("div");
+      alertDiv.className =
+        "alert alert-warning alert-dismissible fade show position-fixed";
+      alertDiv.innerHTML = `
+            <div><i class="fas fa-exclamation-triangle"></i> You must be at least 16 years old to use this platform.</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+      return;
+    }
+  }
+
   const saveBtn = document.getElementById("saveProfileBtn");
   const originalText = saveBtn.innerHTML;
   saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   saveBtn.disabled = true;
 
-  // First update profile information
+  // Prepare data - convert empty strings to null for optional fields
+  const profileData = {
+    firstName,
+    lastName,
+    username,
+    birthday: birthday || null,
+    gender: gender || null,
+    location: location || null,
+  };
+
+  // Update profile information
   fetch("/profile/update", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      firstName,
-      lastName,
-      username,
-      birthday,
-      gender,
-      location,
-    }),
+    body: JSON.stringify(profileData),
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success) {
-        // Then handle Gravatar toggle
-        return fetch("/profile/toggle-gravatar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ useGravatar }),
-        });
-      } else {
-        throw new Error(data.error || "Failed to update profile");
-      }
-    })
-    .then((response) => response.json())
-    .then((data) => {
+      console.log("Profile update response:", data);
+
       if (data.success) {
         // Hide the modal first
-        editProfileModal.hide();
-
-        // Update profile picture if Gravatar was toggled
-        if (data.profilePicture) {
-          const profilePicture = document.getElementById("profilePicture");
-          if (profilePicture) {
-            profilePicture.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
-          }
-
-          // Update header avatar
-          const headerAvatar = document.querySelector(".user-avatar");
-          if (headerAvatar) {
-            headerAvatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
-          }
+        const modalInstance = bootstrap.Modal.getInstance(
+          document.getElementById("editProfileModal")
+        );
+        if (modalInstance) {
+          modalInstance.hide();
         }
 
         // Show success notification
@@ -2915,12 +2962,14 @@ function saveProfileChanges() {
             `;
         document.body.appendChild(alertDiv);
 
-        // Remove the notification after 2 seconds
+        // Remove the notification after 2 seconds and refresh page
         setTimeout(() => {
           alertDiv.remove();
+          // Refresh the page to show updated profile information
+          window.location.reload();
         }, 2000);
       } else {
-        throw new Error(data.error || "Failed to update Gravatar settings");
+        throw new Error(data.error || "Failed to update profile");
       }
     })
     .catch((error) => {
@@ -2998,14 +3047,42 @@ function handleProfilePictureUpload(event) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // Update the profile picture with the new image
-        profilePicture.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+        // Update the profile picture with the new image and recreate the overlay
+        profilePicture.innerHTML = `
+          <img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">
+          <div class="profile-picture-overlay">
+            <label for="profilePictureInput" class="profile-picture-upload-btn">
+              <i class="fas fa-camera"></i>
+              <span>Change Photo</span>
+            </label>
+          </div>
+        `;
 
         // Update header avatar immediately
         const headerAvatar = document.querySelector(".user-avatar");
         if (headerAvatar) {
           headerAvatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
         }
+
+        // Update all other profile picture instances on the page
+        const allProfileImages = document.querySelectorAll(".profile-image");
+        allProfileImages.forEach((img) => {
+          if (img.src !== data.profilePicture) {
+            img.src = data.profilePicture;
+          }
+        });
+
+        // Update user-avatar-large instances (like in create post section)
+        const userAvatarLarge = document.querySelectorAll(".user-avatar-large");
+        userAvatarLarge.forEach((avatar) => {
+          const existingImg = avatar.querySelector(".profile-image");
+          if (existingImg) {
+            existingImg.src = data.profilePicture;
+          } else {
+            // If no image exists, create one
+            avatar.innerHTML = `<img src="${data.profilePicture}" alt="Profile Picture" class="profile-image">`;
+          }
+        });
 
         // Show success notification
         const alertDiv = document.createElement("div");
@@ -3089,8 +3166,9 @@ function handleInlinePhotoSelection(event) {
 
     // Show filename and remove button
     document.getElementById("inlinePhotoFileName").textContent = file.name;
-    document.getElementById("inlineRemovePhotoBtn").style.display =
-      "inline-block";
+    document
+      .getElementById("inlineRemovePhotoBtn")
+      .classList.remove("hidden-button");
   }
 }
 
@@ -3120,7 +3198,9 @@ function handlePhotoSelection(event) {
 function removeInlinePhoto() {
   document.getElementById("inlinePostPhoto").value = "";
   document.getElementById("inlinePhotoFileName").textContent = "";
-  document.getElementById("inlineRemovePhotoBtn").style.display = "none";
+  document
+    .getElementById("inlineRemovePhotoBtn")
+    .classList.add("hidden-button");
 }
 
 function removeModalPhoto() {

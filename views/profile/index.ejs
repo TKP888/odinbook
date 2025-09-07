@@ -68,7 +68,7 @@
                       <button class="btn btn-secondary btn-lg" disabled>
                         <i class="fas fa-clock me-2"></i> Request Sent
                       </button>
-                      <button class="btn btn-outline-danger btn-lg" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                      <button class="btn btn-outline-danger btn-lg" data-request-id="<%= pendingRequest.id %>" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
                         <i class="fas fa-times me-2"></i> Cancel Request
                       </button>
                     </div>
@@ -241,7 +241,7 @@
                     <button class="btn btn-secondary btn-sm" disabled>
                       <i class="fas fa-clock me-1"></i> Request Sent
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                    <button class="btn btn-outline-danger btn-sm" data-request-id="<%= pendingRequest.id %>" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
                       <i class="fas fa-times me-1"></i> Cancel Request
                     </button>
                   </div>
@@ -482,7 +482,7 @@
                 <button class="btn btn-secondary btn-sm" disabled>
                   <i class="fas fa-clock me-1"></i> Request Sent
                 </button>
-                <button class="btn btn-outline-danger btn-sm" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
+                <button class="btn btn-outline-danger btn-sm" data-request-id="<%= pendingRequest.id %>" onclick="cancelFriendRequest('<%= pendingRequest.id %>', '<%= profileUser.firstName %> <%= profileUser.lastName %>')">
                   <i class="fas fa-times me-1"></i> Cancel Request
                 </button>
               </div>
@@ -899,13 +899,15 @@ document.addEventListener('DOMContentLoaded', function() {
           
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="editBirthday" class="form-label">Birthday (Optional)</label>
+              <label for="editBirthday" class="form-label">Birthday</label>
               <input
                 type="date"
                 class="form-control"
                 id="editBirthday"
                 value="<%= user.birthday ? user.birthday.toISOString().split('T')[0] : '' %>"
+                max="<%= new Date().toISOString().split('T')[0] %>"
               />
+              <div class="form-text">Must be at least 16 years old</div>
             </div>
             
             <div class="col-md-6 mb-3">
@@ -1009,14 +1011,16 @@ document.addEventListener('DOMContentLoaded', function() {
                   </h6>
                   <p class="friend-username-modal">@<%= friend.username %></p>
                 </div>
-                <button
-                  class="btn btn-outline-danger btn-sm remove-friend-btn-modal"
-                  data-friend-id="<%= friend.id %>"
-                  data-friend-name="<%= friend.firstName || 'No First Name' %> <%= friend.lastName || 'No Last Name' %>"
-                  title="Unfriend"
-                >
-                  <i class="fas fa-user-minus"></i>
-                </button>
+                <% if (typeof profileUser === 'undefined') { %>
+                  <button
+                    class="btn btn-outline-danger btn-sm remove-friend-btn-modal"
+                    data-friend-id="<%= friend.id %>"
+                    data-friend-name="<%= friend.firstName || 'No First Name' %> <%= friend.lastName || 'No Last Name' %>"
+                    title="Unfriend"
+                  >
+                    <i class="fas fa-user-minus"></i>
+                  </button>
+                <% } %>
               </div>
             <% }); %>
           </div>

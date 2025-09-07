@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const { ensureAuthenticated, ensureOwnership } = require("../middleware/auth");
-const { validatePost, validateComment } = require("../middleware/validation");
+const {
+  validatePost,
+  validatePostUpdate,
+  validateComment,
+} = require("../middleware/validation");
 const postService = require("../services/postService");
 const {
   uploadPostPhoto,
@@ -140,7 +144,7 @@ router.put(
   ensureAuthenticated,
   ensureOwnership("post"),
   uploadPostPhotoMiddleware.single("photo"),
-  validatePost,
+  validatePostUpdate,
   async (req, res) => {
     try {
       console.log("Updating post:", {
@@ -162,6 +166,15 @@ router.put(
         return res.status(404).json({ error: "Post not found" });
       }
 
+      // Allow empty content - no minimum character requirement
+      const content = req.body.content?.trim() || "";
+
+      console.log(
+        "Updating post with content:",
+        `"${content}"`,
+        "Length:",
+        content.length
+      );
       console.log("Existing post image data:", {
         hasPhoto: !!existingPost.photoUrl,
         photoUrl: existingPost.photoUrl,
@@ -195,7 +208,7 @@ router.put(
       const post = await postService.updatePost(
         req.params.id,
         req.user.id,
-        req.body.content,
+        content,
         photoUrl,
         cloudinaryPublicId
       );
@@ -209,6 +222,13 @@ router.put(
       res.json({ success: true, post });
     } catch (error) {
       console.error("Error updating post:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        postId: req.params.id,
+        content: req.body.content,
+        userId: req.user?.id,
+      });
       res.status(500).json({ error: "Failed to update post" });
     }
   }
