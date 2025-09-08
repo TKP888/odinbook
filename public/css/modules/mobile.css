@@ -470,12 +470,6 @@
     padding: 0.5rem 0 !important;
   }
 
-  .comment-item .user-avatar-small {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 0.7rem !important;
-  }
-
   /* Comment actions on very small screens */
   .comment-item .btn-group {
     flex-direction: column !important;

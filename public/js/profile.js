@@ -146,28 +146,24 @@ function sendFriendRequest(userId, userName = "") {
 
 // Function to get user avatar (Gravatar or initials)
 function getUserAvatar(user) {
-  // Check if user uses Gravatar and has email
-  if (user.useGravatar && user.email) {
-    // Generate Gravatar URL
-    const email = user.email.toLowerCase().trim();
-    const hash = CryptoJS.MD5(email).toString();
-    const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?s=200&d=identicon&r=pg`;
-    return `<img src="${gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover">`;
-  }
-  // If user has a profile picture (including Gravatar URLs), use it
-  else if (
+  console.log("getUserAvatar called with user:", user);
+
+  if (
     user.profilePicture &&
     (user.profilePicture.startsWith("http") ||
       user.profilePicture.startsWith("/uploads/") ||
-      user.profilePicture.includes("cloudinary.com") ||
-      user.profilePicture.includes("gravatar.com"))
+      user.profilePicture.includes("cloudinary.com"))
   ) {
-    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image avatar-cover">`;
+    console.log("Using profile picture:", user.profilePicture);
+    return `<img src="${user.profilePicture}" alt="Profile Picture" class="profile-image avatar-cover" />`;
+  } else if (user.useGravatar && user.email && user.gravatarUrl) {
+    console.log("Using Gravatar:", user.gravatarUrl);
+    return `<img src="${user.gravatarUrl}" alt="Profile Picture" class="profile-image avatar-cover" />`;
   } else {
-    // Fallback to initials
-    return `${(user.firstName || "").charAt(0)}${(user.lastName || "").charAt(
-      0
-    )}`;
+    console.log("Using initials fallback");
+    return `<div class="text-white rounded-circle d-flex align-items-center justify-content-center avatar-initials">${(
+      user.firstName || ""
+    ).charAt(0)}${(user.lastName || "").charAt(0)}</div>`;
   }
 }
 
@@ -1093,7 +1089,7 @@ function displayPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2 avatar-small">
+            <div class="user-avatar-small me-2">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -1323,7 +1319,7 @@ function appendPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -1556,7 +1552,7 @@ function appendPosts(posts) {
           comment.id
         }">
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2">
               ${getUserAvatar(comment.user)}
             </div>
             <div class="flex-grow-1">
@@ -1878,7 +1874,7 @@ function submitComment(postId) {
 
         newComment.innerHTML = `
           <div class="d-flex align-items-start">
-            <div class="user-avatar-small me-2" style="width: 24px; height: 24px; font-size: 0.7rem;">
+            <div class="user-avatar-small me-2">
               ${getUserAvatar(commentUser)}
             </div>
             <div class="flex-grow-1">
