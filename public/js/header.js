@@ -5,9 +5,16 @@ function initializeMobileMenu() {
   const hamburgerBtn = document.getElementById("hamburgerMenuBtn");
   const mobileMenuPanel = document.getElementById("mobileMenuPanel");
   const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+  const mobileMenuClose = document.getElementById("mobileMenuClose");
 
   if (!hamburgerBtn || !mobileMenuPanel || !mobileMenuOverlay) {
     return;
+  }
+
+  // Function to close the mobile menu
+  function closeMobileMenu() {
+    mobileMenuPanel.classList.remove("active");
+    mobileMenuOverlay.classList.remove("active");
   }
 
   // Toggle mobile menu
@@ -16,19 +23,20 @@ function initializeMobileMenu() {
     mobileMenuOverlay.classList.toggle("active");
   });
 
+  // Close menu when clicking close button
+  if (mobileMenuClose) {
+    mobileMenuClose.addEventListener("click", closeMobileMenu);
+  }
+
   // Close menu when clicking overlay
-  mobileMenuOverlay.addEventListener("click", function () {
-    mobileMenuPanel.classList.remove("active");
-    mobileMenuOverlay.classList.remove("active");
-  });
+  mobileMenuOverlay.addEventListener("click", closeMobileMenu);
 
   // Close menu when clicking menu items
   const mobileMenuItems = mobileMenuPanel.querySelectorAll(".mobile-menu-item");
   mobileMenuItems.forEach((item) => {
     item.addEventListener("click", function () {
       // Close mobile menu
-      mobileMenuPanel.classList.remove("active");
-      mobileMenuOverlay.classList.remove("active");
+      closeMobileMenu();
 
       // If navigating to users page with tab, ensure proper tab switching
       const href = this.getAttribute("href");
@@ -48,8 +56,7 @@ function initializeMobileMenu() {
   // Close menu on escape key
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
-      mobileMenuPanel.classList.remove("active");
-      mobileMenuOverlay.classList.remove("active");
+      closeMobileMenu();
     }
   });
 }

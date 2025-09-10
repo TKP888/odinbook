@@ -1,97 +1,308 @@
 /* ========================================
-   ODINBOOK MOBILE RESPONSIVE STYLES
-   Mobile-specific styles and responsive design
+   ODINBOOK RESPONSIVE STYLES
+   Tablet and Desktop responsive design
    ======================================== */
 
 /* ========================================
-   AUTH MOBILE RESPONSIVE STYLES
+   TABLET BREAKPOINTS (768px - 1199px) - Includes iPad M4 13"
    ======================================== */
-@media (max-width: 767px) {
-  /* Mobile auth page layout */
-  .auth-page {
-    padding: var(--spacing-sm) !important;
-    min-height: 100vh !important;
-    align-items: flex-start !important;
-    padding-top: calc(var(--header-height) + var(--spacing-md)) !important;
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  /* ========================================
+     TABLET LAYOUT ADJUSTMENTS
+     ======================================== */
+
+  /* Reduce card margins for tablet */
+  .card {
+    margin: 0 150px !important;
   }
 
-  /* Mobile auth container */
-  .auth-page .auth-container {
-    max-width: 100% !important;
-    padding: 0 var(--spacing-sm) !important;
-    padding-top: var(--spacing-md) !important;
-  }
-
-  /* Mobile auth card */
-  .auth-page .auth-card {
-    border-radius: var(--border-radius-lg) !important;
-    box-shadow: var(--shadow-lg) !important;
+  /* Remove margins for cards inside col-split on tablet */
+  .col-split .card {
     margin: 0 !important;
   }
 
-  /* Mobile auth header */
+  /* Add outer margins to center the col-split layout on tablet */
+  .col-split .about-section-card {
+    margin-left: 100px !important;
+  }
+
+  .col-split .friends-section-card {
+    margin-right: 100px !important;
+  }
+
+  /* Tablet users page content container */
+  .users-page .content-container {
+    margin: 0 10px !important;
+  }
+
+  /* Tablet users page buttons - show only icons */
+  .users-page .btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .users-page .btn span {
+    display: none !important;
+  }
+
+  .users-page .btn i {
+    margin: 0 !important;
+  }
+
+  /* Tablet users page - 2 columns instead of 3 */
+  .users-page .user-card-grid .col-md-6,
+  .users-page .user-card-grid .col-lg-4 {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+  }
+
+  /* Remove margin bottom and reduce height of user cards on tablet */
+  .users-page .user-card {
+    margin-bottom: 0 !important;
+    padding: 0.75rem !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  /* Center user cards vertically on tablet */
+  .users-page .user-card-grid .row {
+    align-items: center !important;
+  }
+
+  /* Tablet post actions */
+  .post-actions .btn {
+    min-height: 44px !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Tablet header adjustments */
+  .main-header .header-search {
+    max-width: 400px !important;
+  }
+
+  /* Tablet form controls */
+  .form-control {
+    font-size: 16px !important; /* Prevent zoom on iOS */
+    padding: 0.75rem !important;
+  }
+
+  /* Tablet buttons */
+  .btn {
+    min-height: 44px !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+
+  /* Tablet modal adjustments */
+  .modal-dialog {
+    margin: 2rem auto !important;
+    max-width: 600px !important;
+  }
+
+  /* Tablet user cards */
+  .user-card {
+    padding: 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .user-card .user-avatar {
+    width: 55px !important;
+    height: 55px !important;
+    font-size: 1.4rem !important;
+  }
+
+  /* Tablet profile adjustments */
+  .profile-header-flex {
+    gap: 1.5rem !important;
+    min-height: 140px !important;
+  }
+
+  .profile-avatar {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 2.5rem !important;
+  }
+
+  /* Tablet comment optimizations */
+  .comment-form .form-control {
+    min-height: 44px !important;
+    font-size: 16px !important;
+  }
+
+  .comment-form .btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+
+  /* Tablet search optimizations */
+  .main-header .search-results-dropdown {
+    max-height: 350px !important;
+  }
+
+  /* Tablet touch targets */
+  .btn,
+  .form-control,
+  .nav-link {
+    min-height: 44px !important;
+  }
+
+  /* Tablet dashboard adjustments */
+  .dashboard-main {
+    padding: 1.25rem !important;
+  }
+
+  .card {
+    margin: 0 100px !important;
+  }
+
+  /* Tablet profile page optimizations */
+  .profile-page .col-lg-8 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-bottom: var(--spacing-lg) !important;
+  }
+
+  .profile-page .col-lg-4 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .profile-header-flex {
+    gap: 1.5rem !important;
+    min-height: 140px !important;
+  }
+
+  .profile-avatar {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 2.5rem !important;
+  }
+
+  .profile-name {
+    font-size: var(--font-size-2xl) !important;
+  }
+
+  .profile-username {
+    font-size: var(--font-size-lg) !important;
+  }
+
+  /* Tablet auth page optimizations - SCALED UP and POSITIONED BETWEEN CENTERED AND TOP */
+  .auth-page {
+    padding: var(
+      --spacing-lg
+    ) !important; /* Increased padding for better spacing */
+    min-height: 100vh !important;
+    align-items: center !important; /* Center vertically */
+    justify-content: center !important; /* Center horizontally */
+    padding-top: calc(
+      var(--header-height) + var(--spacing-xl)
+    ) !important; /* Increased top spacing to push form down slightly */
+    padding-bottom: 100px !important; /* Increased bottom padding for tablet */
+    display: flex !important; /* Ensure flexbox is active */
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--secondary-color) 100%
+    ) !important; /* Ensure background extends fully */
+  }
+
+  .auth-page .auth-container {
+    max-width: 600px !important; /* Increased from 100% to fixed width */
+    padding: 0 var(--spacing-md) !important;
+    padding-top: 0 !important; /* Remove top padding since we're using flexbox centering */
+    margin: 0 auto !important; /* Center the container */
+    width: 100% !important; /* Ensure full width within max-width */
+    min-height: 100vh !important; /* Full viewport height to accommodate all content */
+  }
+
+  .auth-page .auth-card {
+    border-radius: var(
+      --border-radius-xl
+    ) !important; /* Larger border radius */
+    box-shadow: var(--shadow-xl) !important; /* Enhanced shadow */
+    margin: var(--spacing-lg) 0 !important; /* Add top and bottom margin */
+    margin-bottom: 100px !important; /* Added bottom margin for tablet */
+    transform: scale(1.1) !important; /* Scale up the entire card */
+    transform-origin: top center !important;
+    min-height: auto !important; /* Let content determine height */
+    height: auto !important; /* Allow natural height based on content */
+  }
+
   .auth-page .auth-header {
-    padding: var(--spacing-lg) var(--spacing-md) !important;
+    padding: var(--spacing-xl) var(--spacing-lg) !important; /* Increased padding */
   }
 
   .auth-page .auth-header h1 {
-    font-size: var(--font-size-2xl) !important;
-    margin-bottom: var(--spacing-sm) !important;
+    font-size: var(--font-size-4xl) !important; /* Much larger title */
+    margin-bottom: var(--spacing-md) !important;
+    font-weight: 700 !important;
   }
 
   .auth-page .auth-header p {
-    font-size: var(--font-size-sm) !important;
-    line-height: 1.4 !important;
+    font-size: var(--font-size-lg) !important; /* Larger tagline */
+    line-height: 1.5 !important;
+    opacity: 0.9 !important;
   }
 
-  /* Mobile auth body */
   .auth-page .auth-body {
-    padding: var(--spacing-lg) var(--spacing-md) !important;
+    padding: var(--spacing-2xl) var(--spacing-lg) !important; /* Increased padding for more spacing */
+    min-height: auto !important; /* Let content determine height */
+    height: auto !important; /* Allow natural height based on content */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important; /* Distribute content evenly */
   }
 
-  /* Mobile form controls */
+  /* Tablet form controls - SCALED UP for better readability */
   .auth-page .form-control {
-    font-size: 16px !important; /* Prevents zoom on iOS */
-    padding: 0.75rem !important;
-    border-radius: var(--border-radius-md) !important;
-    border: 1px solid var(--medium-gray) !important;
+    font-size: 18px !important; /* Larger font for better readability */
+    padding: 1rem 1.25rem !important; /* Increased padding */
+    border-radius: var(
+      --border-radius-lg
+    ) !important; /* Larger border radius */
+    border: 2px solid var(--medium-gray) !important; /* Thicker border */
+    min-height: 56px !important; /* Larger touch target */
   }
 
   .auth-page .form-control:focus {
     border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 0.2rem rgba(49, 21, 85, 0.25) !important;
+    box-shadow: 0 0 0 0.3rem rgba(49, 21, 85, 0.25) !important; /* Larger focus ring */
   }
 
-  /* Mobile form labels */
+  /* Tablet form labels - SCALED UP */
   .auth-page .form-label {
-    font-size: var(--font-size-sm) !important;
+    font-size: var(--font-size-lg) !important; /* Larger labels */
     font-weight: 600 !important;
     color: var(--dark-gray) !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.75rem !important; /* Increased spacing */
   }
 
-  /* Mobile form spacing */
+  /* Tablet form spacing - SCALED UP */
   .auth-page .mb-3 {
-    margin-bottom: 1rem !important;
+    margin-bottom: 1.5rem !important; /* Increased spacing */
   }
 
   .auth-page .mb-4 {
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 2rem !important; /* Increased spacing */
   }
 
-  /* Mobile buttons */
+  /* Tablet buttons - SCALED UP */
   .auth-page .btn {
-    padding: 0.875rem 1.5rem !important;
-    font-size: var(--font-size-base) !important;
+    padding: 1rem 2rem !important; /* Larger padding */
+    font-size: var(--font-size-lg) !important; /* Larger font */
     font-weight: 600 !important;
-    border-radius: var(--border-radius-md) !important;
-    min-height: 48px !important; /* Touch target size */
+    border-radius: var(
+      --border-radius-lg
+    ) !important; /* Larger border radius */
+    min-height: 56px !important; /* Larger touch target */
   }
 
   .auth-page .btn-lg {
-    padding: 1rem 2rem !important;
-    font-size: var(--font-size-lg) !important;
-    min-height: 52px !important;
+    padding: 1.25rem 2.5rem !important; /* Even larger for main buttons */
+    font-size: var(--font-size-xl) !important; /* Larger font */
+    min-height: 64px !important; /* Larger touch target */
   }
 
   .auth-page .btn-primary {
@@ -103,49 +314,52 @@
   .auth-page .btn-primary:hover {
     background: var(--secondary-color) !important;
     border-color: var(--secondary-color) !important;
+    color: white !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 4px 12px rgba(49, 21, 85, 0.4) !important;
   }
 
+  /* Keep "Continue as Guest" button purple with white text like desktop */
   .auth-page .btn-outline-secondary {
-    border-color: var(--medium-gray) !important;
-    color: var(--dark-gray) !important;
-    background: transparent !important;
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
   }
 
   .auth-page .btn-outline-secondary:hover {
-    background: var(--light-gray) !important;
-    border-color: var(--dark-gray) !important;
-    color: var(--dark-gray) !important;
+    background: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;
+    color: white !important;
   }
 
-  /* Mobile form rows */
+  /* Tablet form rows - SCALED UP */
   .auth-page .row {
-    margin: 0 -0.5rem !important;
+    margin: 0 -0.75rem !important; /* Increased margin */
   }
 
   .auth-page .col-md-6 {
-    padding: 0 0.5rem !important;
+    padding: 0 0.75rem !important; /* Increased padding */
   }
 
-  /* Mobile auth footer */
+  /* Tablet auth footer - SCALED UP */
   .auth-page .auth-footer {
-    margin-top: var(--spacing-lg) !important;
-    padding-top: var(--spacing-md) !important;
-    border-top: 1px solid var(--light-gray) !important;
+    margin-top: var(--spacing-xl) !important; /* Increased margin */
+    padding-top: var(--spacing-lg) !important; /* Increased padding */
+    border-top: 2px solid var(--light-gray) !important; /* Thicker border */
     text-align: center !important;
   }
 
   .auth-page .auth-footer p {
-    font-size: var(--font-size-sm) !important;
-    color: var(--medium-gray) !important;
-    margin-bottom: 0.5rem !important;
+    font-size: var(--font-size-lg) !important; /* Larger text */
+    color: var(--dark-gray) !important; /* Darker color for better legibility */
+    margin-bottom: 0.75rem !important; /* Increased spacing */
   }
 
   .auth-page .auth-footer a {
     color: var(--primary-color) !important;
     text-decoration: none !important;
     font-weight: 600 !important;
+    font-size: var(--font-size-lg) !important; /* Larger link text */
   }
 
   .auth-page .auth-footer a:hover {
@@ -153,25 +367,52 @@
     text-decoration: underline !important;
   }
 
-  /* Mobile header bar adjustments */
+  /* Tablet header bar adjustments - SCALED UP to match auth form */
   .auth-page .auth-header-bar {
-    height: 60px !important;
+    height: 80px !important; /* Increased height */
   }
 
   .auth-page .auth-header-bar .header-container {
-    padding: 0 var(--spacing-sm) !important;
+    padding: 0 var(--spacing-lg) !important; /* Increased padding */
   }
 
   .auth-page .auth-header-bar .header-left .logo {
-    font-size: var(--font-size-lg) !important;
+    font-size: var(--font-size-2xl) !important; /* Much larger logo */
+    font-weight: 700 !important;
   }
 
   .auth-page .auth-header-bar .nav-link {
-    padding: 0.5rem 0.75rem !important;
-    font-size: var(--font-size-sm) !important;
+    padding: 0.75rem 1.25rem !important; /* Larger padding */
+    font-size: var(--font-size-lg) !important; /* Larger font */
+    font-weight: 600 !important;
+    border-radius: var(
+      --border-radius-lg
+    ) !important; /* Larger border radius */
+    min-height: 48px !important; /* Larger touch target */
   }
 
-  /* Mobile touch optimizations */
+  /* Scale up header buttons to match auth form buttons */
+  .auth-page .auth-header-bar .btn-purple {
+    padding: 0.75rem 1.5rem !important; /* Larger padding */
+    font-size: var(--font-size-lg) !important; /* Larger font */
+    font-weight: 600 !important;
+    border-radius: var(
+      --border-radius-lg
+    ) !important; /* Larger border radius */
+    min-height: 48px !important; /* Larger touch target */
+  }
+
+  .auth-page .auth-header-bar .btn-outline-secondary {
+    padding: 0.75rem 1.5rem !important; /* Larger padding */
+    font-size: var(--font-size-lg) !important; /* Larger font */
+    font-weight: 600 !important;
+    border-radius: var(
+      --border-radius-lg
+    ) !important; /* Larger border radius */
+    min-height: 48px !important; /* Larger touch target */
+  }
+
+  /* Tablet touch optimizations */
   .auth-page .form-control,
   .auth-page .btn {
     -webkit-appearance: none !important;
@@ -179,14 +420,14 @@
     appearance: none !important;
   }
 
-  /* Mobile focus states */
+  /* Tablet focus states */
   .auth-page .form-control:focus,
   .auth-page .btn:focus {
     outline: 2px solid var(--primary-color) !important;
     outline-offset: 2px !important;
   }
 
-  /* Mobile animations */
+  /* Tablet animations */
   .auth-page .auth-card {
     animation: slideInUp 0.3s ease-out !important;
   }
@@ -204,666 +445,149 @@
 }
 
 /* ========================================
-   MOBILE POST ACTIONS - COMPLETE REDESIGN
+   MOBILE BREAKPOINTS (max-width: 767px) - MATCH TABLET STYLING
    ======================================== */
 
 @media (max-width: 767px) {
-  /* ========================================
-     POST ACTIONS CONTAINER - CLEAN MOBILE LAYOUT
-     ======================================== */
-
-  .post-actions {
-    padding: 0.75rem 1rem !important;
-    border-top: 1px solid #e9ecef !important;
-    background: white !important;
-    overflow: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* ========================================
-     MAIN ACTIONS ROW - HORIZONTAL BUTTON LAYOUT
-     ======================================== */
-
-  /* Force horizontal layout for all post types */
-  .post-actions .d-flex.justify-content-between.align-items-center,
-  .post-actions .d-flex.align-items-center {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 1rem !important;
-    width: 100% !important;
+  /* Mobile dashboard page - optimized for mobile */
+  .dashboard-page .card {
     margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
   }
 
-  /* ========================================
-     MOBILE-SPECIFIC ADJUSTMENTS
-     ======================================== */
-
-  /* Mobile-specific post action button adjustments */
-  @media (max-width: 480px) {
-    .post-actions .btn,
-    .post-actions .d-flex.gap-2 .btn,
-    .post-actions-bar .like-btn,
-    .post-actions-bar .comment-btn {
-      min-width: 36px;
-      min-height: 36px;
-    }
-  }
-  .post-actions .btn:active i,
-  .post-actions .d-flex.gap-2 .btn:active i,
-  .post-actions-bar .like-btn:active i,
-  .post-actions-bar .comment-btn:active i {
-    color: #212529 !important;
-  }
-}
-
-/* ========================================
-   MOBILE COMMENT SECTION OPTIMIZATION
-   ======================================== */
-
-@media (max-width: 767px) {
-  /* Comment section container */
-  .comments-section {
-    margin-top: 1rem !important;
-    padding: 0 !important;
+  .dashboard-main {
+    padding: 1rem !important;
   }
 
-  /* Comment form optimization */
-  .comment-form {
-    margin-top: 0.75rem !important;
-    padding: 0 !important;
+  /* Mobile welcome section */
+  .welcome-section {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 
-  /* Input group for comment form */
-  .comment-form .input-group {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    width: 100% !important;
+  /* Mobile post creation buttons */
+  .welcome-section .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 40px !important;
   }
 
-  /* Comment input field */
-  .comment-form .form-control {
-    flex: 1 !important;
+  /* Mobile post input */
+  .welcome-section .form-control {
+    font-size: 16px !important;
+    padding: 0.75rem !important;
+    min-height: 44px !important;
+  }
+
+  /* Mobile post cards */
+  .post-card {
+    margin-bottom: 1rem !important;
+    border-radius: var(--border-radius-md) !important;
+  }
+
+  .post-card .card-body {
+    padding: 1rem !important;
+  }
+
+  /* Mobile post actions - optimized for mobile */
+  .post-actions .btn {
     min-height: 40px !important;
     padding: 0.5rem 0.75rem !important;
     font-size: 0.875rem !important;
-    border: 1px solid #dee2e6 !important;
-    border-radius: 20px !important;
-    background: white !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* Comment input focus state */
-  .comment-form .form-control:focus {
-    border-color: #311555 !important;
-    box-shadow: 0 0 0 0.2rem rgba(49, 21, 85, 0.25) !important;
-    outline: none !important;
-  }
-
-  /* Send button optimization */
-  .comment-form .btn {
-    min-height: 40px !important;
-    min-width: 40px !important;
-    padding: 0.5rem !important;
-    border-radius: 50% !important;
-    background: #311555 !important;
-    border: 1px solid #311555 !important;
-    color: white !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 2px 4px rgba(49, 21, 85, 0.3) !important;
-    transition: all 0.2s ease !important;
-  }
-
-  /* Send button hover state */
-  .comment-form .btn:hover {
-    background: #4a1f7a !important;
-    border-color: #4a1f7a !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 8px rgba(49, 21, 85, 0.4) !important;
-  }
-
-  /* Send button active state */
-  .comment-form .btn:active {
-    transform: translateY(0) !important;
-    box-shadow: 0 2px 4px rgba(49, 21, 85, 0.3) !important;
-  }
-
-  /* Send button icon */
-  .comment-form .btn i {
-    font-size: 0.875rem !important;
-    color: white !important;
-  }
-
-  /* Comments list optimization */
-  .comments-list {
-    margin-bottom: 0.75rem !important;
-  }
-
-  /* Individual comment items */
-  .comment-item {
-    padding: 0.75rem 0 !important;
-    border-bottom: 1px solid #f1f3f4 !important;
-  }
-
-  .comment-item:last-child {
-    border-bottom: none !important;
-  }
-
-  /* Comment user info */
-  .comment-item .user-avatar-small {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.75rem !important;
-    margin-right: 0.5rem !important;
-  }
-
-  /* Comment content */
-  .comment-content {
-    font-size: 0.875rem !important;
-    line-height: 1.4 !important;
-    margin: 0.25rem 0 !important;
-    word-wrap: break-word !important;
-  }
-
-  /* Comment metadata */
-  .comment-item small {
-    font-size: 0.75rem !important;
-    color: #6c757d !important;
-  }
-
-  /* Comment actions (edit/delete) */
-  .comment-item .btn-group {
-    margin-top: 0.25rem !important;
-  }
-
-  .comment-item .btn-group .btn {
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    min-height: 28px !important;
-  }
-
-  /* ========================================
-     MOBILE COMMENT ADDITIONAL OPTIMIZATIONS
-     ======================================== */
-
-  /* Better touch targets for mobile */
-  .comment-form .form-control,
-  .comment-form .btn {
-    touch-action: manipulation !important;
-  }
-
-  /* Improved spacing for mobile */
-  .comments-section .mt-3 {
-    margin-top: 0.75rem !important;
-  }
-
-  .comments-section .mb-3 {
-    margin-bottom: 0.75rem !important;
-  }
-
-  /* Comment form placeholder text */
-  .comment-form .form-control::placeholder {
-    color: #adb5bd !important;
-    font-size: 0.875rem !important;
-  }
-
-  /* Comment input autofill styling */
-  .comment-form .form-control:-webkit-autofill,
-  .comment-form .form-control:-webkit-autofill:hover,
-  .comment-form .form-control:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: #495057 !important;
-  }
-
-  /* Comment section animations */
-  .comments-section {
-    animation: slideIn 0.3s ease-out !important;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0 !important;
-      transform: translateY(-10px) !important;
-    }
-    to {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-  }
-
-  /* ========================================
-     VERY SMALL SCREEN COMMENT OPTIMIZATION
-     ======================================== */
-
-  /* Comment form on very small screens */
-  .comment-form .input-group {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-  }
-
-  /* Comment input on very small screens */
-  .comment-form .form-control {
-    width: 100% !important;
+  /* Mobile form controls - optimized for mobile */
+  .form-control {
+    font-size: 16px !important;
+    padding: 0.75rem !important;
     min-height: 44px !important;
-    font-size: 16px !important; /* Prevents zoom on iOS */
   }
 
-  /* Send button on very small screens */
-  .comment-form .btn {
-    width: 100% !important;
+  /* Mobile buttons - optimized for mobile */
+  .btn {
     min-height: 44px !important;
-    border-radius: 8px !important;
-    justify-content: center !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
   }
 
-  /* Comment items on very small screens */
-  .comment-item {
-    padding: 0.5rem 0 !important;
+  /* Mobile modal adjustments - optimized for mobile */
+  .modal-dialog {
+    margin: 1rem !important;
+    max-width: calc(100% - 2rem) !important;
   }
 
-  /* Comment actions on very small screens */
-  .comment-item .btn-group {
-    flex-direction: column !important;
-    gap: 0.25rem !important;
-    width: 100% !important;
+  .modal-body {
+    padding: 1rem !important;
+    max-height: 60vh !important;
   }
 
-  .comment-item .btn-group .btn {
-    width: 100% !important;
-    justify-content: center !important;
+  /* Mobile user cards - optimized for mobile */
+  .user-card {
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
   }
-}
 
-/* ========================================
-   MOBILE COMMENT BUTTON OPTIMIZATION
-   ======================================== */
-@media (max-width: 767px) {
-  /* Comment action buttons - reduce width for mobile */
-  .comment-actions {
-    flex-wrap: nowrap !important;
-    flex-shrink: 0 !important;
+  .user-card .user-avatar {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.25rem !important;
+  }
+
+  /* Mobile touch targets - optimized for mobile */
+  .btn,
+  .form-control,
+  .nav-link {
+    min-height: 44px !important;
+  }
+
+  /* Mobile header adjustments */
+  .main-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    padding: 0.75rem 1rem !important;
+  }
+
+  .main-header .header-search {
     max-width: 200px !important;
   }
 
-  .comment-actions .btn {
-    min-width: auto !important;
-    width: auto !important;
-    max-width: 60px !important;
-    height: 32px !important;
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  /* Specific button styling for mobile */
-  .comment-actions .btn[onclick*="editComment"] {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-  }
-
-  .comment-actions .btn[onclick*="deleteComment"] {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-  }
-
-  /* Target the actual classes used by JavaScript */
-  .comment-actions .btn.btn-outline-primary {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-  }
-
-  .comment-actions .btn.btn-outline-danger {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-  }
-
-  /* Override global btn-sm styles for comment buttons */
-  .comment-actions .btn.btn-sm {
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-  }
-
-  /* Target btn-group buttons specifically */
-  .btn-group.btn-group-sm .btn.btn-outline-primary,
-  .btn-group.btn-group-sm .btn.btn-outline-danger {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-  }
-
-  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity */
-  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
-  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
-  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
-  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Target any Bootstrap button in comment actions */
-  .comment-actions .btn,
-  .comment-actions .btn.btn-sm,
-  .comment-actions .btn.btn-outline-primary,
-  .comment-actions .btn.btn-outline-danger {
-    max-width: 36px !important;
-    min-width: 36px !important;
-    width: 36px !important;
-    padding: 0.25rem !important;
-    min-height: 36px !important;
-    height: 36px !important;
-    box-sizing: border-box !important;
-  }
-
-  .comment-actions .btn[onclick*="likeComment"] {
-    max-width: 40px !important;
-    padding: 0.25rem !important;
-  }
-
-  /* Force button container to not expand */
-  .comment-content {
-    min-width: 0 !important;
-    flex: 1 !important;
-    flex-grow: 1 !important;
-    margin-right: 0.5rem !important;
-  }
-
-  /* Touch optimization for comment buttons */
-  .comment-actions .btn {
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: transparent !important;
-  }
-
-  /* Ensure comment actions stay compact */
-  .comment-actions {
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-    max-width: 80px !important;
-    width: auto !important;
-  }
-
-  /* Override Bootstrap's justify-content-between for comment layout */
-  .d-flex.justify-content-between.align-items-start {
-    justify-content: flex-start !important;
-    gap: 0.5rem !important;
-  }
-
-  /* Force comment content to take most of the space */
-  .d-flex.justify-content-between.align-items-start > *:first-child {
-    flex: 1 !important;
-    flex-grow: 1 !important;
-    min-width: 0 !important;
-    margin-right: 0.5rem !important;
-  }
-
-  /* Force buttons to take minimal space */
-  .d-flex.justify-content-between.align-items-start > *:last-child {
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-    max-width: 80px !important;
-    width: auto !important;
-  }
-}
-
-/* ========================================
-   TABLET POST ACTIONS OPTIMIZATION
-   ======================================== */
-
-@media (min-width: 768px) and (max-width: 1023px) {
-  .post-actions .btn {
-    min-height: 40px !important;
-    padding: 0.5rem 1rem !important;
-  }
-}
-
-/* ========================================
-   VERY SMALL SCREEN COMMENT BUTTONS
-   ======================================== */
-@media (max-width: 375px) {
-  .comment-actions .btn {
-    max-width: 45px !important;
-    padding: 0.2rem 0.4rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  .comment-actions .btn[onclick*="editComment"],
-  .comment-actions .btn[onclick*="deleteComment"] {
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-  }
-
-  /* Target the actual classes used by JavaScript for very small screens */
-  .comment-actions .btn.btn-outline-primary,
-  .comment-actions .btn.btn-outline-danger {
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-    padding: 0.2rem !important;
-    min-height: 32px !important;
-    height: 32px !important;
-  }
-
-  /* Override global btn-sm styles for comment buttons on very small screens */
-  .comment-actions .btn.btn-sm {
-    padding: 0.2rem !important;
-    min-height: 32px !important;
-    height: 32px !important;
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-  }
-
-  /* Target btn-group buttons specifically for very small screens */
-  .btn-group.btn-group-sm .btn.btn-outline-primary,
-  .btn-group.btn-group-sm .btn.btn-outline-danger {
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-    padding: 0.2rem !important;
-    min-height: 32px !important;
-    height: 32px !important;
-  }
-
-  /* NUCLEAR OPTION: Override Bootstrap button styles with maximum specificity for very small screens */
-  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
-  .comment-actions .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger,
-  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-primary,
-  .btn-group.btn-group-sm .btn.btn-sm.btn-outline-danger {
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-    padding: 0.2rem !important;
-    min-height: 32px !important;
-    height: 32px !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Target any Bootstrap button in comment actions for very small screens */
-  .comment-actions .btn,
-  .comment-actions .btn.btn-sm,
-  .comment-actions .btn.btn-outline-primary,
-  .comment-actions .btn.btn-outline-danger {
-    max-width: 32px !important;
-    min-width: 32px !important;
-    width: 32px !important;
-    padding: 0.2rem !important;
-    min-height: 32px !important;
-    height: 32px !important;
-    box-sizing: border-box !important;
-  }
-
-  .comment-actions .btn[onclick*="likeComment"] {
-    max-width: 35px !important;
-  }
-
-  /* Even more compact on very small screens */
-  .comment-actions {
-    gap: 0.25rem !important;
-    max-width: 70px !important;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-  }
-
-  /* Give more space to comment content on very small screens */
-  .comment-content {
-    margin-right: 0.4rem !important;
-    flex-grow: 1 !important;
-  }
-
-  /* Override Bootstrap's justify-content-between for very small screens */
-  .d-flex.justify-content-between.align-items-start {
-    justify-content: flex-start !important;
-    gap: 0.4rem !important;
-  }
-
-  /* Force comment content to take most of the space on very small screens */
-  .d-flex.justify-content-between.align-items-start > *:first-child {
-    flex: 1 !important;
-    flex-grow: 1 !important;
-    margin-right: 0.4rem !important;
-  }
-
-  /* Force buttons to take minimal space on very small screens */
-  .d-flex.justify-content-between.align-items-start > *:last-child {
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
-    max-width: 70px !important;
-    width: auto !important;
-  }
-}
-
-/* ========================================
-   COMMENT LAYOUT OPTIMIZATION
-   ======================================== */
-.comment-item {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f1f3f4;
-}
-
-.comment-item:last-child {
-  border-bottom: none;
-}
-
-.comment-content {
-  flex: 1;
-  min-width: 0; /* Allow content to shrink */
-}
-
-.comment-header {
-  margin-bottom: 0.25rem;
-}
-
-.comment-text {
-  margin-bottom: 0.5rem;
-  word-wrap: break-word;
-}
-
-/* Ensure comment actions don't expand beyond content */
-.comment-actions {
-  flex-shrink: 0;
-  max-width: 250px; /* Base max width for larger screens */
-}
-
-/* Mobile-specific comment layout */
-@media (max-width: 767px) {
-  .comment-item {
-    padding: 0.5rem 0;
-  }
-
-  .comment-content {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .comment-actions {
-    max-width: 200px;
-  }
-}
-
-@media (max-width: 375px) {
-  .comment-actions {
-    max-width: 150px;
-  }
-}
-
-/* ========================================
-   ADDITIONAL MOBILE OPTIMIZATIONS
-   ======================================== */
-@media (max-width: 767px) {
-  /* Ensure buttons don't overflow on mobile */
-  .comment-actions .btn {
-    box-sizing: border-box !important;
-    max-width: 60px !important;
-    min-width: 32px !important;
-  }
-
-  /* Prevent text overflow in buttons */
-  .comment-actions .btn i {
+  /* Mobile navigation */
+  .nav-link {
+    padding: 0.5rem 0.75rem !important;
     font-size: 0.875rem !important;
   }
 
-  /* Optimize touch targets */
-  .comment-actions .btn {
-    min-height: 44px !important; /* iOS recommended touch target */
-    padding: 0.5rem !important;
+  /* Mobile post time - show date but hide time portion */
+  .post-item .d-flex.align-items-center.gap-2 small:last-child {
+    display: inline !important;
   }
 
-  /* Ensure proper spacing between buttons */
-  .comment-actions {
-    gap: 0.375rem !important;
+  /* Mobile post header - reduce margin bottom */
+  .post-item .d-flex.align-items-start.mb-3 {
+    margin-bottom: 0 !important;
+  }
+
+  /* Hide user avatar in header on mobile */
+  .main-header .user-avatar,
+  .main-header .user-menu {
+    display: none !important;
+  }
+
+  /* Mobile comment content padding */
+  .comment-content {
+    width: 70% !important;
+    height: auto !important;
+    padding: 0 !important;
+    font-size: 0.875rem !important;
   }
 }
 
-/* ========================================
-   EXTRA SMALL SCREEN OPTIMIZATIONS
-   ======================================== */
-@media (max-width: 320px) {
-  .comment-actions .btn {
-    max-width: 40px !important;
-    min-width: 28px !important;
-    padding: 0.375rem !important;
-  }
-
-  .comment-actions {
-    gap: 0.25rem !important;
-    max-width: 120px !important;
-  }
-
-  .comment-actions .btn i {
-    font-size: 0.75rem !important;
+/* Mobile JavaScript to modify timestamps */
+@media (max-width: 767px) {
+  /* Add mobile-specific script to modify timestamps */
+  .mobile-timestamp {
+    display: none !important;
   }
 }

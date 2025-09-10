@@ -141,23 +141,17 @@
 }
 
 /* ========================================
-   DASHBOARD STYLES
+   DASHBOARD STYLES - SINGLE COLUMN LAYOUT
    ======================================== */
 .dashboard-container {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: var(--spacing-lg);
+  display: block;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
 }
 
 .dashboard-sidebar {
-  background: var(--white);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
-  height: fit-content;
+  display: none; /* Hide sidebar completely */
 }
 
 .dashboard-main {
@@ -165,6 +159,7 @@
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-md);
+  width: 100%;
 }
 
 .dashboard-widget {
@@ -262,6 +257,29 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .profile-header-main {
+    background: var(--card-background) !important;
+    color: var(--dark-gray);
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header-main .card-body {
+    margin: 0;
+    padding: var(--spacing-md);
+  }
+
+  /* Profile Header Flex Layout */
+  .profile-header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-lg);
+    min-height: 120px;
+  }
+
   .profile-header-flex {
     flex-direction: column;
     text-align: center;
@@ -530,6 +548,7 @@
 
 .profile-page .modal-dialog {
   z-index: 10000;
+  position: relative;
 }
 
 /* Profile Page Hidden Elements */
@@ -861,4 +880,133 @@
   padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--light-gray);
   background: var(--light-gray);
+}
+
+@media (max-width: 768px) {
+  /* Users page tabs container */
+  .users-page .tabs-container {
+    background: white;
+    padding: 1rem 0 1rem 0;
+    border-bottom: 1px solid #e9ecef;
+    margin-top: 0;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Users page tab navigation */
+  .users-page .nav-tabs {
+    border: none;
+    gap: 0.1rem;
+  }
+
+  .users-page .nav-tabs .nav-item {
+    margin: 0;
+  }
+
+  .users-page .nav-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: transparent;
+    position: relative;
+  }
+
+  .users-page .nav-tabs .nav-link:hover {
+    background-color: #e9ecef;
+    color: #495057;
+    transform: translateY(-1px);
+  }
+
+  .users-page .nav-tabs .nav-link.active {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+  }
+
+  /* Users page badge styling */
+  .users-page .badge {
+    font-size: 0.75rem;
+    padding: 0.35rem;
+    border-radius: 999px;
+  }
+
+  .users-page .badge.bg-primary {
+    background-color: #007bff !important;
+  }
+
+  .users-page .badge.bg-success {
+    background-color: #28a745 !important;
+  }
+
+  .users-page .badge.bg-warning {
+    background-color: #ffc107 !important;
+  }
+
+  /* Users page tab content */
+  .users-page .tab-content {
+    padding-top: 1rem;
+  }
+
+  .users-page .tab-pane {
+    transition: opacity 0.3s ease;
+  }
+
+  .users-page .tab-pane.fade:not(.show) {
+    opacity: 0;
+  }
+
+  .users-page .tab-pane.fade.show {
+    opacity: 1;
+  }
+
+  /* Users page user cards grid */
+  .users-page .user-card-grid .row {
+    margin: 0 -0.75rem;
+  }
+
+  .users-page .user-card-grid .col-md-6,
+  .users-page .user-card-grid .col-lg-4 {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Users page user info */
+  .users-page .user-info {
+    flex: 1;
+    min-width: 0;
+    margin-right: 0;
+  }
+
+  .users-page .user-info h6 {
+    color: #212529;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .users-page .user-info p {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .users-page .user-info small {
+    color: #868e96;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
 }

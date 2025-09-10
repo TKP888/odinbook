@@ -1224,14 +1224,19 @@ function formatDateTime(dateString) {
     const days = Math.floor(diffInHours / 24);
     return `${days} day${days !== 1 ? "s" : ""} ago`;
   } else {
-    return (
-      date.toLocaleDateString() +
-      " at " +
-      date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
+    // Check if mobile device
+    if (isMobileDevice()) {
+      return date.toLocaleDateString(); // Only date on mobile
+    } else {
+      return (
+        date.toLocaleDateString() +
+        " at " +
+        date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      );
+    }
   }
 }
 
