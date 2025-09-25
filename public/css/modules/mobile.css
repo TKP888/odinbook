@@ -582,6 +582,863 @@
     padding: 0 !important;
     font-size: 0.875rem !important;
   }
+
+  /* ========================================
+     MOBILE USERS PAGE LAYOUT FIXES
+     ======================================== */
+
+  /* Mobile users page content container - FULL WIDTH */
+  .users-page .content-container {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+  }
+
+  /* Mobile users page outer container - FULL WIDTH */
+  .users-page .outer-content-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Mobile users page tabs container - FULL WIDTH */
+  .users-page .tabs-container {
+    padding: 0.5rem 0 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    border-bottom: 1px solid #e9ecef !important;
+    width: 100% !important;
+  }
+
+  /* Mobile users page tabs navigation - IMPROVED LAYOUT */
+  .users-page .nav-tabs {
+    gap: 0.25rem !important;
+    padding: 0 0.5rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+
+  .users-page .nav-tabs .nav-item {
+    flex: 1 !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+  }
+
+  .users-page .nav-tabs .nav-link {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+    border-radius: 6px !important;
+  }
+
+  /* Mobile users page tab content - FULL WIDTH */
+  .users-page .tab-content {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .users-page .tab-pane {
+    padding: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  /* Mobile users page user cards grid - SINGLE COLUMN LIKE TABLET */
+  .users-page .user-card-grid .row {
+    margin: 0 -0.5rem !important;
+    width: 100% !important;
+  }
+
+  .users-page .user-card-grid .col-md-6,
+  .users-page .user-card-grid .col-lg-4 {
+    padding: 0 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Mobile users page user cards - CENTERED LAYOUT */
+  .users-page .user-card {
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: var(--border-radius-md) !important;
+    border: 1px solid var(--light-gray) !important;
+    background: var(--white) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    min-height: auto !important;
+    height: auto !important;
+    text-align: center !important;
+  }
+
+  /* Mobile users page user card inner layout - CENTERED */
+  .users-page .user-card .d-flex {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Mobile users page user info - CENTERED LAYOUT */
+  .users-page .user-info {
+    text-align: center !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .users-page .user-info h6 {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.25rem !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+  }
+
+  .users-page .user-info p {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    color: #6c757d !important;
+  }
+
+  .users-page .user-info small {
+    font-size: 0.8rem !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    color: #868e96 !important;
+  }
+
+  /* Mobile users page user avatar - CENTERED */
+  .users-page .user-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 1.5rem !important;
+    margin: 0 auto 0.5rem auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Mobile users page button container - CENTERED */
+  .users-page .user-card .ms-auto {
+    margin: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile users page buttons - COMPACT LIKE TABLET */
+  .users-page .btn {
+    min-height: 36px !important;
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .users-page .btn-sm {
+    min-height: 36px !important;
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Mobile users page badge adjustments */
+  .users-page .badge {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Mobile users page empty states */
+  .users-page .text-muted {
+    padding: 1.5rem 0.75rem !important;
+    text-align: center !important;
+  }
+
+  .users-page .text-muted i {
+    font-size: 2rem !important;
+    margin-bottom: 0.75rem !important;
+    opacity: 0.6 !important;
+  }
+
+  .users-page .text-muted h5 {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.5rem !important;
+    color: #495057 !important;
+  }
+
+  .users-page .text-muted p {
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    color: #6c757d !important;
+  }
+
+  /* Mobile users page container spacing */
+  .users-page .container {
+    padding: 0 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .users-page .tab-content .container {
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Mobile users page touch optimizations */
+  .users-page .nav-tabs .nav-link {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Mobile users page hover effects disabled */
+  .users-page .nav-tabs .nav-link:hover {
+    transform: none !important;
+  }
+
+  .users-page .user-card:hover {
+    transform: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Mobile users page performance optimizations */
+  .users-page .nav-tabs .nav-link {
+    transition: all 0.15s ease !important;
+  }
+
+  .users-page .nav-tabs .nav-link.active {
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2) !important;
+  }
+
+  /* Mobile users page focus states */
+  .users-page .nav-tabs .nav-link:focus {
+    outline: 2px solid #311555 !important;
+    outline-offset: 2px !important;
+  }
+
+  .users-page .btn:focus {
+    outline: 2px solid #311555 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Mobile users page contrast improvements */
+  .users-page .text-muted {
+    color: #495057 !important;
+  }
+
+  /* Mobile users page modal optimizations */
+  .users-page .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+
+  .users-page .modal-body {
+    padding: 1rem !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+  }
+
+  .users-page .modal-footer {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .users-page .modal-footer .btn {
+    width: 100% !important;
+  }
+
+  /* ========================================
+     MOBILE PROFILE PAGE LAYOUT FIXES
+     ======================================== */
+
+  /* Profile page container adjustments - FULL WIDTH */
+  .profile-page .container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Profile page row adjustments - FULL WIDTH */
+  .profile-page .row {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Profile page column adjustments - FULL WIDTH */
+  .profile-page .col-12 {
+    padding: 0 !important;
+    margin-bottom: 1rem !important;
+    width: 100% !important;
+  }
+
+  /* Remove gap between profile header and about section */
+  .profile-page .col-12:first-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Profile page main content row - FULL WIDTH */
+  .profile-page .row:has(.col-split) {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Posts section row - remove margins for proper alignment */
+  .profile-page .row:has([id*="postsList"]) {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Profile header card mobile layout */
+  .profile-page .profile-header-main {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-bottom: 1px solid var(--light-gray) !important;
+  }
+
+  .profile-page .profile-header-main .card-body {
+    padding: 1rem !important;
+  }
+
+  /* Profile header flex mobile layout - KEEP HORIZONTAL like tablet */
+  .profile-page .profile-header-flex {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: left !important;
+    gap: 0.75rem !important;
+    min-height: 80px !important;
+  }
+
+  /* Profile avatar container mobile sizing */
+  .profile-page .profile-avatar-container {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Profile avatar mobile sizing - scaled down but not stacked */
+  .profile-page .profile-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 0 !important;
+    border: 3px solid var(--white) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  /* Profile avatar inner user-avatar-large mobile sizing */
+  .profile-page .profile-avatar .user-avatar-large {
+    width: 100% !important;
+    height: 100% !important;
+    font-size: 1.5rem !important;
+    border-radius: 50% !important;
+  }
+
+  /* Profile avatar image mobile sizing */
+  .profile-page .profile-avatar .profile-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    border: none !important;
+  }
+
+  /* Profile avatar initials mobile sizing */
+  .profile-page .profile-avatar .avatar-initials {
+    font-size: 1.5rem !important;
+    font-weight: bold !important;
+  }
+
+  /* Profile avatar overlay mobile sizing */
+  .profile-page .profile-avatar .profile-picture-overlay {
+    border-radius: 50% !important;
+  }
+
+  .profile-page .profile-avatar .profile-picture-upload-btn {
+    font-size: 0.75rem !important;
+    padding: 0.25rem !important;
+  }
+
+  .profile-page .profile-avatar .profile-picture-upload-btn i {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.125rem !important;
+  }
+
+  .profile-page .profile-avatar .profile-picture-upload-btn span {
+    font-size: 0.625rem !important;
+    display: block !important;
+  }
+
+  /* Profile info mobile layout - KEEP LEFT ALIGNED like tablet */
+  .profile-page .profile-info-container {
+    text-align: left !important;
+    padding: 0 0.5rem !important;
+    margin-bottom: 0 !important;
+    flex: 1 !important;
+  }
+
+  .profile-page .profile-name {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.125rem !important;
+  }
+
+  .profile-page .profile-username {
+    font-size: 0.9rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Profile actions mobile layout - SCALED DOWN BUTTONS like tablet */
+  .profile-page .profile-actions-container {
+    width: auto !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    flex-shrink: 0 !important;
+  }
+
+  .profile-page .profile-actions-container .btn {
+    width: auto !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    min-height: 36px !important;
+  }
+
+  .profile-page .profile-actions-container .btn-lg {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    min-height: 36px !important;
+  }
+
+  .profile-page .profile-actions-container .btn-group-vertical {
+    width: auto !important;
+  }
+
+  .profile-page .profile-actions-container .btn-group-vertical .btn {
+    width: 100% !important;
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.75rem !important;
+    min-height: 32px !important;
+  }
+
+  .profile-page .profile-actions-container .d-flex.flex-column.gap-2 {
+    width: auto !important;
+    gap: 0.25rem !important;
+  }
+
+  .profile-page .profile-actions-container .d-flex.gap-2 {
+    width: auto !important;
+    gap: 0.25rem !important;
+  }
+
+  /* Profile page col-split mobile layout - FULL WIDTH */
+  .profile-page .col-split {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove any top margin from the row containing col-split */
+  .profile-page .row:has(.col-split) {
+    margin-top: 0 !important;
+  }
+
+  /* Add margin to the section after col-split (Create New Post) */
+  .profile-page .row:has(.col-split) + .row {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Profile page card headers - CONSISTENT STYLING */
+  .profile-page .card-header {
+    padding: 0.75rem 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important;
+  }
+
+  /* Posts section headers - MATCH CREATE NEW POST STYLING */
+  .profile-page .card:has([id*="postsList"]) .card-header {
+    padding: 0.75rem 1rem !important;
+    min-height: auto !important;
+  }
+
+  /* Posts section card - remove top margin to align with top */
+  .profile-page .card:has([id*="postsList"]) {
+    margin-top: 0 !important;
+  }
+
+  /* Posts section container - ensure proper alignment */
+  .profile-page .col-12:has([id*="postsList"]) {
+    margin-top: 0 !important;
+  }
+
+  /* Target posts section more specifically */
+  .profile-page
+    .card:has(.card-header:has([id*="postsList"], .fas.fa-newspaper)) {
+    margin-top: 0 !important;
+    border-radius: var(--border-radius-md) !important;
+  }
+
+  /* Posts section header specific styling - MATCH CREATE NEW POST */
+  .profile-page .card-header:has(.fas.fa-newspaper) {
+    padding: 0.75rem 1rem !important;
+    margin: 0 !important;
+    border-bottom: 1px solid var(--light-gray) !important;
+    background: var(--card-background) !important;
+    min-height: auto !important;
+  }
+
+  .profile-page .col-split .card {
+    margin: 0 !important;
+    border-radius: var(--border-radius-md) !important;
+    width: 100% !important;
+    flex: none !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure first card in col-split has no top margin */
+  .profile-page .col-split .card:first-child {
+    margin-top: 0 !important;
+  }
+
+  .profile-page .col-split .about-section-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+  }
+
+  .profile-page .col-split .friends-section-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Profile page cards mobile layout - FULL WIDTH with proper padding */
+  .profile-page .card {
+    margin: 0 0 1rem 0 !important;
+    border-radius: var(--border-radius-md) !important;
+    width: 100% !important;
+  }
+
+  .profile-page .card-body {
+    padding: 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .profile-page .card-header {
+    padding: 0.75rem 1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Profile page buttons mobile optimization */
+  .profile-page .btn {
+    min-height: 44px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .profile-page .btn-sm {
+    min-height: 36px !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Profile page form controls mobile optimization */
+  .profile-page .form-control {
+    font-size: 16px !important;
+    padding: 0.75rem !important;
+    min-height: 44px !important;
+  }
+
+  .profile-page .form-control-sm {
+    font-size: 16px !important;
+    padding: 0.5rem !important;
+    min-height: 36px !important;
+  }
+
+  /* Profile page modal mobile optimization */
+  .profile-page .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+
+  .profile-page .modal-body {
+    padding: 1rem !important;
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Profile page friend items mobile layout */
+  .profile-page .profile-friend-item {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .profile-page .profile-friend-item .user-avatar-small {
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 0.9rem !important;
+    margin-right: 0.75rem !important;
+  }
+
+  .profile-page .profile-friend-item .remove-friend-btn {
+    min-height: 32px !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Add spacing between Friends section and Create New Post section */
+  .profile-page .col-12:has(.card:has([id*="inlinePostContent"])) {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Alternative selector for Create New Post section */
+  .profile-page .col-12:has([id*="inlinePostContent"]) {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Target Create New Post card directly */
+  .profile-page .card:has([id*="inlinePostContent"]) {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Profile page create post form mobile layout - MATCH DASHBOARD */
+  .profile-page .user-avatar-large {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.2rem !important;
+    margin-right: 0.75rem !important;
+  }
+
+  .profile-page .user-avatar-large img {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Profile page posts section mobile layout */
+  .profile-page .post-card {
+    margin-bottom: 1rem !important;
+    border-radius: var(--border-radius-md) !important;
+  }
+
+  .profile-page .post-card .card-body {
+    padding: 1rem !important;
+  }
+
+  /* Profile page responsive text */
+  .profile-page .text-muted {
+    font-size: 0.85rem !important;
+  }
+
+  .profile-page .small {
+    font-size: 0.8rem !important;
+  }
+
+  /* Profile page spacing adjustments */
+  .profile-page .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+
+  .profile-page .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .profile-page .mt-3 {
+    margin-top: 1rem !important;
+  }
+
+  .profile-page .mt-4 {
+    margin-top: 1.5rem !important;
+  }
+
+  /* Profile page additional mobile fixes */
+  .profile-page .info-item {
+    padding: 0.5rem 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .profile-page .info-item i {
+    font-size: 0.9rem !important;
+    margin-right: 0.5rem !important;
+  }
+
+  .profile-page .bio-text {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .profile-page .friends-list {
+    margin: 0 !important;
+  }
+
+  .profile-page .friends-list .text-center {
+    padding: 1rem 0 !important;
+  }
+
+  .profile-page .friends-list .fa-3x {
+    font-size: 2rem !important;
+  }
+
+  /* Profile page post creation form mobile layout - MATCH DASHBOARD */
+  .profile-page .d-flex.align-items-start {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+  }
+
+  .profile-page .d-flex.align-items-start .user-avatar-large {
+    align-self: flex-start !important;
+    margin-bottom: 0 !important;
+    margin-right: 0.75rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .profile-page .d-flex.align-items-start .flex-grow-1 {
+    width: auto !important;
+    flex: 1 !important;
+  }
+
+  /* Profile page post creation buttons mobile layout - MATCH DASHBOARD */
+  .profile-page .d-flex.align-items-center.justify-content-between {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 1rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .profile-page
+    .d-flex.align-items-center.justify-content-between
+    .d-flex.align-items-center {
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 0.75rem !important;
+  }
+
+  .profile-page
+    .d-flex.align-items-center.justify-content-between
+    .d-flex.align-items-center:last-child {
+    width: auto !important;
+    justify-content: flex-end !important;
+    margin-left: auto !important;
+  }
+
+  /* Profile page post creation photo upload mobile layout - MATCH DASHBOARD */
+  .profile-page #inlinePhotoFileName {
+    display: inline !important;
+    width: auto !important;
+    text-align: left !important;
+    margin: 0 0.5rem !important;
+  }
+
+  .profile-page #inlineRemovePhotoBtn {
+    margin-top: 0 !important;
+    margin-left: 0.5rem !important;
+  }
+
+  /* Profile page posts loading and empty states mobile layout */
+  .profile-page #postsLoading,
+  .profile-page #noPosts {
+    padding: 2rem 1rem !important;
+  }
+
+  .profile-page #postsLoading .spinner-border {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .profile-page #noPosts .fa-3x {
+    font-size: 2.5rem !important;
+  }
+
+  .profile-page #noPosts h5 {
+    font-size: 1.25rem !important;
+  }
+
+  .profile-page #noPosts p {
+    font-size: 0.9rem !important;
+  }
+
+  /* Profile page modal mobile optimizations */
+  .profile-page .modal-lg {
+    max-width: calc(100% - 1rem) !important;
+  }
+
+  .profile-page .modal-header {
+    padding: 1rem !important;
+  }
+
+  .profile-page .modal-footer {
+    padding: 1rem !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .profile-page .modal-footer .btn {
+    width: 100% !important;
+  }
+
+  /* Profile page form mobile optimizations */
+  .profile-page .form-text {
+    font-size: 0.8rem !important;
+  }
+
+  .profile-page textarea.form-control {
+    resize: vertical !important;
+    min-height: 80px !important;
+  }
+
+  /* Profile page responsive utilities */
+  .profile-page .d-none.d-sm-block {
+    display: none !important;
+  }
+
+  .profile-page .d-sm-none {
+    display: block !important;
+  }
+
+  /* Profile page overflow handling */
+  .profile-page .card-body {
+    overflow-x: hidden !important;
+  }
+
+  .profile-page .text-truncate {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 }
 
 /* Mobile JavaScript to modify timestamps */

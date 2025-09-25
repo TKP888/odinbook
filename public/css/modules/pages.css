@@ -255,47 +255,7 @@
   justify-content: flex-end;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .profile-header-main {
-    background: var(--card-background) !important;
-    color: var(--dark-gray);
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .profile-header-main .card-body {
-    margin: 0;
-    padding: var(--spacing-md);
-  }
-
-  /* Profile Header Flex Layout */
-  .profile-header-flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-lg);
-    min-height: 120px;
-  }
-
-  .profile-header-flex {
-    flex-direction: column;
-    text-align: center;
-    gap: var(--spacing-md);
-    min-height: auto;
-  }
-
-  .profile-info-container {
-    text-align: center;
-    padding: 0;
-  }
-
-  .profile-actions-container {
-    justify-content: center;
-  }
-}
+/* Responsive adjustments - REMOVED to avoid conflicts with mobile.css */
 
 .profile-header {
   background: linear-gradient(

@@ -841,20 +841,8 @@ function loadPosts(reset = true) {
     });
 }
 
-// Function to refresh posts (force reload)
-function refreshPosts() {
-  console.log("[PROFILE] Refreshing posts...");
-
-  // Clear any cached data
-  currentPage = 1;
-  hasNextPage = true;
-
-  // Force reload posts
-  loadPosts(true);
-
-  // Show feedback to user
-  showNotification("Posts refreshed!", "success");
-}
+// Function to refresh posts (force reload) - REMOVED (no longer needed)
+// Users can refresh the page manually if needed
 
 // Function to load more posts
 function loadMorePosts() {
