@@ -27,7 +27,10 @@
     "reorganize": "node scripts/reorganize.js",
     "clean": "node scripts/cleanup.js",
     "status": "node scripts/check-status.js",
-    "start:script": "./scripts/start.sh"
+    "start:script": "./scripts/start.sh",
+    "deploy:railway": "node scripts/deploy-to-railway.js",
+    "backup:local": "node scripts/backup-local-db.js",
+    "setup:railway": "node scripts/set-railway-env.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
