@@ -123,6 +123,33 @@ showFriendRequests: true, showUserMenu: true, activePage: 'dashboard' }) %>
       </div>
       <% } %>
 
+      <!-- Mobile Friend Requests Button -->
+      <% if (showFriendRequests) { %>
+      <div class="mobile-friend-requests dropdown d-md-none me-2">
+        <button
+          class="btn btn-purple btn-sm mobile-friend-requests-btn"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          title="Friend Requests"
+        >
+          <i class="fas fa-user-plus"></i>
+          <span id="mobileRequestCount" class="badge bg-danger ms-1 d-none"
+            >0</span
+          >
+        </button>
+        <ul
+          class="dropdown-menu dropdown-menu-end mobile-friend-requests-dropdown"
+          id="mobileRequestsList"
+        >
+          <li class="dropdown-item text-center text-muted p-3">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span class="ms-2">Loading...</span>
+          </li>
+        </ul>
+      </div>
+      <% } %>
+
       <!-- Mobile Hamburger Menu Button -->
       <button
         class="hamburger-menu d-md-none"

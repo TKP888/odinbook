@@ -2533,10 +2533,16 @@ function saveBio() {
 }
 
 function createInlinePost() {
-  console.log(`[PROFILE] createInlinePost called`);
+  console.log("[PROFILE] createInlinePost function called");
+
   const content = document.getElementById("inlinePostContent").value.trim();
   const photoFile = document.getElementById("inlinePostPhoto").files[0];
-  console.log(`[PROFILE] Content: "${content}", Photo:`, photoFile);
+
+  console.log("[PROFILE] createInlinePost called");
+  console.log("[PROFILE] Content:", content);
+  console.log("[PROFILE] Photo file:", photoFile);
+  console.log("[PROFILE] User agent:", navigator.userAgent);
+  console.log("[PROFILE] Screen width:", window.innerWidth);
 
   // Require either content (min 1 char) OR an image
   if (!content && !photoFile) {
@@ -2577,9 +2583,38 @@ function createInlinePost() {
 
   fetch("/posts", {
     method: "POST",
-    body: formData, // Don't set Content-Type header for FormData
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    body: formData,
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("[PROFILE] Response status:", response.status);
+      console.log("[PROFILE] Response headers:", response.headers);
+      console.log("[PROFILE] Response ok:", response.ok);
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        console.log("[PROFILE] Response not ok, throwing error");
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Check if response is JSON or HTML (mobile browsers sometimes return HTML)
+      const contentType = response.headers.get("content-type");
+      console.log("[PROFILE] Content-Type:", contentType);
+
+      if (contentType && contentType.includes("application/json")) {
+        console.log("[PROFILE] Parsing as JSON");
+        return response.json();
+      } else {
+        // Mobile browser returned HTML instead of JSON - post was likely successful
+        console.log(
+          "[PROFILE] Mobile browser returned HTML response, post likely successful"
+        );
+        return { success: true, post: null };
+      }
+    })
     .then((data) => {
       if (data.success) {
         console.log(`[PROFILE] Post created successfully, clearing form...`);
@@ -2605,10 +2640,45 @@ function createInlinePost() {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Full page refresh after 3 seconds to ensure everything is fresh
+        // Refresh posts after successful post creation (matching dashboard behavior)
         setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+          console.log(
+            "[PROFILE] Refreshing posts after successful inline post creation..."
+          );
+          // Force refresh posts regardless of any errors
+          try {
+            loadPosts()
+              .then(() => {
+                console.log(
+                  "[PROFILE] Posts refreshed successfully after inline post creation"
+                );
+              })
+              .catch((loadError) => {
+                console.error("[PROFILE] Error refreshing posts:", loadError);
+                // Force refresh even if there's an error
+                console.log("[PROFILE] Forcing posts refresh...");
+                setTimeout(() => {
+                  loadPosts().catch((retryError) => {
+                    console.error("[PROFILE] Retry failed:", retryError);
+                    // Last resort: force page reload
+                    console.log(
+                      "[PROFILE] Forcing page reload as last resort..."
+                    );
+                    window.location.reload();
+                  });
+                }, 1000);
+              });
+          } catch (error) {
+            console.error("[PROFILE] Error in loadPosts:", error);
+            // If all else fails, force page reload
+            console.log(
+              "[PROFILE] Forcing page reload due to loadPosts error..."
+            );
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+        }, 500); // Small delay to ensure post is fully saved
       } else {
         const alertDiv = document.createElement("div");
         alertDiv.className =

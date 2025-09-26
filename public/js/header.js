@@ -509,23 +509,44 @@ function updateHeaderRequestCount() {
       console.log("[HEADER] Received friend request data:", data);
       const countBadge = document.getElementById("headerRequestCount");
       const requestsList = document.getElementById("headerRequestsList");
+      const mobileCountBadge = document.getElementById("mobileRequestCount");
+      const mobileRequestsList = document.getElementById("mobileRequestsList");
 
+      // Update desktop count badge
       if (countBadge) {
         if (data.requests.length > 0) {
           countBadge.textContent = data.requests.length;
           countBadge.classList.remove("d-none");
           console.log(
-            "[HEADER] Updated request count badge:",
+            "[HEADER] Updated desktop request count badge:",
             data.requests.length
           );
         } else {
           countBadge.classList.add("d-none");
-          console.log("[HEADER] Hidden request count badge");
+          console.log("[HEADER] Hidden desktop request count badge");
         }
       } else {
-        console.warn("[HEADER] Count badge element not found");
+        console.warn("[HEADER] Desktop count badge element not found");
       }
 
+      // Update mobile count badge
+      if (mobileCountBadge) {
+        if (data.requests.length > 0) {
+          mobileCountBadge.textContent = data.requests.length;
+          mobileCountBadge.classList.remove("d-none");
+          console.log(
+            "[HEADER] Updated mobile request count badge:",
+            data.requests.length
+          );
+        } else {
+          mobileCountBadge.classList.add("d-none");
+          console.log("[HEADER] Hidden mobile request count badge");
+        }
+      } else {
+        console.warn("[HEADER] Mobile count badge element not found");
+      }
+
+      // Update desktop requests list
       if (requestsList) {
         if (data.requests.length === 0) {
           requestsList.innerHTML = `
@@ -534,7 +555,7 @@ function updateHeaderRequestCount() {
                   <p class="mb-0 small">No pending requests</p>
                 </div>
               `;
-          console.log("[HEADER] Set empty requests list");
+          console.log("[HEADER] Set empty desktop requests list");
         } else {
           requestsList.innerHTML = data.requests
             .map(
@@ -572,13 +593,69 @@ function updateHeaderRequestCount() {
             )
             .join("");
           console.log(
-            "[HEADER] Populated requests list with",
+            "[HEADER] Populated desktop requests list with",
             data.requests.length,
             "requests"
           );
         }
       } else {
-        console.warn("[HEADER] Requests list element not found");
+        console.warn("[HEADER] Desktop requests list element not found");
+      }
+
+      // Update mobile requests list
+      if (mobileRequestsList) {
+        if (data.requests.length === 0) {
+          mobileRequestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          console.log("[HEADER] Set empty mobile requests list");
+        } else {
+          mobileRequestsList.innerHTML = data.requests
+            .map(
+              (request) => `
+                <div class="dropdown-item p-3" data-request-id="${request.id}">
+                  <div class="d-flex align-items-center">
+                    <div class="user-avatar-small me-3" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                      ${(request.sender.firstName || "").charAt(0)}${(
+                request.sender.lastName || ""
+              ).charAt(0)}
+                    </div>
+                    <div class="flex-grow-1 me-3">
+                      <div class="fw-bold small mb-1">${
+                        request.sender.firstName || ""
+                      } ${request.sender.lastName || ""}</div>
+                      <div class="text-muted small">@${
+                        request.sender.username
+                      }</div>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button class="btn btn-success btn-sm accept-request-btn" data-request-id="${
+                        request.id
+                      }" title="Accept">
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm decline-request-btn" data-request-id="${
+                        request.id
+                      }" title="Decline">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `
+            )
+            .join("");
+          console.log(
+            "[HEADER] Populated mobile requests list with",
+            data.requests.length,
+            "requests"
+          );
+        }
+      } else {
+        console.warn("[HEADER] Mobile requests list element not found");
       }
     })
     .catch((error) => {
@@ -629,12 +706,20 @@ function acceptRequest(requestId) {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Remove the request from the header dropdown
+        // Remove the request from both desktop and mobile dropdowns
         if (requestElement) {
           requestElement.remove();
         }
 
-        // Check if there are any requests left
+        // Also remove from mobile dropdown if it exists
+        const mobileRequestElement = document.querySelector(
+          `#mobileRequestsList [data-request-id="${requestId}"]`
+        );
+        if (mobileRequestElement) {
+          mobileRequestElement.remove();
+        }
+
+        // Check if there are any requests left in desktop dropdown
         const remainingRequests = document.querySelectorAll(
           "#headerRequestsList .dropdown-item"
         );
@@ -642,6 +727,23 @@ function acceptRequest(requestId) {
           const requestsList = document.getElementById("headerRequestsList");
           if (requestsList) {
             requestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          }
+        }
+
+        // Check if there are any requests left in mobile dropdown
+        const remainingMobileRequests = document.querySelectorAll(
+          "#mobileRequestsList .dropdown-item"
+        );
+        if (remainingMobileRequests.length === 0) {
+          const mobileRequestsList =
+            document.getElementById("mobileRequestsList");
+          if (mobileRequestsList) {
+            mobileRequestsList.innerHTML = `
                 <div class="dropdown-item text-center text-muted p-3">
                   <i class="fas fa-inbox fa-2x mb-2"></i>
                   <p class="mb-0 small">No pending requests</p>
@@ -736,11 +838,51 @@ function declineRequest(requestId) {
         document.body.appendChild(alertDiv);
         setTimeout(() => alertDiv.remove(), 3000);
 
-        // Refresh the page after successful decline
-        setTimeout(() => {
-          console.log("[HEADER] Refreshing page now...");
-          window.location.reload();
-        }, 1500);
+        // Remove the request from both desktop and mobile dropdowns
+        if (requestElement) {
+          requestElement.remove();
+        }
+
+        // Also remove from mobile dropdown if it exists
+        const mobileRequestElement = document.querySelector(
+          `#mobileRequestsList [data-request-id="${requestId}"]`
+        );
+        if (mobileRequestElement) {
+          mobileRequestElement.remove();
+        }
+
+        // Check if there are any requests left in desktop dropdown
+        const remainingRequests = document.querySelectorAll(
+          "#headerRequestsList .dropdown-item"
+        );
+        if (remainingRequests.length === 0) {
+          const requestsList = document.getElementById("headerRequestsList");
+          if (requestsList) {
+            requestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          }
+        }
+
+        // Check if there are any requests left in mobile dropdown
+        const remainingMobileRequests = document.querySelectorAll(
+          "#mobileRequestsList .dropdown-item"
+        );
+        if (remainingMobileRequests.length === 0) {
+          const mobileRequestsList =
+            document.getElementById("mobileRequestsList");
+          if (mobileRequestsList) {
+            mobileRequestsList.innerHTML = `
+                <div class="dropdown-item text-center text-muted p-3">
+                  <i class="fas fa-inbox fa-2x mb-2"></i>
+                  <p class="mb-0 small">No pending requests</p>
+                </div>
+              `;
+          }
+        }
       } else {
         console.error("[HEADER] Failed to decline friend request:", data.error);
         const alertDiv = document.createElement("div");

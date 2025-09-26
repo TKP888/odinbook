@@ -30,7 +30,10 @@
     "start:script": "./scripts/start.sh",
     "deploy:railway": "node scripts/deploy-to-railway.js",
     "backup:local": "node scripts/backup-local-db.js",
-    "setup:railway": "node scripts/set-railway-env.js"
+    "setup:railway": "node scripts/set-railway-env.js",
+    "import:railway": "node scripts/import-to-railway.js",
+    "export:railway": "node scripts/export-for-railway.js",
+    "replace:railway": "node scripts/replace-railway-db.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

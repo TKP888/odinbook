@@ -21,6 +21,11 @@ showPhotoUpload: true, showCharCount: true, onSubmit: 'createInlinePost()' }) %>
             placeholder="<%= placeholder %>"
             maxlength="<%= maxLength %>"
           ></textarea>
+          <% if (typeof showCharCount !== 'undefined' && showCharCount) { %>
+          <div class="form-text">
+            <span id="<%= charCountId %>">0</span>/<%= maxLength %>
+          </div>
+          <% } %>
         </div>
 
         <% if (typeof showPhotoUpload !== 'undefined' && showPhotoUpload) { %>

@@ -106,9 +106,18 @@ router.post(
         hasPhoto: !!photoUrl,
       });
 
+      console.log("Request headers for post creation:", {
+        xhr: req.xhr,
+        accept: req.headers.accept,
+        userAgent: req.headers["user-agent"],
+        contentType: req.headers["content-type"],
+      });
+
       if (req.xhr || req.headers.accept?.includes("application/json")) {
+        console.log("Sending JSON response");
         res.json({ success: true, post });
       } else {
+        console.log("Sending redirect response");
         req.flash("success_msg", "Post created successfully!");
         res.redirect("/dashboard");
       }

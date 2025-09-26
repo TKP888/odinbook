@@ -721,6 +721,86 @@
 }
 
 /* ========================================
+   MOBILE FRIEND REQUESTS BUTTON
+   ======================================== */
+.mobile-friend-requests {
+  position: relative !important;
+  flex-shrink: 0 !important;
+}
+
+.mobile-friend-requests-btn {
+  background: #311555 !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.2rem !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.25rem !important;
+  white-space: nowrap !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  min-height: 36px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+}
+
+.mobile-friend-requests-btn:hover {
+  background: #764ba2 !important;
+  color: white !important;
+}
+
+.mobile-friend-requests-btn .dropdown-toggle::after {
+  margin-left: 0.25rem !important;
+  font-size: 0.75rem !important;
+}
+
+.mobile-friend-requests .dropdown-menu {
+  min-width: 280px !important;
+  max-height: 400px !important;
+  overflow-y: auto !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.5rem 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+  right: 0 !important;
+  left: auto !important;
+}
+
+.mobile-friend-requests .dropdown-menu .dropdown-item {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 0.75rem !important;
+  color: #495057 !important;
+  transition: background-color 0.2s !important;
+}
+
+.mobile-friend-requests .dropdown-menu .dropdown-item:hover {
+  background-color: #f8f9fa !important;
+  color: #311555 !important;
+}
+
+.mobile-friend-requests .dropdown-menu .dropdown-item:last-child {
+  border-bottom: none !important;
+}
+
+.mobile-friend-requests .dropdown-item.text-center.text-muted {
+  padding: 2rem 1rem !important;
+  color: #6c757d !important;
+}
+
+.mobile-friend-requests .dropdown-item.text-center.text-muted i {
+  font-size: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+  opacity: 0.8 !important;
+  color: #495057 !important;
+}
+
+/* ========================================
    HAMBURGER MENU STYLES
    ======================================== */
 .hamburger-menu {
@@ -1020,11 +1100,19 @@
   .main-header .friend-requests {
     display: none !important;
   }
+
+  .main-header .mobile-friend-requests {
+    display: block !important;
+  }
 }
 
 /* Hide hamburger menu on desktop */
 @media (min-width: 768px) {
   .hamburger-menu {
+    display: none !important;
+  }
+
+  .main-header .mobile-friend-requests {
     display: none !important;
   }
 

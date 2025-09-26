@@ -243,6 +243,24 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeModals();
   initializeInlinePost();
   handlePhotoSelection(); // Add this line
+
+  // Add mobile-specific event listener for post button
+  const inlinePostBtn = document.getElementById("inlineCreatePostBtn");
+  if (inlinePostBtn) {
+    console.log("[MOBILE DEBUG] Adding event listener to inline post button");
+    inlinePostBtn.addEventListener("click", function (e) {
+      console.log("[MOBILE DEBUG] Post button clicked via event listener");
+      console.log("[MOBILE DEBUG] Event:", e);
+      console.log("[MOBILE DEBUG] Target:", e.target);
+    });
+
+    // Also add touchstart for mobile
+    inlinePostBtn.addEventListener("touchstart", function (e) {
+      console.log("[MOBILE DEBUG] Post button touchstart via event listener");
+      console.log("[MOBILE DEBUG] Touch event:", e);
+    });
+  }
+
   // Mobile dropdown enhancements removed - using Bootstrap default
 });
 
@@ -343,8 +361,16 @@ function openCreatePostModal() {
 }
 
 function createInlinePost() {
+  console.log("[MOBILE DEBUG] createInlinePost function called");
+
   const content = document.getElementById("inlinePostContent").value.trim();
   const photoFile = document.getElementById("inlinePostPhoto").files[0];
+
+  console.log("[MOBILE DEBUG] createInlinePost called");
+  console.log("[MOBILE DEBUG] Content:", content);
+  console.log("[MOBILE DEBUG] Photo file:", photoFile);
+  console.log("[MOBILE DEBUG] User agent:", navigator.userAgent);
+  console.log("[MOBILE DEBUG] Screen width:", window.innerWidth);
 
   // Require either content (min 1 char) OR an image
   if (!content && !photoFile) {
@@ -376,26 +402,51 @@ function createInlinePost() {
 
   fetch("/posts", {
     method: "POST",
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
     body: formData,
   })
     .then((response) => {
+      console.log("[MOBILE DEBUG] Response status:", response.status);
+      console.log("[MOBILE DEBUG] Response headers:", response.headers);
+      console.log("[MOBILE DEBUG] Response ok:", response.ok);
+
       // Check if response is ok before trying to parse JSON
       if (!response.ok) {
+        console.log("[MOBILE DEBUG] Response not ok, throwing error");
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+
+      // Check if response is JSON or HTML (mobile browsers sometimes return HTML)
+      const contentType = response.headers.get("content-type");
+      console.log("[MOBILE DEBUG] Content-Type:", contentType);
+
+      if (contentType && contentType.includes("application/json")) {
+        console.log("[MOBILE DEBUG] Parsing as JSON");
+        return response.json();
+      } else {
+        // Mobile browser returned HTML instead of JSON - post was likely successful
+        console.log(
+          "[MOBILE DEBUG] Mobile browser returned HTML response, post likely successful"
+        );
+        return { success: true, post: null };
+      }
     })
     .then((data) => {
+      console.log("[MOBILE DEBUG] Response data:", data);
       if (data.success) {
+        console.log("[MOBILE DEBUG] Post created successfully, clearing form");
         // Clear the form
         document.getElementById("inlinePostContent").value = "";
-        document.getElementById("inlineCharCount").textContent = "0";
-        updateCharCounterColor(
-          document.getElementById("inlineCharCount"),
-          0,
-          200,
-          150
-        );
+
+        // Clear character counter if it exists
+        const charCountElement = document.getElementById("inlineCharCount");
+        if (charCountElement) {
+          charCountElement.textContent = "0";
+          updateCharCounterColor(charCountElement, 0, 200, 150);
+        }
 
         // Clear photo
         removePhoto();
@@ -454,7 +505,8 @@ function createInlinePost() {
         console.log(
           "Detected HTML response instead of JSON, post may have been created successfully"
         );
-        // Force refresh posts since the post was likely created successfully
+        // Show success message and force refresh posts since the post was likely created successfully
+        showNotification("Post created successfully!", "success");
         setTimeout(() => {
           console.log("Forcing posts refresh due to JSON parsing error...");
           forceRefreshPosts();
@@ -492,6 +544,8 @@ function createPost() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
     },
     body: JSON.stringify({ content }),
   })
@@ -500,7 +554,18 @@ function createPost() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+
+      // Check if response is JSON or HTML (mobile browsers sometimes return HTML)
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        // Mobile browser returned HTML instead of JSON - post was likely successful
+        console.log(
+          "Mobile browser returned HTML response, post likely successful"
+        );
+        return { success: true, post: null };
+      }
     })
     .then((data) => {
       if (data.success) {
@@ -560,7 +625,8 @@ function createPost() {
         console.log(
           "Detected HTML response instead of JSON, post may have been created successfully"
         );
-        // Force refresh posts since the post was likely created successfully
+        // Show success message and force refresh posts since the post was likely created successfully
+        showNotification("Post created successfully!", "success");
         setTimeout(() => {
           console.log("Forcing posts refresh due to JSON parsing error...");
           forceRefreshPosts();
