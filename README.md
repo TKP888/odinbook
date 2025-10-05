@@ -4,7 +4,7 @@ A full-stack social media platform built with modern web technologies, featuring
 
 ## 🌟 Live Demo
 
-Visit the live site: [OdinBook on Railway](https://odinbook-production.up.railway.app/)
+Visit the live site: https://odinbook-production-4ff2.up.railway.app/auth/login
 
 ## 📖 About
 
